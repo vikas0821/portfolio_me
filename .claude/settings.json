@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git rev-parse *)",
+      "Bash(cat package.json)",
+      "Bash(node -e \"import\\('./apigateway/app.mjs'\\).then\\(\\(\\)=>console.log\\('OK: backend app imports & routes mount'\\)\\).catch\\(e=>{console.error\\('FAIL:',e\\);process.exit\\(1\\)}\\)\")",
+      "PowerShell(docker compose ps --format \"table {{.Name}}\\\\t{{.Status}}\\\\t{{.Ports}}\" 2>&1)",
+      "PowerShell(docker rm -f portfolio_atlas_test 2>$null)",
+      "PowerShell(docker compose ps --format \"table {{.Name}}\\\\t{{.Status}}\" 2>&1)",
+      "PowerShell(docker compose up --build -d frontend 2>&1)",
+      "PowerShell(docker compose ps frontend --format \"table {{.Name}}\\\\t{{.Status}}\\\\t{{.Ports}}\")"
+    ]
+  }
+}

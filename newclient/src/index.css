@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Runtime-themeable accent color (overridden at runtime from Site Settings) */
+:root {
+  --accent-rgb: 79 70 229;
+}
+
+/* ── Markdown content (blog posts) ──────────────────────────────────────────── */
+.md-content { color: #334155; line-height: 1.75; font-size: 1rem; }
+.dark .md-content { color: #cbd5e1; }
+.md-content > * + * { margin-top: 1rem; }
+.md-content h1, .md-content h2, .md-content h3, .md-content h4 {
+  font-weight: 800; line-height: 1.25; color: #0f172a; margin-top: 2rem;
+}
+.dark .md-content h1, .dark .md-content h2, .dark .md-content h3, .dark .md-content h4 { color: #f1f5f9; }
+.md-content h1 { font-size: 1.875rem; }
+.md-content h2 { font-size: 1.5rem; }
+.md-content h3 { font-size: 1.25rem; }
+.md-content a { color: rgb(var(--accent-rgb)); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.md-content ul, .md-content ol { padding-left: 1.4rem; }
+.md-content ul { list-style: disc; }
+.md-content ol { list-style: decimal; }
+.md-content li { margin-top: 0.35rem; }
+.md-content blockquote {
+  border-left: 3px solid rgb(var(--accent-rgb)); padding-left: 1rem; color: #64748b; font-style: italic;
+}
+.md-content :not(pre) > code {
+  background: rgba(99,102,241,0.1); color: rgb(var(--accent-rgb));
+  padding: 0.15em 0.4em; border-radius: 6px; font-size: 0.875em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.md-content pre {
+  background: #0d1117; border-radius: 12px; padding: 1rem 1.1rem; overflow-x: auto;
+  font-size: 0.875rem; border: 1px solid rgba(255,255,255,0.08);
+}
+.md-content pre code { background: transparent; padding: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.md-content img { border-radius: 12px; max-width: 100%; }
+.md-content hr { border: 0; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+.dark .md-content hr { border-top-color: rgba(255,255,255,0.1); }
+.md-content table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.md-content th, .md-content td { border: 1px solid #e2e8f0; padding: 0.5rem 0.75rem; text-align: left; }
+.dark .md-content th, .dark .md-content td { border-color: rgba(255,255,255,0.1); }
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-slate-50 dark:bg-black text-slate-900 dark:text-white;
+    font-family: 'Inter', system-ui, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-slate-100 dark:bg-zinc-900; }
+  ::-webkit-scrollbar-thumb { @apply bg-slate-300 dark:bg-zinc-700 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { background-color: rgb(var(--accent-rgb)); }
+}
+
+/* ── Refined warm light theme — linen canvas + elevated cards (light mode only) ──
+   Warm neutrals with cool indigo accent; cards lift off the page with soft shadows.
+   Unlayered so these reliably override Tailwind utilities; scoped to .light so dark
+   mode is completely unaffected. */
+
+/* warm linen canvas + default text */
+.light body {
+  background-color: #f2efe8;
+  color: #2c2922;
+}
+
+/* default white surfaces -> soft warm white (cards, panels, inputs, icons) */
+.light .bg-white { background-color: #fffdf8; }
+.light .bg-white\/95 { background-color: rgba(255, 253, 248, 0.9); }
+
+/* full-width sections & full-screen states -> calm linen canvas (kills the glare) */
+.light .bg-white.py-28,
+.light .bg-white.min-h-screen,
+.light .bg-slate-50 { background-color: #f2efe8; }
+
+/* card depth — subtle lift so cards read as elevated, not flat */
+.light .bg-white.rounded-2xl,
+.light .bg-white.rounded-3xl {
+  box-shadow: 0 1px 2px rgba(44, 41, 34, 0.05), 0 12px 32px -14px rgba(44, 41, 34, 0.14);
+}
+
+/* pills / small insets */
+.light .bg-slate-100 { background-color: #ece7db; }
+
+/* warm, soft borders instead of cold slate */
+.light .border-slate-100,
+.light .border-slate-200,
+.light .border-slate-200\/80,
+.light .border-slate-200\/60 { border-color: #e8e1d3; }
+
+/* ease text contrast (near-black -> warm charcoal) */
+.light .text-slate-900 { color: #2c2922; }
+
+/* matching warm scrollbar */
+.light ::-webkit-scrollbar-track { background-color: #ece7db; }
+.light ::-webkit-scrollbar-thumb { background-color: #d0c7b4; }

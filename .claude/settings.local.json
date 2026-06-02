@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"d:\\\\project_files\\\\project_Dec\\\\portfolio_me\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "PowerShell(ls \"d:\\\\project_files\\\\project_Dec\\\\portfolio_me\\\\newclient\\\\src\\\\components\" -Recurse | Where-Object { $_.PSIsContainer -eq $false } | Select-Object -First 30 | Format-Table Name)",
+      "PowerShell(docker compose -f \"d:\\\\project_files\\\\project_Dec\\\\portfolio_me\\\\docker-compose.yml\" down 2>&1)",
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:3000/health\" -UseBasicParsing)",
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:3000/api/v1/portfolio/getPortfolio\" -UseBasicParsing)",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:3000/api/v1/portfolio/getPortfolio\" -UseBasicParsing ; $r.Content | ConvertFrom-Json | Select-Object -ExpandProperty data | Select-Object -ExpandProperty skills | ConvertTo-Json)",
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:80\" -UseBasicParsing)",
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:80/api/v1/portfolio/getPortfolio\" -UseBasicParsing)",
+      "Bash(Get-ChildItem -Path \"d:\\\\project_files\\\\project_Dec\\\\portfolio_me\" -Recurse)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(docker compose *)",
+      "Bash(npm install *)",
+      "Bash(curl -s http://localhost:3000/health)",
+      "Bash(curl -s http://localhost:3000/api/v1/portfolio)",
+      "Bash(curl -s http://localhost:3000/api/v1/portfolio/profile)",
+      "Bash(curl -s http://localhost:3000/api/v1/portfolio/getPortfolio)",
+      "Bash(curl -s http://localhost/api/v1/portfolio/getPortfolio)",
+      "Bash(curl -s -X POST http://localhost/api/v1/admin/login -H \"Content-Type: application/json\" -d '{\"password\":\"admin@portfolio2025\"}')",
+      "Bash(curl -s http://localhost/)",
+      "Bash(del \"d:\\\\project_files\\\\project_Dec\\\\portfolio_me\\\\mongod.conf\")"
+    ]
+  }
+}

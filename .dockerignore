@@ -1,0 +1,18 @@
+# Applies to the root build context (backend + seed images)
+node_modules
+**/node_modules
+dist
+**/dist
+.env
+.env.*
+*.log
+.git
+.gitignore
+.vscode
+.idea
+
+# The frontend has its own image/build context — not needed in backend/seed images
+newclient
+
+# Docs / misc
+*.md
