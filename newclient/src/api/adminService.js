@@ -79,3 +79,9 @@ export const getBlogPosts = () => api.get("blog").then(ok);
 export const createBlogPost = (data) => api.post("blog", data).then(ok);
 export const updateBlogPost = (id, data) => api.put(`blog/${id}`, data).then(ok);
 export const deleteBlogPost = (id) => api.delete(`blog/${id}`).then(ok);
+
+// ── Notes ────────────────────────────────────────────────────────────────────
+export const getNotes = () => api.get("notes").then(ok);
+export const createNote = (data) => api.post("notes", data).then(ok);
+export const updateNote = (id, data) => api.put(`notes/${id}`, data).then(ok);
+export const deleteNote = (id) => api.delete(`notes/${id}`).then(ok);

@@ -25,6 +25,7 @@ const SkillSchema = new mongoose.Schema({ category: String, skills: [String] });
 const EducationSchema = new mongoose.Schema({ qualification: String, institution: String, score: String, year: String, location: String });
 const CertificationSchema = new mongoose.Schema({ title: String, issuer: String, platform: String, year: String, logo: String, certificateUrl: String, credentialId: String, order: Number });
 const BlogPostSchema = new mongoose.Schema({ title: String, slug: String, excerpt: String, content: String }, { timestamps: true });
+const NoteSchema = new mongoose.Schema({ title: String, content: String, color: String, pinned: Boolean }, { timestamps: true });
 
 const Profile = mongoose.model("Profile", ProfileSchema);
 const Experience = mongoose.model("Experience", ExperienceSchema);
@@ -33,6 +34,7 @@ const Skill = mongoose.model("Skill", SkillSchema);
 const Education = mongoose.model("Education", EducationSchema);
 const Certification = mongoose.model("Certification", CertificationSchema);
 const BlogPost = mongoose.model("BlogPost", BlogPostSchema);
+const Note = mongoose.model("Note", NoteSchema);
 
 // ── Seed Data ─────────────────────────────────────────────────────────────
 
@@ -231,6 +233,33 @@ The result deploys cleanly on **Render + Vercel + MongoDB Atlas**, all on free t
   },
 ];
 
+const notesData = [
+  {
+    title: "Currently exploring",
+    content: "Diving deeper into event-driven architecture with RabbitMQ and message-queue patterns for resilient, decoupled banking services.",
+    color: "purple",
+    pinned: true,
+  },
+  {
+    title: "Perf tip",
+    content: "Always index the fields you filter and sort on. A compound index on { status: 1, createdAt: -1 } turned a 1.2s query into <20ms.",
+    color: "green",
+    pinned: false,
+  },
+  {
+    title: "Reminder",
+    content: "Right tool for the right scale — microservices aren't free. Start simple, split when team/scale actually demands it.",
+    color: "yellow",
+    pinned: false,
+  },
+  {
+    title: "Reading list",
+    content: "• Designing Data-Intensive Applications\n• Node.js Design Patterns\n• The Pragmatic Programmer",
+    color: "blue",
+    pinned: false,
+  },
+];
+
 // ── Run ────────────────────────────────────────────────────────────────────
 
 async function seed() {
@@ -247,6 +276,7 @@ async function seed() {
     Education.deleteMany({}),
     Certification.deleteMany({}),
     BlogPost.deleteMany({}),
+    Note.deleteMany({}),
   ]);
   console.log("Cleared existing data.");
 
@@ -259,6 +289,7 @@ async function seed() {
     Education.insertMany(educationData),
     Certification.insertMany(certificationsData),
     BlogPost.insertMany(blogData),
+    Note.insertMany(notesData),
   ]);
 
   console.log("Seed data inserted successfully.");

@@ -7,6 +7,25 @@
   --accent-rgb: 79 70 229;
 }
 
+/* ── Notes: subtle ruled-paper lines behind note cards ──────────────────────── */
+.note-paper {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 27px,
+    rgba(100, 116, 139, 0.12) 28px
+  );
+  background-attachment: local;
+}
+.dark .note-paper {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 27px,
+    rgba(255, 255, 255, 0.06) 28px
+  );
+}
+
 /* ── Markdown content (blog posts) ──────────────────────────────────────────── */
 .md-content { color: #334155; line-height: 1.75; font-size: 1rem; }
 .dark .md-content { color: #cbd5e1; }

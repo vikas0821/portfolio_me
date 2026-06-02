@@ -4,6 +4,7 @@ import PortfolioHome from "./routes/portfolioHome";
 import AdminPage from "./routes/AdminPage";
 import BlogPage from "./routes/BlogPage";
 import BlogPostPage from "./routes/BlogPostPage";
+import NotesPage from "./routes/NotesPage";
 import Navbar from "./features/portfolio/Navbar";
 
 // Persistent navbar — mounted once so it doesn't remount/re-animate on route
@@ -20,6 +21,7 @@ const App = () => (
       <Route path="/" element={<PortfolioHome />} />
       <Route path="/blog" element={<BlogPage />} />
       <Route path="/blog/:slug" element={<BlogPostPage />} />
+      <Route path="/notes" element={<NotesPage />} />
       <Route path="/admin" element={<AdminPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

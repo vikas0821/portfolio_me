@@ -6,6 +6,7 @@ import { getCertificates } from "../modelservices/getcertificates.modelservice.m
 import * as admin from "../modelservices/admin.modelservice.mjs";
 import { getSettings, adminUpdateSettings } from "../modelservices/settings.modelservice.mjs";
 import * as blog from "../modelservices/blog.modelservice.mjs";
+import * as note from "../modelservices/note.modelservice.mjs";
 
 const log = logger.child({ svc: "portfolio" });
 
@@ -37,6 +38,11 @@ export function buildHandlers(config) {
     async getBlogPost(msg) {
       const data = await blog.getBlogPostBySlug(msg.slug);
       if (!data) return { responseCode: "99", responseMessage: "Post not found" };
+      return { responseCode: "00", responseMessage: "SUCCESS", data };
+    },
+
+    async getNotes() {
+      const data = await note.listNotes();
       return { responseCode: "00", responseMessage: "SUCCESS", data };
     },
   };
@@ -71,6 +77,9 @@ const adminOps = {
   getBlogPosts:        () => blog.adminGetBlogPosts(),
   saveBlogPost:        (d) => blog.adminSaveBlogPost(d.data),
   deleteBlogPost:      (d) => blog.adminDeleteBlogPost(d.id),
+  getNotes:            () => note.adminGetNotes(),
+  saveNote:            (d) => note.adminSaveNote(d.data),
+  deleteNote:          (d) => note.adminDeleteNote(d.id),
 };
 
 export async function handleAdminOperation(msg) {

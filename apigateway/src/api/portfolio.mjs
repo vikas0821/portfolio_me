@@ -55,6 +55,15 @@ export function portfolioApi(config) {
     }
   });
 
+  r.get("/getNotes", async (req, res) => {
+    try {
+      const out = await handlers.getNotes({}, config);
+      res.status(out.responseCode === "00" ? 200 : 404).json(out);
+    } catch (err) {
+      handleErr(req, res, err);
+    }
+  });
+
   r.get("/downloadResume", (req, res) => {
     const resumePath = config.resumePath
       ? path.resolve(config.resumePath)

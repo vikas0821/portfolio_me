@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { label: "Experience", id: "experience" },
   { label: "Certifications", id: "certifications" },
   { label: "Blog", to: "/blog" },
+  { label: "Notes", to: "/notes" },
   { label: "Contact", id: "contact" },
 ];
 
