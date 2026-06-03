@@ -3,10 +3,21 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   Lock, Eye, EyeOff, Plus, Trash2, Pencil, Check, X, FileText, Folder,
-  ArrowLeft, LogOut, StickyNote, Menu,
+  ArrowLeft, LogOut, StickyNote, Search, Sun, Moon, FolderPlus,
 } from "lucide-react";
 import * as svc from "../api/notesService";
 import Markdown from "../components/Markdown";
+import { useTheme } from "../context/ThemeContext";
+
+const ThemeToggle = ({ className = "" }) => {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button onClick={toggleTheme} aria-label="Toggle theme"
+      className={`p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white transition ${className}`}>
+      {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
+    </button>
+  );
+};
 
 // ── Login gate ────────────────────────────────────────────────────────────────
 const NotesLogin = ({ onLogin }) => {
@@ -26,30 +37,28 @@ const NotesLogin = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center px-4">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white flex items-center justify-center px-4">
+      <div className="absolute top-4 right-4"><ThemeToggle /></div>
       <div className="relative w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 mb-4">
             <StickyNote size={26} className="text-accent" />
           </div>
           <h1 className="text-2xl font-bold">My Notes</h1>
-          <p className="text-slate-500 text-sm mt-1">Private workspace — enter password</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Private workspace — enter password</p>
         </div>
-        <form onSubmit={submit} className="bg-[#141414] border border-white/8 rounded-2xl p-6 shadow-2xl space-y-4">
+        <form onSubmit={submit} className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-white/8 rounded-2xl p-6 shadow-xl space-y-4">
           <div className="relative">
-            <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type={show ? "text" : "password"}
               value={pw}
               onChange={(e) => setPw(e.target.value)}
               placeholder="Notes password"
               required
-              className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-[#0f0f0f] border border-white/10 text-white placeholder:text-slate-600 focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/30 text-sm"
+              className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-slate-50 dark:bg-[#0f0f0f] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/30 text-sm"
             />
-            <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+            <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
               {show ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
@@ -57,29 +66,30 @@ const NotesLogin = ({ onLogin }) => {
             {loading ? "…" : "Unlock"}
           </button>
         </form>
-        <p className="text-center text-xs text-slate-600 mt-4">
-          <Link to="/" className="hover:text-slate-400 transition">← Back to portfolio</Link>
+        <p className="text-center text-xs text-slate-500 dark:text-slate-600 mt-4">
+          <Link to="/" className="hover:text-slate-700 dark:hover:text-slate-400 transition">← Back to portfolio</Link>
         </p>
       </div>
     </div>
   );
 };
 
-// ── Workspace ───────────────────────────────────────────────────────────────
+// ── Workspace (three-pane) ──────────────────────────────────────────────────
 const Workspace = ({ onLogout }) => {
   const [sections, setSections] = useState([]);
   const [activeSection, setActiveSection] = useState(null);
   const [notes, setNotes] = useState([]);
-  const [openNote, setOpenNote] = useState(null); // currently opened note
-  const [mode, setMode] = useState("view");       // "view" | "edit"
+  const [openNote, setOpenNote] = useState(null);
+  const [mode, setMode] = useState("view");           // "view" | "edit"
   const [draft, setDraft] = useState({ title: "", content: "" });
   const [preview, setPreview] = useState(false);
+  const [query, setQuery] = useState("");
   const [addingSection, setAddingSection] = useState(false);
   const [newSection, setNewSection] = useState("");
   const [renameId, setRenameId] = useState(null);
   const [renameVal, setRenameVal] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
+  const [pane, setPane] = useState("sections");        // mobile: sections | list | editor
 
   const loadSections = useCallback(async () => {
     try {
@@ -89,7 +99,6 @@ const Workspace = ({ onLogout }) => {
       setActiveSection((cur) => cur || list[0] || null);
     } catch { toast.error("Failed to load sections"); }
   }, []);
-
   useEffect(() => { loadSections(); }, [loadSections]);
 
   const loadNotes = useCallback(async (sectionId) => {
@@ -97,17 +106,17 @@ const Workspace = ({ onLogout }) => {
     try { const r = await svc.getSectionNotes(sectionId); setNotes(r.data || []); }
     catch { toast.error("Failed to load notes"); }
   }, []);
-
   useEffect(() => { if (activeSection?._id) loadNotes(activeSection._id); }, [activeSection, loadNotes]);
 
-  // Sections CRUD
+  // Sections
+  const pickSection = (s) => { setActiveSection(s); setOpenNote(null); setQuery(""); setPane("list"); };
   const addSection = async () => {
     if (!newSection.trim()) return;
     try {
       const r = await svc.createSection({ title: newSection.trim() });
       setNewSection(""); setAddingSection(false);
       await loadSections();
-      setActiveSection(r.data);
+      pickSection(r.data);
     } catch { toast.error("Failed to add section"); }
   };
   const renameSection = async (id) => {
@@ -126,19 +135,12 @@ const Workspace = ({ onLogout }) => {
     } catch { toast.error("Failed to delete section"); }
   };
 
-  // Notes CRUD
-  const openNoteView = (note) => { setOpenNote(note); setMode("view"); };
-  const startEdit = () => {
-    setDraft({ title: openNote.title || "", content: openNote.content || "" });
-    setPreview(false);
-    setMode("edit");
-  };
+  // Notes
+  const openNoteView = (note) => { setOpenNote(note); setMode("view"); setPane("editor"); };
+  const startEdit = () => { setDraft({ title: openNote.title || "", content: openNote.content || "" }); setPreview(false); setMode("edit"); };
   const newNote = () => {
     if (!activeSection) return;
-    setOpenNote({ _id: null });
-    setDraft({ title: "", content: "" });
-    setPreview(false);
-    setMode("edit");
+    setOpenNote({ _id: null }); setDraft({ title: "", content: "" }); setPreview(false); setMode("edit"); setPane("editor");
   };
   const saveNote = async () => {
     setSavingNote(true);
@@ -156,45 +158,50 @@ const Workspace = ({ onLogout }) => {
     if (note._id && !window.confirm("Delete this note?")) return;
     try {
       if (note._id) await svc.deleteNote(note._id);
-      setOpenNote(null);
+      setOpenNote(null); setPane("list");
       loadNotes(activeSection._id);
     } catch { toast.error("Failed to delete note"); }
   };
 
+  const filtered = notes.filter((n) =>
+    (`${n.title} ${n.content}`).toLowerCase().includes(query.trim().toLowerCase())
+  );
+
+  const paneCls = (name) => `${pane === name ? "flex" : "hidden"} lg:flex`;
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex">
-      {/* Sidebar */}
-      {sidebarOpen && <div className="fixed inset-0 bg-black/60 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
-      <aside className={`fixed lg:sticky top-0 h-screen w-64 bg-[#111111] border-r border-white/8 flex flex-col z-30 transition-transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
-        <div className="px-5 py-5 border-b border-white/8 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/20 flex items-center justify-center">
-            <StickyNote size={16} className="text-accent" />
+    <div className="h-screen flex bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white overflow-hidden">
+
+      {/* ── Pane 1: Sections ───────────────────────────────────────────── */}
+      <aside className={`${paneCls("sections")} w-full lg:w-56 flex-col flex-shrink-0 bg-white dark:bg-[#111111] border-r border-slate-200 dark:border-white/8`}>
+        <div className="px-4 py-4 border-b border-slate-200 dark:border-white/8 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/20 flex items-center justify-center">
+              <StickyNote size={15} className="text-accent" />
+            </div>
+            <p className="font-bold text-sm">My Notes</p>
           </div>
-          <p className="font-bold text-sm">My Notes</p>
+          <ThemeToggle />
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
-          <p className="px-2 mb-1 text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Sections</p>
+        <div className="flex-1 overflow-y-auto px-2.5 py-3">
+          <p className="px-2 mb-1.5 text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-semibold">Sections</p>
           {sections.map((s) => (
-            <div key={s._id} className={`group flex items-center rounded-lg ${activeSection?._id === s._id ? "bg-accent/10" : "hover:bg-white/5"}`}>
+            <div key={s._id} className={`group flex items-center rounded-lg ${activeSection?._id === s._id ? "bg-accent/10" : "hover:bg-slate-100 dark:hover:bg-white/5"}`}>
               {renameId === s._id ? (
-                <input
-                  autoFocus value={renameVal}
+                <input autoFocus value={renameVal}
                   onChange={(e) => setRenameVal(e.target.value)}
                   onBlur={() => renameSection(s._id)}
                   onKeyDown={(e) => { if (e.key === "Enter") renameSection(s._id); if (e.key === "Escape") setRenameId(null); }}
-                  className="flex-1 bg-[#0f0f0f] border border-white/10 rounded-md px-2 py-1 text-sm m-1"
-                />
+                  className="flex-1 bg-slate-50 dark:bg-[#0f0f0f] border border-slate-200 dark:border-white/10 rounded-md px-2 py-1 text-sm m-1 outline-none" />
               ) : (
                 <>
-                  <button
-                    onClick={() => { setActiveSection(s); setOpenNote(null); setSidebarOpen(false); }}
-                    className={`flex-1 flex items-center gap-2 px-3 py-2 text-sm text-left truncate ${activeSection?._id === s._id ? "text-accent" : "text-slate-300"}`}
-                  >
+                  <button onClick={() => pickSection(s)}
+                    className={`flex-1 flex items-center gap-2 px-2.5 py-2 text-sm text-left truncate ${activeSection?._id === s._id ? "text-accent font-medium" : "text-slate-600 dark:text-slate-300"}`}>
                     <Folder size={14} className="flex-shrink-0" /> <span className="truncate">{s.title}</span>
                   </button>
-                  <button onClick={() => { setRenameId(s._id); setRenameVal(s.title); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-white"><Pencil size={12} /></button>
-                  <button onClick={() => removeSection(s)} className="opacity-0 group-hover:opacity-100 p-1 mr-1 text-slate-500 hover:text-red-400"><Trash2 size={12} /></button>
+                  <button onClick={() => { setRenameId(s._id); setRenameVal(s.title); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white"><Pencil size={12} /></button>
+                  <button onClick={() => removeSection(s)} className="opacity-0 group-hover:opacity-100 p-1 mr-1 text-slate-400 hover:text-red-500"><Trash2 size={12} /></button>
                 </>
               )}
             </div>
@@ -202,110 +209,122 @@ const Workspace = ({ onLogout }) => {
 
           {addingSection ? (
             <div className="flex items-center gap-1 mt-1">
-              <input
-                autoFocus value={newSection}
+              <input autoFocus value={newSection}
                 onChange={(e) => setNewSection(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") addSection(); if (e.key === "Escape") setAddingSection(false); }}
                 placeholder="Section name"
-                className="flex-1 bg-[#0f0f0f] border border-white/10 rounded-md px-2 py-1.5 text-sm"
-              />
-              <button onClick={addSection} className="p-1.5 text-emerald-400 hover:bg-white/5 rounded"><Check size={14} /></button>
-              <button onClick={() => setAddingSection(false)} className="p-1.5 text-slate-500 hover:bg-white/5 rounded"><X size={14} /></button>
+                className="flex-1 bg-slate-50 dark:bg-[#0f0f0f] border border-slate-200 dark:border-white/10 rounded-md px-2 py-1.5 text-sm outline-none" />
+              <button onClick={addSection} className="p-1.5 text-emerald-500 hover:bg-slate-100 dark:hover:bg-white/5 rounded"><Check size={14} /></button>
+              <button onClick={() => setAddingSection(false)} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded"><X size={14} /></button>
             </div>
           ) : (
-            <button onClick={() => setAddingSection(true)} className="w-full flex items-center gap-2 px-3 py-2 mt-1 rounded-lg text-sm text-slate-400 hover:bg-white/5 hover:text-white">
-              <Plus size={14} /> New section
+            <button onClick={() => setAddingSection(true)} className="w-full flex items-center gap-2 px-2.5 py-2 mt-1 rounded-lg text-sm text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
+              <FolderPlus size={14} /> New section
             </button>
           )}
         </div>
 
-        <div className="px-3 pb-4 border-t border-white/8 pt-3">
-          <Link to="/" className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-500 hover:text-white hover:bg-white/5 mb-1"><ArrowLeft size={15} /> Portfolio</Link>
-          <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10"><LogOut size={15} /> Lock</button>
+        <div className="px-2.5 pb-3 border-t border-slate-200 dark:border-white/8 pt-2.5">
+          <Link to="/" className="w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white mb-1"><ArrowLeft size={15} /> Portfolio</Link>
+          <button onClick={onLogout} className="w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm text-red-500 dark:text-red-400 hover:bg-red-500/10"><LogOut size={15} /> Lock</button>
         </div>
       </aside>
 
-      {/* Main */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        <header className="sticky top-0 z-10 bg-[#0f0f0f]/90 backdrop-blur border-b border-white/8 px-5 py-3 flex items-center gap-3">
-          <button onClick={() => setSidebarOpen((o) => !o)} className="lg:hidden text-slate-400 hover:text-white"><Menu size={20} /></button>
-          <Folder size={16} className="text-accent" />
-          <h1 className="font-semibold text-sm truncate">{activeSection ? activeSection.title : "No section"}</h1>
-        </header>
-
-        <main className="flex-1 p-5 lg:p-8 max-w-3xl w-full mx-auto">
-          {!activeSection ? (
-            <p className="text-center text-slate-500 py-20 text-sm">Create a section to start adding notes.</p>
-          ) : openNote && mode === "view" ? (
-            // Note — read (view) mode
-            <div>
-              <button onClick={() => setOpenNote(null)} className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white mb-5"><ArrowLeft size={15} /> Back to {activeSection.title}</button>
-              <div className="flex items-start justify-between gap-4 mb-6">
-                <h1 className="text-2xl font-bold break-words">{openNote.title || "Untitled"}</h1>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <button onClick={startEdit} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm bg-accent text-white font-semibold hover:bg-accent/90"><Pencil size={14} /> Edit</button>
-                  <button onClick={() => removeNote(openNote)} title="Delete" className="inline-flex items-center px-3 py-2 rounded-lg text-sm bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"><Trash2 size={14} /></button>
-                </div>
-              </div>
-              {openNote.content
-                ? <div className="dark"><Markdown>{openNote.content}</Markdown></div>
-                : <p className="text-slate-500 text-sm italic">This note is empty. Click <b className="not-italic font-semibold">Edit</b> to add content.</p>}
-            </div>
-          ) : openNote ? (
-            // Note — edit mode
-            <div>
-              <button onClick={() => (openNote._id ? setMode("view") : setOpenNote(null))} className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white mb-5"><ArrowLeft size={15} /> {openNote._id ? "Cancel" : `Back to ${activeSection.title}`}</button>
-              <input
-                value={draft.title}
-                onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
-                placeholder="Note title"
-                className="w-full bg-transparent text-2xl font-bold outline-none mb-4 placeholder:text-slate-600"
-              />
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Content (Markdown)</span>
-                <button onClick={() => setPreview((p) => !p)} className="text-xs text-accent hover:underline">{preview ? "Edit" : "Preview"}</button>
-              </div>
-              {preview ? (
-                <div className="dark rounded-lg bg-[#0f0f0f] border border-white/10 p-4 min-h-[300px]"><Markdown>{draft.content}</Markdown></div>
-              ) : (
-                <textarea
-                  value={draft.content}
-                  onChange={(e) => setDraft((d) => ({ ...d, content: e.target.value }))}
-                  placeholder={"Write your note in Markdown…\n\n## Heading\n- point\n`code`"}
-                  className="w-full min-h-[300px] rounded-lg bg-[#0f0f0f] border border-white/10 p-4 text-sm leading-relaxed outline-none focus:border-accent/50 resize-y font-mono"
-                />
-              )}
-              <div className="flex items-center gap-2 justify-end mt-4">
-                <button onClick={() => removeNote(openNote)} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"><Trash2 size={14} /> Delete</button>
-                <button onClick={saveNote} disabled={savingNote} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm bg-accent text-white font-semibold hover:bg-accent/90 disabled:opacity-50"><Check size={14} /> {savingNote ? "Saving…" : "Save"}</button>
-              </div>
-            </div>
-          ) : (
-            // Notes list for the section
-            <div>
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-xl font-bold">{activeSection.title}</h2>
-                <button onClick={newNote} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm bg-accent text-white font-semibold hover:bg-accent/90"><Plus size={15} /> New note</button>
-              </div>
-              {notes.length === 0 ? (
-                <p className="text-slate-500 py-16 text-center text-sm">No notes here yet. Add your first topic.</p>
-              ) : (
-                <div className="space-y-2.5">
-                  {notes.map((n) => (
-                    <button key={n._id} onClick={() => openNoteView(n)} className="group w-full text-left p-4 rounded-xl bg-[#141414] border border-white/8 hover:border-accent/30 transition">
-                      <div className="flex items-center gap-2">
-                        <FileText size={15} className="text-slate-500 group-hover:text-accent flex-shrink-0" />
-                        <span className="font-semibold text-white truncate">{n.title || "Untitled"}</span>
-                      </div>
-                      {n.content && <p className="text-slate-400 text-xs mt-1.5 line-clamp-2 whitespace-pre-wrap">{n.content.replace(/[#*`>_~]/g, "")}</p>}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+      {/* ── Pane 2: Notes list ─────────────────────────────────────────── */}
+      <aside className={`${paneCls("list")} w-full lg:w-72 flex-col flex-shrink-0 bg-slate-50 dark:bg-[#0d0d0d] border-r border-slate-200 dark:border-white/8`}>
+        <div className="px-4 py-3 border-b border-slate-200 dark:border-white/8 flex items-center gap-2">
+          <button onClick={() => setPane("sections")} className="lg:hidden p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white"><ArrowLeft size={18} /></button>
+          <Folder size={15} className="text-accent flex-shrink-0" />
+          <h2 className="font-semibold text-sm truncate flex-1">{activeSection ? activeSection.title : "No section"}</h2>
+          {activeSection && (
+            <button onClick={newNote} title="New note" className="p-1.5 rounded-lg bg-accent text-white hover:bg-accent/90"><Plus size={15} /></button>
           )}
-        </main>
-      </div>
+        </div>
+
+        {activeSection && (
+          <div className="px-3 pt-3">
+            <div className="relative">
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search notes…"
+                className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-white dark:bg-[#0f0f0f] border border-slate-200 dark:border-white/10 text-sm placeholder:text-slate-400 outline-none focus:border-accent/40" />
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
+          {!activeSection ? (
+            <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-10">Create a section to start.</p>
+          ) : filtered.length === 0 ? (
+            <p className="text-slate-400 dark:text-slate-500 text-sm text-center py-10">{query ? "No matches." : "No notes yet."}</p>
+          ) : filtered.map((n) => (
+            <button key={n._id} onClick={() => openNoteView(n)}
+              className={`w-full text-left px-3 py-2.5 rounded-xl border transition ${openNote?._id === n._id ? "bg-accent/10 border-accent/30" : "bg-white dark:bg-[#141414] border-slate-200 dark:border-white/8 hover:border-accent/30"}`}>
+              <div className="flex items-center gap-2">
+                <FileText size={14} className={openNote?._id === n._id ? "text-accent" : "text-slate-400"} />
+                <span className="font-semibold text-sm truncate">{n.title || "Untitled"}</span>
+              </div>
+              {n.content && <p className="text-slate-500 dark:text-slate-400 text-xs mt-1 line-clamp-2">{n.content.replace(/[#*`>_~[\]]/g, "")}</p>}
+            </button>
+          ))}
+        </div>
+      </aside>
+
+      {/* ── Pane 3: Editor / viewer ────────────────────────────────────── */}
+      <main className={`${paneCls("editor")} flex-1 min-w-0 flex-col`}>
+        {!openNote ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center mb-4">
+              <FileText size={24} className="text-slate-400" />
+            </div>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Select a note to read it, or create a new one.</p>
+          </div>
+        ) : (
+          <>
+            <div className="px-5 lg:px-8 py-3 border-b border-slate-200 dark:border-white/8 flex items-center gap-3">
+              <button onClick={() => { setOpenNote(null); setPane("list"); }} className="lg:hidden p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white"><ArrowLeft size={18} /></button>
+              <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1.5 flex-1 truncate"><Folder size={12} /> {activeSection?.title}</span>
+              {mode === "view" ? (
+                <div className="flex items-center gap-2">
+                  <button onClick={startEdit} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm bg-accent text-white font-semibold hover:bg-accent/90"><Pencil size={13} /> Edit</button>
+                  <button onClick={() => removeNote(openNote)} title="Delete" className="p-2 rounded-lg text-red-500 dark:text-red-400 hover:bg-red-500/10"><Trash2 size={14} /></button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button onClick={() => (openNote._id ? setMode("view") : (setOpenNote(null), setPane("list")))} className="px-3 py-1.5 rounded-lg text-sm text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5">Cancel</button>
+                  <button onClick={saveNote} disabled={savingNote} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm bg-accent text-white font-semibold hover:bg-accent/90 disabled:opacity-50"><Check size={13} /> {savingNote ? "Saving…" : "Save"}</button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 lg:px-10 py-7 max-w-3xl w-full mx-auto">
+              {mode === "view" ? (
+                <article>
+                  <h1 className="text-3xl font-black tracking-tight mb-6 break-words">{openNote.title || "Untitled"}</h1>
+                  {openNote.content
+                    ? <Markdown>{openNote.content}</Markdown>
+                    : <p className="text-slate-400 dark:text-slate-500 text-sm italic">This note is empty. Click <b className="not-italic font-semibold">Edit</b> to add content.</p>}
+                </article>
+              ) : (
+                <div>
+                  <input value={draft.title} onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))} placeholder="Note title"
+                    className="w-full bg-transparent text-3xl font-black tracking-tight outline-none mb-4 placeholder:text-slate-300 dark:placeholder:text-slate-700" />
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs uppercase tracking-wider text-slate-400 dark:text-slate-500 font-semibold">Content (Markdown)</span>
+                    <button onClick={() => setPreview((p) => !p)} className="text-xs text-accent hover:underline">{preview ? "Write" : "Preview"}</button>
+                  </div>
+                  {preview ? (
+                    <div className="rounded-lg bg-slate-50 dark:bg-[#0f0f0f] border border-slate-200 dark:border-white/10 p-4 min-h-[320px]"><Markdown>{draft.content}</Markdown></div>
+                  ) : (
+                    <textarea value={draft.content} onChange={(e) => setDraft((d) => ({ ...d, content: e.target.value }))}
+                      placeholder={"Write in Markdown…\n\n## Heading\n- point\n`code`"}
+                      className="w-full min-h-[320px] rounded-lg bg-slate-50 dark:bg-[#0f0f0f] border border-slate-200 dark:border-white/10 p-4 text-sm leading-relaxed outline-none focus:border-accent/50 resize-y font-mono" />
+                  )}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </main>
     </div>
   );
 };

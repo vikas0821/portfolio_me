@@ -11,7 +11,8 @@ import Navbar from "./features/portfolio/Navbar";
 // changes. Hidden on the admin dashboard (which has its own layout).
 const ChromeNavbar = () => {
   const { pathname } = useLocation();
-  return pathname.startsWith("/admin") ? null : <Navbar />;
+  const hidden = pathname.startsWith("/admin") || pathname.startsWith("/notes");
+  return hidden ? null : <Navbar />;
 };
 
 const App = () => (
