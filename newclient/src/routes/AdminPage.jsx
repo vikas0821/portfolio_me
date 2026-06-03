@@ -4,12 +4,11 @@ import {
   User, Code2, FolderOpen, Briefcase, GraduationCap, Award,
   MessageSquare, LogOut, Plus, Pencil, Trash2, Check, X,
   ChevronDown, ChevronUp, Eye, EyeOff, LayoutDashboard, Save, Mail,
-  Settings as SettingsIcon, Newspaper, StickyNote, Pin
+  Settings as SettingsIcon, Newspaper
 } from "lucide-react";
 import * as svc from "../api/adminService";
 import { applyAccent } from "../lib/accent";
 import Markdown from "../components/Markdown";
-import { NOTE_COLOR_KEYS, noteColor } from "../lib/noteColors";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -894,105 +893,6 @@ const BlogAdminSection = () => {
   );
 };
 
-// ─── Notes Section ────────────────────────────────────────────────────────────
-
-const emptyNote = () => ({ title: "", content: "", color: "yellow", pinned: false });
-
-const NoteForm = ({ initial = emptyNote(), onSave, onCancel, saving }) => {
-  const [f, setF] = useState({ ...initial });
-  const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
-  const submit = (e) => { e.preventDefault(); onSave(f); };
-  return (
-    <form onSubmit={submit} className="space-y-3">
-      <div><Label>Title (optional)</Label><Input value={f.title || ""} onChange={(e) => set("title", e.target.value)} placeholder="Note title" /></div>
-      <div><Label>Content</Label><Textarea rows={6} required value={f.content} onChange={(e) => set("content", e.target.value)} placeholder="Write your note…" /></div>
-      <div className="flex items-end gap-6 flex-wrap">
-        <div>
-          <Label>Color</Label>
-          <div className="flex gap-2">
-            {NOTE_COLOR_KEYS.map((k) => (
-              <button
-                type="button"
-                key={k}
-                onClick={() => set("color", k)}
-                aria-label={k}
-                className={`w-7 h-7 rounded-full ${noteColor(k).swatch} transition ${f.color === k ? "ring-2 ring-offset-2 ring-offset-[#141414] ring-white" : "opacity-70 hover:opacity-100"}`}
-              />
-            ))}
-          </div>
-        </div>
-        <label className="flex items-center gap-2 cursor-pointer pb-1">
-          <input type="checkbox" className="accent-indigo-500 w-4 h-4" checked={Boolean(f.pinned)} onChange={(e) => set("pinned", e.target.checked)} />
-          <span className="text-sm text-slate-300">Pin to top</span>
-        </label>
-      </div>
-      <div className="flex gap-2 justify-end">
-        <Btn type="button" variant="ghost" onClick={onCancel}><X size={14} /> Cancel</Btn>
-        <Btn type="submit" variant="primary" disabled={saving}><Check size={14} /> {saving ? "Saving…" : "Save"}</Btn>
-      </div>
-    </form>
-  );
-};
-
-const NotesSection = () => {
-  const { items, loading, reload } = useListSection(svc.getNotes);
-  const [adding, setAdding] = useState(false);
-  const [editId, setEditId] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const { confirm, Dialog } = useConfirm();
-
-  const save = async (data, id) => {
-    setSaving(true);
-    try {
-      if (id) await svc.updateNote(id, data); else await svc.createNote(data);
-      toast.success(id ? "Updated" : "Added"); setAdding(false); setEditId(null); reload();
-    } catch { toast.error("Failed to save"); } finally { setSaving(false); }
-  };
-
-  const remove = async (item) => {
-    if (!await confirm("Delete this note?")) return;
-    try { await svc.deleteNote(item._id); toast.success("Deleted"); reload(); }
-    catch { toast.error("Failed to delete"); }
-  };
-
-  return (
-    <Section title="Notes" description="Short notes shown on your public /notes page.">
-      {Dialog}
-      {adding
-        ? <Card className="mb-4"><NoteForm onSave={(d) => save(d)} onCancel={() => setAdding(false)} saving={saving} /></Card>
-        : <Btn variant="primary" className="mb-4" onClick={() => setAdding(true)}><Plus size={14} /> New Note</Btn>
-      }
-      {loading ? <Spinner /> : items.length === 0 ? <Empty text="No notes yet." /> : (
-        <div className="space-y-3">
-          {items.map((n) => (
-            <Card key={n._id}>
-              {editId === n._id
-                ? <NoteForm initial={n} onSave={(d) => save(d, n._id)} onCancel={() => setEditId(null)} saving={saving} />
-                : (
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-3 h-3 rounded-full flex-shrink-0 ${noteColor(n.color).swatch}`} />
-                        {n.title && <p className="font-semibold text-white truncate">{n.title}</p>}
-                        {n.pinned && <Badge color="gold"><Pin size={9} className="inline -mt-0.5" /> Pinned</Badge>}
-                      </div>
-                      <p className="text-slate-400 text-xs mt-1 line-clamp-2 whitespace-pre-wrap">{n.content}</p>
-                    </div>
-                    <div className="flex gap-2 flex-shrink-0">
-                      <Btn variant="ghost" onClick={() => setEditId(n._id)}><Pencil size={13} /></Btn>
-                      <Btn variant="danger" onClick={() => remove(n)}><Trash2 size={13} /></Btn>
-                    </div>
-                  </div>
-                )
-              }
-            </Card>
-          ))}
-        </div>
-      )}
-    </Section>
-  );
-};
-
 // ─── Sidebar nav ──────────────────────────────────────────────────────────────
 
 const NAV = [
@@ -1003,7 +903,6 @@ const NAV = [
   { id: "education",        label: "Education",        icon: GraduationCap },
   { id: "certifications",   label: "Certifications",   icon: Award },
   { id: "blog",             label: "Blog",             icon: Newspaper },
-  { id: "notes",            label: "Notes",            icon: StickyNote },
   { id: "messages",         label: "Messages",         icon: MessageSquare },
   { id: "settings",         label: "Site Settings",    icon: SettingsIcon },
 ];
@@ -1016,7 +915,6 @@ const SECTIONS = {
   education:      <EducationSection />,
   certifications: <CertificationsSection />,
   blog:           <BlogAdminSection />,
-  notes:          <NotesSection />,
   messages:       <MessagesSection />,
   settings:       <SettingsSection />,
 };

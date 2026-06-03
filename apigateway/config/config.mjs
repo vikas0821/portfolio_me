@@ -19,6 +19,10 @@ export function loadConfig() {
       jwtSecret: str("ADMIN_JWT_SECRET", "change-me-admin-secret"),
     },
 
+    notes: {
+      password: str("NOTES_PASSWORD", "notes123"),
+    },
+
     mongo: {
       uri: str("MONGO_URI", "mongodb://localhost:27017/portfolio"),
       options: {

@@ -35,6 +35,7 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-change-me-admin-secret}
+      NOTES_PASSWORD: ${NOTES_PASSWORD:-notes123}
     ports:
       - "3000:3000"
 

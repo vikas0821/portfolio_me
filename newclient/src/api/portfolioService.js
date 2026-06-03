@@ -69,13 +69,3 @@ export const fetchBlogPost = async (slug) => {
     return null;
   }
 };
-
-export const fetchNotes = async () => {
-  try {
-    const response = await axiosInstance.get("/portfolio/getNotes");
-    return extractData(response);
-  } catch (error) {
-    toast.error(error?.response?.data?.responseMessage || error.message || "Error fetching notes");
-    return null;
-  }
-};

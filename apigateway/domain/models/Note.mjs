@@ -2,10 +2,10 @@ import mongoose from "mongoose";
 
 const NoteSchema = new mongoose.Schema(
   {
+    sectionId: { type: mongoose.Schema.Types.ObjectId, ref: "NoteSection", required: true, index: true },
     title: { type: String, default: "" },
-    content: { type: String, required: true },
-    color: { type: String, default: "yellow" }, // yellow|green|blue|pink|purple|orange
-    pinned: { type: Boolean, default: false },
+    content: { type: String, default: "" }, // Markdown
+    order: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

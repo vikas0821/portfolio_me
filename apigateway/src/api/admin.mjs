@@ -170,24 +170,6 @@ export function adminApi(_config) {
     try { res.json(await act("deleteBlogPost", { id: req.params.id })); } catch (e) { handleErr(res, e); }
   });
 
-  // ── Notes ─────────────────────────────────────────────────────────────────
-
-  r.get("/notes", async (req, res) => {
-    try { res.json(await act("getNotes")); } catch (e) { handleErr(res, e); }
-  });
-
-  r.post("/notes", async (req, res) => {
-    try { res.json(await act("saveNote", { data: req.body })); } catch (e) { handleErr(res, e); }
-  });
-
-  r.put("/notes/:id", async (req, res) => {
-    try { res.json(await act("saveNote", { data: { _id: req.params.id, ...req.body } })); } catch (e) { handleErr(res, e); }
-  });
-
-  r.delete("/notes/:id", async (req, res) => {
-    try { res.json(await act("deleteNote", { id: req.params.id })); } catch (e) { handleErr(res, e); }
-  });
-
   return r;
 }
 

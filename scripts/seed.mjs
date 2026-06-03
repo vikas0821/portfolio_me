@@ -25,7 +25,8 @@ const SkillSchema = new mongoose.Schema({ category: String, skills: [String] });
 const EducationSchema = new mongoose.Schema({ qualification: String, institution: String, score: String, year: String, location: String });
 const CertificationSchema = new mongoose.Schema({ title: String, issuer: String, platform: String, year: String, logo: String, certificateUrl: String, credentialId: String, order: Number });
 const BlogPostSchema = new mongoose.Schema({ title: String, slug: String, excerpt: String, content: String }, { timestamps: true });
-const NoteSchema = new mongoose.Schema({ title: String, content: String, color: String, pinned: Boolean }, { timestamps: true });
+const NoteSectionSchema = new mongoose.Schema({ title: String, order: Number }, { timestamps: true });
+const NoteSchema = new mongoose.Schema({ sectionId: mongoose.Schema.Types.ObjectId, title: String, content: String, order: Number }, { timestamps: true });
 
 const Profile = mongoose.model("Profile", ProfileSchema);
 const Experience = mongoose.model("Experience", ExperienceSchema);
@@ -34,6 +35,7 @@ const Skill = mongoose.model("Skill", SkillSchema);
 const Education = mongoose.model("Education", EducationSchema);
 const Certification = mongoose.model("Certification", CertificationSchema);
 const BlogPost = mongoose.model("BlogPost", BlogPostSchema);
+const NoteSection = mongoose.model("NoteSection", NoteSectionSchema);
 const Note = mongoose.model("Note", NoteSchema);
 
 // ── Seed Data ─────────────────────────────────────────────────────────────
@@ -233,32 +235,23 @@ The result deploys cleanly on **Render + Vercel + MongoDB Atlas**, all on free t
   },
 ];
 
-const notesData = [
-  {
-    title: "Currently exploring",
-    content: "Diving deeper into event-driven architecture with RabbitMQ and message-queue patterns for resilient, decoupled banking services.",
-    color: "purple",
-    pinned: true,
-  },
-  {
-    title: "Perf tip",
-    content: "Always index the fields you filter and sort on. A compound index on { status: 1, createdAt: -1 } turned a 1.2s query into <20ms.",
-    color: "green",
-    pinned: false,
-  },
-  {
-    title: "Reminder",
-    content: "Right tool for the right scale — microservices aren't free. Start simple, split when team/scale actually demands it.",
-    color: "yellow",
-    pinned: false,
-  },
-  {
-    title: "Reading list",
-    content: "• Designing Data-Intensive Applications\n• Node.js Design Patterns\n• The Pragmatic Programmer",
-    color: "blue",
-    pinned: false,
-  },
+// Private notes workspace: sections, each with topic notes (Markdown)
+const noteSectionsData = [
+  { title: "Backend", order: 0 },
+  { title: "Learning", order: 1 },
 ];
+
+// keyed by section title -> notes
+const noteContentBySection = {
+  Backend: [
+    { title: "Indexing", content: "## DB indexing\nAlways index the fields you filter and sort on.\n\nA compound index on `{ status: 1, createdAt: -1 }` turned a **1.2s** query into **<20ms**." },
+    { title: "Architecture", content: "Right tool for the right scale — microservices aren't free.\n\n- Start simple (single service)\n- Split only when team/scale actually demands it" },
+  ],
+  Learning: [
+    { title: "Reading list", content: "- Designing Data-Intensive Applications\n- Node.js Design Patterns\n- The Pragmatic Programmer" },
+    { title: "Exploring", content: "Diving into **event-driven architecture** with RabbitMQ and message-queue patterns for resilient, decoupled services." },
+  ],
+};
 
 // ── Run ────────────────────────────────────────────────────────────────────
 
@@ -276,6 +269,7 @@ async function seed() {
     Education.deleteMany({}),
     Certification.deleteMany({}),
     BlogPost.deleteMany({}),
+    NoteSection.deleteMany({}),
     Note.deleteMany({}),
   ]);
   console.log("Cleared existing data.");
@@ -289,8 +283,16 @@ async function seed() {
     Education.insertMany(educationData),
     Certification.insertMany(certificationsData),
     BlogPost.insertMany(blogData),
-    Note.insertMany(notesData),
   ]);
+
+  // Note sections + their notes (notes reference the section _id)
+  const createdSections = await NoteSection.insertMany(noteSectionsData);
+  for (const section of createdSections) {
+    const items = noteContentBySection[section.title] || [];
+    if (items.length) {
+      await Note.insertMany(items.map((n, i) => ({ ...n, sectionId: section._id, order: i })));
+    }
+  }
 
   console.log("Seed data inserted successfully.");
   await mongoose.disconnect();
