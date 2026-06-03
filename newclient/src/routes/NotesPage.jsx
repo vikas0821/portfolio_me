@@ -70,7 +70,8 @@ const Workspace = ({ onLogout }) => {
   const [sections, setSections] = useState([]);
   const [activeSection, setActiveSection] = useState(null);
   const [notes, setNotes] = useState([]);
-  const [openNote, setOpenNote] = useState(null); // note being edited
+  const [openNote, setOpenNote] = useState(null); // currently opened note
+  const [mode, setMode] = useState("view");       // "view" | "edit"
   const [draft, setDraft] = useState({ title: "", content: "" });
   const [preview, setPreview] = useState(false);
   const [addingSection, setAddingSection] = useState(false);
@@ -126,28 +127,28 @@ const Workspace = ({ onLogout }) => {
   };
 
   // Notes CRUD
-  const openEditor = (note) => {
-    setOpenNote(note);
-    setDraft({ title: note.title || "", content: note.content || "" });
+  const openNoteView = (note) => { setOpenNote(note); setMode("view"); };
+  const startEdit = () => {
+    setDraft({ title: openNote.title || "", content: openNote.content || "" });
     setPreview(false);
+    setMode("edit");
   };
   const newNote = () => {
     if (!activeSection) return;
     setOpenNote({ _id: null });
     setDraft({ title: "", content: "" });
     setPreview(false);
+    setMode("edit");
   };
   const saveNote = async () => {
     setSavingNote(true);
     try {
-      if (openNote._id) {
-        await svc.updateNote(openNote._id, { title: draft.title, content: draft.content });
-      } else {
-        await svc.createNote({ sectionId: activeSection._id, title: draft.title, content: draft.content });
-      }
+      const r = openNote._id
+        ? await svc.updateNote(openNote._id, { title: draft.title, content: draft.content })
+        : await svc.createNote({ sectionId: activeSection._id, title: draft.title, content: draft.content });
       toast.success("Saved");
-      setOpenNote(null);
       loadNotes(activeSection._id);
+      if (r?.data) { setOpenNote(r.data); setMode("view"); } else { setOpenNote(null); }
     } catch { toast.error("Failed to save note"); }
     finally { setSavingNote(false); }
   };
@@ -235,10 +236,25 @@ const Workspace = ({ onLogout }) => {
         <main className="flex-1 p-5 lg:p-8 max-w-3xl w-full mx-auto">
           {!activeSection ? (
             <p className="text-center text-slate-500 py-20 text-sm">Create a section to start adding notes.</p>
-          ) : openNote ? (
-            // Note editor
+          ) : openNote && mode === "view" ? (
+            // Note — read (view) mode
             <div>
               <button onClick={() => setOpenNote(null)} className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white mb-5"><ArrowLeft size={15} /> Back to {activeSection.title}</button>
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <h1 className="text-2xl font-bold break-words">{openNote.title || "Untitled"}</h1>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button onClick={startEdit} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm bg-accent text-white font-semibold hover:bg-accent/90"><Pencil size={14} /> Edit</button>
+                  <button onClick={() => removeNote(openNote)} title="Delete" className="inline-flex items-center px-3 py-2 rounded-lg text-sm bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20"><Trash2 size={14} /></button>
+                </div>
+              </div>
+              {openNote.content
+                ? <div className="dark"><Markdown>{openNote.content}</Markdown></div>
+                : <p className="text-slate-500 text-sm italic">This note is empty. Click <b className="not-italic font-semibold">Edit</b> to add content.</p>}
+            </div>
+          ) : openNote ? (
+            // Note — edit mode
+            <div>
+              <button onClick={() => (openNote._id ? setMode("view") : setOpenNote(null))} className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white mb-5"><ArrowLeft size={15} /> {openNote._id ? "Cancel" : `Back to ${activeSection.title}`}</button>
               <input
                 value={draft.title}
                 onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
@@ -276,7 +292,7 @@ const Workspace = ({ onLogout }) => {
               ) : (
                 <div className="space-y-2.5">
                   {notes.map((n) => (
-                    <button key={n._id} onClick={() => openEditor(n)} className="group w-full text-left p-4 rounded-xl bg-[#141414] border border-white/8 hover:border-accent/30 transition">
+                    <button key={n._id} onClick={() => openNoteView(n)} className="group w-full text-left p-4 rounded-xl bg-[#141414] border border-white/8 hover:border-accent/30 transition">
                       <div className="flex items-center gap-2">
                         <FileText size={15} className="text-slate-500 group-hover:text-accent flex-shrink-0" />
                         <span className="font-semibold text-white truncate">{n.title || "Untitled"}</span>
