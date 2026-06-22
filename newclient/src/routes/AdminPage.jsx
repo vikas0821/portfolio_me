@@ -980,7 +980,7 @@ const LoginScreen = ({ onLogin }) => {
         </form>
 
         <p className="text-center text-xs text-slate-600 mt-4">
-          <a href="/" className="hover:text-slate-400 transition">← Back to portfolio</a>
+          <a href="/studio" className="hover:text-slate-400 transition">← Back to workspace</a>
         </p>
       </div>
     </div>

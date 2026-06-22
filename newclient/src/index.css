@@ -79,7 +79,34 @@
   ::-webkit-scrollbar-track { @apply bg-slate-100 dark:bg-zinc-900; }
   ::-webkit-scrollbar-thumb { @apply bg-slate-300 dark:bg-zinc-700 rounded-full; }
   ::-webkit-scrollbar-thumb:hover { background-color: rgb(var(--accent-rgb)); }
+
+  /* Accessibility: clear keyboard-focus ring (mouse clicks stay clean) */
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent-rgb));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
+
+/* Respect prefers-reduced-motion for CSS animations/scroll.
+   (framer-motion animations are handled globally via <MotionConfig reducedMotion="user">.) */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Skip-to-content link (visible only on keyboard focus) */
+.skip-link {
+  position: fixed; top: 0; left: 50%; transform: translate(-50%, -120%);
+  z-index: 100; padding: 0.5rem 1rem; border-radius: 0 0 0.5rem 0.5rem;
+  background: rgb(var(--accent-rgb)); color: #fff; font-size: 0.875rem; font-weight: 600;
+  transition: transform 0.15s ease;
+}
+.skip-link:focus { transform: translate(-50%, 0); }
 
 /* ── Refined warm light theme — linen canvas + elevated cards (light mode only) ──
    Warm neutrals with cool indigo accent; cards lift off the page with soft shadows.

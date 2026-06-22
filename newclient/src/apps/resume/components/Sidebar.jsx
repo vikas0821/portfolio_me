@@ -16,7 +16,7 @@ export default function Sidebar() {
   const exit = () => {
     localStorage.removeItem('resume_token');
     localStorage.removeItem('token');
-    navigate('/');
+    navigate('/studio');
   };
 
   return (
@@ -45,7 +45,7 @@ export default function Sidebar() {
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-gray-100 w-full transition-colors"
         >
           <LogOut size={18} />
-          Exit to portfolio
+          Exit to Studio
         </button>
       </div>
     </aside>
