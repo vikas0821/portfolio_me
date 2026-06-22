@@ -1,15 +1,28 @@
-import { useEffect } from "react";
+import { useMemo } from "react";
 import App from "./App.jsx";
 import { LearnProvider } from "./context/LearnContext.jsx";
-import { applyThemeVars, getInitialThemeKey } from "./theme/themes.js";
+import { optionThemeTokens, hexToChannels } from "./theme/themes.js";
+import { applyPalette } from "./utils/colors.js";
+import { useTheme } from "../../context/ThemeContext";
 import "./index.css";
 
-// Mounts the Option Analyzer as a self-contained component inside the portfolio.
-// Theme CSS variables are applied on mount; styles are scoped under .option-root.
+// Mounts the Option Analyzer inside the portfolio. Its color tokens follow the
+// global light/dark theme: CSS vars (for Tailwind `bg-card`, `text-txt`, …) are
+// set inline on .option-root, and the chart PALETTE (hex) is kept in sync.
 export default function OptionApp() {
-  useEffect(() => { applyThemeVars(getInitialThemeKey()); }, []);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const styleVars = useMemo(() => {
+    const tokens = optionThemeTokens(isDark);
+    applyPalette(tokens); // charts read hex from PALETTE
+    const vars = { colorScheme: isDark ? "dark" : "light" };
+    for (const [k, v] of Object.entries(tokens)) vars[`--c-${k}`] = hexToChannels(v);
+    return vars;
+  }, [isDark]);
+
   return (
-    <div className="option-root">
+    <div className="option-root" style={styleVars}>
       <LearnProvider>
         <App />
       </LearnProvider>

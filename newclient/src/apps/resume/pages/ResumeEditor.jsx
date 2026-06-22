@@ -3,8 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 import { Plus, Trash2, Save, Download, Eye } from 'lucide-react';
 
-const inputCls = 'w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400';
-const labelCls = 'block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1';
+const inputCls = 'w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400';
+const labelCls = 'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1';
 
 function Field({ label, ...props }) {
   return (
@@ -26,11 +26,11 @@ function TextAreaField({ label, ...props }) {
 
 function Section({ title, children, onAdd, addLabel }) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+    <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 space-y-3">
       <div className="flex justify-between items-center">
         <h2 className="font-semibold">{title}</h2>
         {onAdd && (
-          <button onClick={onAdd} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-700">
+          <button onClick={onAdd} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg border hover:bg-slate-50 dark:hover:bg-accent/90">
             <Plus size={14} /> {addLabel || 'Add'}
           </button>
         )}
@@ -54,7 +54,7 @@ function BulletsEditor({ bullets, onChange }) {
           <button onClick={() => remove(i)} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
         </div>
       ))}
-      <button onClick={add} className="text-xs text-gray-900 dark:text-gray-100 hover:underline">+ Add bullet</button>
+      <button onClick={add} className="text-xs text-slate-900 dark:text-slate-100 hover:underline">+ Add bullet</button>
     </div>
   );
 }
@@ -85,7 +85,7 @@ export default function ResumeEditor() {
     load();
   }, [id]);
 
-  if (!resume) return <div className="text-gray-500 dark:text-gray-400">Loading...</div>;
+  if (!resume) return <div className="text-slate-500 dark:text-slate-400">Loading...</div>;
 
   const set = (key, val) => setResume(r => ({ ...r, [key]: val }));
   const setArr = (key, val) => setResume(r => ({ ...r, [key]: val }));
@@ -112,31 +112,31 @@ export default function ResumeEditor() {
 
   return (
     <div className="space-y-4 pb-10">
-      <div className="flex justify-between items-center sticky top-0 bg-gray-100 dark:bg-gray-900 py-2 z-10">
+      <div className="flex justify-between items-center sticky top-0 bg-slate-100 dark:bg-[#0f0f0f] py-2 z-10">
         <div>
           <h1 className="text-2xl font-bold">{resume.variantName}</h1>
-          <Link to="/resume-builder/variants" className="text-sm text-gray-900 dark:text-gray-100 hover:underline">← Back to variants</Link>
+          <Link to="/resume-builder/variants" className="text-sm text-slate-900 dark:text-slate-100 hover:underline">← Back to variants</Link>
         </div>
         <div className="flex gap-2">
           <select className={inputCls} value={resume.template} onChange={e => set('template', e.target.value)}>
             <option value="classic">Classic</option>
             <option value="modern">Modern</option>
           </select>
-          <button onClick={render} disabled={rendering} className="flex items-center gap-2 border px-4 py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
+          <button onClick={render} disabled={rendering} className="flex items-center gap-2 border px-4 py-2 rounded-lg text-sm hover:bg-slate-50 dark:hover:bg-accent/90 disabled:opacity-50">
             <Eye size={16} /> {rendering ? 'Rendering...' : 'Preview / Generate'}
           </button>
-          <button onClick={save} disabled={saving} className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 disabled:opacity-50">
+          <button onClick={save} disabled={saving} className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-lg text-sm hover:bg-accent/90 disabled:opacity-50">
             <Save size={16} /> {saving ? 'Saving...' : 'Save'}
           </button>
         </div>
       </div>
 
       {previewFiles && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4">
+        <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 flex items-center gap-4">
           <span className="text-sm font-medium">Generated:</span>
-          <a href={previewFiles.html} target="_blank" rel="noreferrer" className="text-sm text-gray-900 dark:text-gray-100 hover:underline flex items-center gap-1"><Eye size={14} /> View HTML</a>
-          <a href={previewFiles.pdf} target="_blank" rel="noreferrer" className="text-sm text-gray-900 dark:text-gray-100 hover:underline flex items-center gap-1"><Download size={14} /> Download PDF</a>
-          <a href={previewFiles.docx} target="_blank" rel="noreferrer" className="text-sm text-gray-900 dark:text-gray-100 hover:underline flex items-center gap-1"><Download size={14} /> Download DOCX</a>
+          <a href={previewFiles.html} target="_blank" rel="noreferrer" className="text-sm text-slate-900 dark:text-slate-100 hover:underline flex items-center gap-1"><Eye size={14} /> View HTML</a>
+          <a href={previewFiles.pdf} target="_blank" rel="noreferrer" className="text-sm text-slate-900 dark:text-slate-100 hover:underline flex items-center gap-1"><Download size={14} /> Download PDF</a>
+          <a href={previewFiles.docx} target="_blank" rel="noreferrer" className="text-sm text-slate-900 dark:text-slate-100 hover:underline flex items-center gap-1"><Download size={14} /> Download DOCX</a>
         </div>
       )}
 
@@ -172,7 +172,7 @@ export default function ResumeEditor() {
       {/* Experience */}
       <Section title="Experience" addLabel="Add Job" onAdd={() => setArr('experience', [...resume.experience, { role: '', company: '', location: '', duration: '', bullets: [] }])}>
         {resume.experience.map((exp, i) => (
-          <div key={i} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
+          <div key={i} className="border border-slate-200 dark:border-white/10 rounded-lg p-3 space-y-2">
             <div className="grid grid-cols-2 gap-3">
               <Field label="Role" value={exp.role} onChange={e => setArr('experience', resume.experience.map((x, idx) => idx === i ? { ...x, role: e.target.value } : x))} />
               <Field label="Company" value={exp.company} onChange={e => setArr('experience', resume.experience.map((x, idx) => idx === i ? { ...x, company: e.target.value } : x))} />
@@ -188,7 +188,7 @@ export default function ResumeEditor() {
       {/* Projects */}
       <Section title="Projects" addLabel="Add Project" onAdd={() => setArr('projects', [...resume.projects, { name: '', tech: '', bullets: [] }])}>
         {resume.projects.map((p, i) => (
-          <div key={i} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
+          <div key={i} className="border border-slate-200 dark:border-white/10 rounded-lg p-3 space-y-2">
             <div className="grid grid-cols-2 gap-3">
               <Field label="Project Name" value={p.name} onChange={e => setArr('projects', resume.projects.map((x, idx) => idx === i ? { ...x, name: e.target.value } : x))} />
               <Field label="Tech Stack" value={p.tech} onChange={e => setArr('projects', resume.projects.map((x, idx) => idx === i ? { ...x, tech: e.target.value } : x))} />

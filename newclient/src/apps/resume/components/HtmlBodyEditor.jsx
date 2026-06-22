@@ -63,15 +63,15 @@ export default function HtmlBodyEditor({ value, onChange, rows = 10 }) {
   ];
 
   return (
-    <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-      <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-900/40 border-b border-gray-300 dark:border-gray-600 px-2">
+    <div className="border border-slate-300 dark:border-slate-600 rounded-lg overflow-hidden">
+      <div className="flex items-center justify-between bg-slate-50 dark:bg-[#0f0f0f]/40 border-b border-slate-300 dark:border-slate-600 px-2">
         <div className="flex">
           <button type="button" onClick={() => setTab('write')}
-            className={`px-3 py-1.5 text-sm font-medium border-b-2 -mb-px ${tab === 'write' ? 'border-gray-900 dark:border-gray-100 text-gray-900 dark:text-gray-100' : 'border-transparent text-gray-500 dark:text-gray-400'}`}>
+            className={`px-3 py-1.5 text-sm font-medium border-b-2 -mb-px ${tab === 'write' ? 'border-slate-900 dark:border-slate-100 text-slate-900 dark:text-slate-100' : 'border-transparent text-slate-500 dark:text-slate-400'}`}>
             Write
           </button>
           <button type="button" onClick={() => setTab('preview')}
-            className={`px-3 py-1.5 text-sm font-medium border-b-2 -mb-px ${tab === 'preview' ? 'border-gray-900 dark:border-gray-100 text-gray-900 dark:text-gray-100' : 'border-transparent text-gray-500 dark:text-gray-400'}`}>
+            className={`px-3 py-1.5 text-sm font-medium border-b-2 -mb-px ${tab === 'preview' ? 'border-slate-900 dark:border-slate-100 text-slate-900 dark:text-slate-100' : 'border-transparent text-slate-500 dark:text-slate-400'}`}>
             Preview
           </button>
         </div>
@@ -79,7 +79,7 @@ export default function HtmlBodyEditor({ value, onChange, rows = 10 }) {
           <div className="flex items-center gap-0.5 py-1">
             {actions.map(({ icon: Icon, title, onClick }) => (
               <button key={title} type="button" title={title} onClick={onClick}
-                className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
+                className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-accent/90 text-slate-600 dark:text-slate-300">
                 <Icon size={15} />
               </button>
             ))}
@@ -90,19 +90,19 @@ export default function HtmlBodyEditor({ value, onChange, rows = 10 }) {
       {tab === 'write' ? (
         <textarea
           ref={textareaRef}
-          className="w-full px-3 py-2 text-sm font-mono focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100"
+          className="w-full px-3 py-2 text-sm font-mono focus:outline-none bg-white dark:bg-[#161616] dark:text-slate-100"
           rows={rows}
           value={value}
           onChange={e => onChange(e.target.value)}
         />
       ) : (
         <div
-          className="px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:text-gray-100 min-h-[160px]
+          className="px-3 py-2 text-sm bg-white dark:bg-[#161616] dark:text-slate-100 min-h-[160px]
             [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-2 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:mb-2
             [&_p]:mb-2 [&_strong]:font-semibold [&_em]:italic
-            [&_a]:text-blue-600 [&_a]:underline [&_code]:bg-gray-100 [&_code]:dark:bg-gray-700 [&_code]:px-1 [&_code]:rounded
+            [&_a]:text-blue-600 [&_a]:underline [&_code]:bg-slate-100 [&_code]:dark:bg-slate-700 [&_code]:px-1 [&_code]:rounded
             [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-2
-            [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:dark:border-gray-600 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:dark:text-gray-400"
+            [&_blockquote]:border-l-4 [&_blockquote]:border-slate-300 [&_blockquote]:dark:border-slate-600 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_blockquote]:dark:text-slate-400"
           style={{ minHeight: `${rows * 1.5}em` }}
           dangerouslySetInnerHTML={{ __html: softRenderPreview(value) }}
         />

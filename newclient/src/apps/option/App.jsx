@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { Sun, Moon } from "lucide-react";
 import UploadPanel from "./components/UploadPanel.jsx";
 import Dashboard from "./components/Dashboard.jsx";
 import GlossaryModal from "./components/GlossaryModal.jsx";
-import ThemePicker from "./components/ThemePicker.jsx";
 import { analyzeSingle, analyzeCompare } from "./api/analyzer.js";
 import { useLearn } from "./context/LearnContext.jsx";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function App() {
   const [mode, setMode] = useState("single"); // "single" | "compare"
@@ -12,6 +13,7 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const { beginner, toggleBeginner, openGlossary, lang, toggleLang } = useLearn();
+  const { theme, toggleTheme } = useTheme();
 
   async function runSingle(file, expiry) {
     setLoading(true);
@@ -68,8 +70,15 @@ export default function App() {
           </button>
 
           <div className="flex items-center gap-2">
-            {/* Theme picker */}
-            <ThemePicker />
+            {/* Global light/dark toggle */}
+            <button
+              onClick={toggleTheme}
+              title="Toggle theme"
+              aria-label="Toggle theme"
+              className="p-2 rounded-lg border border-border bg-card text-muted hover:text-txt transition-colors"
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
 
             {/* Language toggle (हिंदी / EN) */}
             <button

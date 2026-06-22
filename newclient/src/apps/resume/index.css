@@ -1,5 +1,10 @@
 /* Resume Builder styles — scoped to .resume-root so they don't leak into the
-   portfolio. Tailwind directives live in the portfolio's index.css (one build). */
+   portfolio. Tailwind directives live in the portfolio's index.css (one build).
+   Canvas matches the portfolio: warm linen in light, near-black in dark. */
 .resume-root {
-  @apply bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-100 min-h-screen;
+  @apply text-slate-700 dark:text-slate-200 min-h-screen;
+  background-color: #f2efe8;
+}
+.dark .resume-root {
+  background-color: #0a0a0a;
 }

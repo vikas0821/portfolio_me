@@ -82,6 +82,26 @@ export const THEMES = {
 
 export const THEME_KEYS = Object.keys(THEMES);
 export const DEFAULT_THEME = "midnight";
+
+// Portfolio-aligned token sets so the Option Analyzer matches the rest of the
+// site and follows the global light/dark toggle (instead of its own picker).
+// `neutral` is the portfolio's indigo accent. Light mirrors the linen canvas.
+export const PORTFOLIO_OPTION_THEMES = {
+  dark: {
+    bg: "#0a0a0a", card: "#141414", border: "#262626",
+    bullish: "#10b981", bearish: "#f43f5e", neutral: "#6366f1", warning: "#f59e0b",
+    txt: "#f1f5f9", muted: "#94a3b8",
+  },
+  light: {
+    bg: "#f2efe8", card: "#fffdf8", border: "#e8e1d3",
+    bullish: "#059669", bearish: "#e11d48", neutral: "#4f46e5", warning: "#d97706",
+    txt: "#2c2922", muted: "#6b7280",
+  },
+};
+
+export function optionThemeTokens(isDark) {
+  return isDark ? PORTFOLIO_OPTION_THEMES.dark : PORTFOLIO_OPTION_THEMES.light;
+}
 const STORAGE_KEY = "oca_theme";
 
 // "#0a0e1a" -> "10 14 26" (space-separated RGB channels for `rgb(var() / a)`).

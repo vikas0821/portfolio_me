@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api';
 import { Send, FileSearch, Download, Mail, ListPlus } from 'lucide-react';
 
-const inputCls = 'w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400';
-const labelCls = 'block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1';
+const inputCls = 'w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400';
+const labelCls = 'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1';
 const STATUSES = ['applied', 'replied', 'interview', 'offer', 'rejected', 'ghosted'];
 const SOURCES = ['LinkedIn', 'Naukri', 'Indeed', 'Company Website', 'Referral', 'AngelList/Wellfound', 'Other'];
 
@@ -79,22 +79,22 @@ export default function Apply() {
 
       <div className="flex gap-2">
         <button type="button" onClick={() => setMode('generate')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${mode === 'generate' ? 'bg-gray-900 text-white' : 'border text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${mode === 'generate' ? 'bg-accent text-white' : 'border text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-accent/90'}`}>
           <FileSearch size={16} /> Generate Resume & Apply
         </button>
         <button type="button" onClick={() => setMode('external')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${mode === 'external' ? 'bg-gray-900 text-white' : 'border text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${mode === 'external' ? 'bg-accent text-white' : 'border text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-accent/90'}`}>
           <ListPlus size={16} /> Track External Application
         </button>
       </div>
       {mode === 'external' && (
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           For jobs you already applied to elsewhere (LinkedIn, Naukri, a company site, etc.). This just logs it for tracking — no resume file is generated.
         </p>
       )}
 
       <form onSubmit={submit} className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+        <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 space-y-3">
           <h2 className="font-semibold">Job Details</h2>
 
           {mode === 'external' ? (
@@ -164,12 +164,12 @@ export default function Apply() {
           <div className="flex gap-2">
             {mode === 'generate' && (
               <button type="button" onClick={analyze} disabled={analyzing || !form.jdText || !form.resumeVariantId}
-                className="flex items-center gap-2 border px-4 py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
+                className="flex items-center gap-2 border px-4 py-2 rounded-lg text-sm hover:bg-slate-50 dark:hover:bg-accent/90 disabled:opacity-50">
                 <FileSearch size={16} /> {analyzing ? 'Analyzing...' : 'Check ATS Score'}
               </button>
             )}
             <button type="submit" disabled={loading}
-              className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 disabled:opacity-50">
+              className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-lg text-sm hover:bg-accent/90 disabled:opacity-50">
               <Send size={16} /> {loading ? 'Saving...' : mode === 'external' ? 'Add to Tracker' : 'Generate Application'}
             </button>
           </div>
@@ -177,13 +177,13 @@ export default function Apply() {
 
         <div className="space-y-4">
           {atsPreview && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+            <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4">
               <h2 className="font-semibold mb-2">ATS Match (current resume)</h2>
               <div className="text-3xl font-bold">{atsPreview.score}%</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">{atsPreview.matched.length} / {atsPreview.total} keywords matched</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">{atsPreview.matched.length} / {atsPreview.total} keywords matched</div>
               {atsPreview.missing.length > 0 && (
                 <div className="mt-2">
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Missing keywords:</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Missing keywords:</div>
                   <div className="flex flex-wrap gap-1">
                     {atsPreview.missing.map(kw => <span key={kw} className="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded-full">{kw}</span>)}
                   </div>
@@ -193,25 +193,25 @@ export default function Apply() {
           )}
 
           {result && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+            <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 space-y-3">
               <h2 className="font-semibold">{result.application.generatedFiles?.pdf ? 'Application Generated' : 'Application Added'}</h2>
               {result.application.generatedFiles?.pdf && (
                 <div className="flex gap-4 text-sm">
                   <div>
-                    <div className="text-gray-500 dark:text-gray-400 text-xs">ATS Before</div>
+                    <div className="text-slate-500 dark:text-slate-400 text-xs">ATS Before</div>
                     <div className="text-xl font-bold">{result.ats.before.score}%</div>
                   </div>
                   <div>
-                    <div className="text-gray-500 dark:text-gray-400 text-xs">ATS After</div>
+                    <div className="text-slate-500 dark:text-slate-400 text-xs">ATS After</div>
                     <div className="text-xl font-bold">{result.ats.after.score}%</div>
                   </div>
                 </div>
               )}
               <div className="flex flex-wrap gap-3">
-                {result.application.generatedFiles?.pdf && <a href={result.application.generatedFiles.pdf} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-gray-900 dark:text-gray-100 hover:underline"><Download size={14} /> PDF</a>}
-                {result.application.generatedFiles?.docx && <a href={result.application.generatedFiles.docx} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-gray-900 dark:text-gray-100 hover:underline"><Download size={14} /> DOCX</a>}
-                {result.application.generatedFiles?.html && <a href={result.application.generatedFiles.html} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-gray-900 dark:text-gray-100 hover:underline"><Download size={14} /> HTML</a>}
-                {result.application.generatedFiles?.coverLetter && <a href={result.application.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-gray-900 dark:text-gray-100 hover:underline"><Download size={14} /> Cover Letter</a>}
+                {result.application.generatedFiles?.pdf && <a href={result.application.generatedFiles.pdf} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100 hover:underline"><Download size={14} /> PDF</a>}
+                {result.application.generatedFiles?.docx && <a href={result.application.generatedFiles.docx} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100 hover:underline"><Download size={14} /> DOCX</a>}
+                {result.application.generatedFiles?.html && <a href={result.application.generatedFiles.html} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100 hover:underline"><Download size={14} /> HTML</a>}
+                {result.application.generatedFiles?.coverLetter && <a href={result.application.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100 hover:underline"><Download size={14} /> Cover Letter</a>}
               </div>
               {form.recruiterEmail && (
                 <button onClick={() => navigate(`/resume-builder/email/${result.application._id}`)}
@@ -219,7 +219,7 @@ export default function Apply() {
                   <Mail size={16} /> Compose & Send Email to Recruiter
                 </button>
               )}
-              <button onClick={() => navigate('/resume-builder/applications')} className="text-sm text-gray-900 dark:text-gray-100 hover:underline">Go to Applications tracker</button>
+              <button onClick={() => navigate('/resume-builder/applications')} className="text-sm text-slate-900 dark:text-slate-100 hover:underline">Go to Applications tracker</button>
             </div>
           )}
         </div>

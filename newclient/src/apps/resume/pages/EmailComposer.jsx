@@ -3,8 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 import { Send, Loader2 } from 'lucide-react';
 
-const inputCls = 'w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400';
-const labelCls = 'block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1';
+const inputCls = 'w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400';
+const labelCls = 'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1';
 
 export default function EmailComposer() {
   const { applicationId } = useParams();
@@ -38,8 +38,8 @@ export default function EmailComposer() {
     api.post('/email/preview', { applicationId, templateId }).then(res => setEmail(res.data));
   }, [templateId, applicationId]);
 
-  if (loading || !app) return <div className="text-gray-500 dark:text-gray-400">Loading...</div>;
-  if (!email) return <div className="text-gray-500 dark:text-gray-400">Loading email preview...</div>;
+  if (loading || !app) return <div className="text-slate-500 dark:text-slate-400">Loading...</div>;
+  if (!email) return <div className="text-slate-500 dark:text-slate-400">Loading email preview...</div>;
 
   const send = async () => {
     setSending(true);
@@ -64,16 +64,16 @@ export default function EmailComposer() {
     <div className="space-y-4 max-w-2xl">
       <div>
         <h1 className="text-2xl font-bold">Compose Email</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{app.role} at {app.company}</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{app.role} at {app.company}</p>
       </div>
 
       {sent ? (
         <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 rounded-xl p-4">
           Email sent to {email.to} successfully.
-          <div className="mt-2"><Link to="/resume-builder/applications" className="text-gray-900 dark:text-gray-100 hover:underline text-sm">Back to applications</Link></div>
+          <div className="mt-2"><Link to="/resume-builder/applications" className="text-slate-900 dark:text-slate-100 hover:underline text-sm">Back to applications</Link></div>
         </div>
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+        <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 space-y-3">
           <div>
             <label className={labelCls}>Email Template</label>
             <select className={inputCls} value={templateId} onChange={e => setTemplateId(e.target.value)}>
@@ -98,7 +98,7 @@ export default function EmailComposer() {
 
           <div>
             <label className={labelCls}>Preview</label>
-            <div className="border rounded-lg p-3 bg-gray-50 dark:bg-gray-900/40 text-sm whitespace-pre-wrap">{email.bodyText}</div>
+            <div className="border rounded-lg p-3 bg-slate-50 dark:bg-[#0f0f0f]/40 text-sm whitespace-pre-wrap">{email.bodyText}</div>
           </div>
 
           <div>

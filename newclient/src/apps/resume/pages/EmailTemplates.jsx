@@ -3,8 +3,8 @@ import api from '../api';
 import { Plus, Save, Trash2, Star } from 'lucide-react';
 import HtmlBodyEditor from '../components/HtmlBodyEditor';
 
-const inputCls = 'w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400';
-const labelCls = 'block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1';
+const inputCls = 'w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400';
+const labelCls = 'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1';
 
 const PLACEHOLDERS = ['recruiterName', 'company', 'role', 'location', 'jobRef', 'candidateName', 'candidateHeadline', 'candidateEmail', 'candidatePhone', 'candidateLinkedin', 'topSkills', 'topSkillsList'];
 
@@ -43,32 +43,32 @@ export default function EmailTemplates() {
     load();
   };
 
-  if (loading) return <div className="text-gray-500 dark:text-gray-400">Loading...</div>;
+  if (loading) return <div className="text-slate-500 dark:text-slate-400">Loading...</div>;
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Email Templates</h1>
-        <button onClick={create} className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700">
+        <button onClick={create} className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-lg text-sm hover:bg-accent/90">
           <Plus size={16} /> New Template
         </button>
       </div>
 
-      <div className="bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-xs text-gray-700 dark:text-gray-300">
+      <div className="bg-slate-50 dark:bg-[#0f0f0f]/40 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-xs text-slate-700 dark:text-slate-300">
         Available placeholders: {PLACEHOLDERS.map(p => `{{${p}}}`).join(', ')}
       </div>
 
       <div className="space-y-4">
         {templates.map(tpl => (
-          <div key={tpl._id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-3">
+          <div key={tpl._id} className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 space-y-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2 flex-1">
                 <input className={inputCls + ' font-semibold'} value={tpl.name} onChange={e => update(tpl._id, 'name', e.target.value)} />
                 {tpl.isDefault && <Star size={16} className="text-amber-400 fill-amber-400 shrink-0" />}
               </div>
               <div className="flex gap-2 ml-3">
-                {!tpl.isDefault && <button onClick={() => setDefault(tpl)} className="text-xs px-3 py-1.5 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-700">Set Default</button>}
-                <button onClick={() => save(tpl)} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-gray-700"><Save size={14} /> Save</button>
+                {!tpl.isDefault && <button onClick={() => setDefault(tpl)} className="text-xs px-3 py-1.5 rounded-lg border hover:bg-slate-50 dark:hover:bg-accent/90">Set Default</button>}
+                <button onClick={() => save(tpl)} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-accent text-white hover:bg-accent/90"><Save size={14} /> Save</button>
                 <button onClick={() => remove(tpl._id)} className="text-red-400 hover:text-red-600 px-2"><Trash2 size={16} /></button>
               </div>
             </div>

@@ -4,16 +4,16 @@ import api from '../api';
 
 function StatCard({ label, value, sub }) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700">
-      <div className="text-sm text-gray-500 dark:text-gray-400">{label}</div>
+    <div className="bg-white dark:bg-[#161616] rounded-xl shadow-sm p-5 border border-slate-200 dark:border-white/10">
+      <div className="text-sm text-slate-500 dark:text-slate-400">{label}</div>
       <div className="text-3xl font-bold mt-1">{value}</div>
-      {sub && <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">{sub}</div>}
+      {sub && <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">{sub}</div>}
     </div>
   );
 }
 
 const STATUS_COLORS = {
-  applied: 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+  applied: 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300',
   replied: 'bg-blue-100 text-blue-700',
   interview: 'bg-amber-100 text-amber-700',
   offer: 'bg-green-100 text-green-700',
@@ -28,7 +28,7 @@ export default function Dashboard() {
     api.get('/dashboard/stats').then(res => setStats(res.data));
   }, []);
 
-  if (!stats) return <div className="text-gray-500 dark:text-gray-400">Loading...</div>;
+  if (!stats) return <div className="text-slate-500 dark:text-slate-400">Loading...</div>;
 
   return (
     <div className="space-y-6">
@@ -56,28 +56,28 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-[#161616] rounded-xl shadow-sm p-5 border border-slate-200 dark:border-white/10">
         <h2 className="font-semibold mb-3">Status Breakdown</h2>
         <div className="flex flex-wrap gap-2">
           {Object.entries(stats.counts).map(([status, count]) => (
-            <span key={status} className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[status] || 'bg-gray-100 dark:bg-gray-900'}`}>
+            <span key={status} className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[status] || 'bg-slate-100 dark:bg-[#0f0f0f]'}`}>
               {status}: {count}
             </span>
           ))}
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-[#161616] rounded-xl shadow-sm p-5 border border-slate-200 dark:border-white/10">
         <div className="flex justify-between items-center mb-3">
           <h2 className="font-semibold">Recent Applications</h2>
-          <Link to="/resume-builder/applications" className="text-sm text-gray-900 dark:text-gray-100 hover:underline">View all</Link>
+          <Link to="/resume-builder/applications" className="text-sm text-slate-900 dark:text-slate-100 hover:underline">View all</Link>
         </div>
         {stats.recent.length === 0 ? (
-          <p className="text-sm text-gray-400 dark:text-gray-500">No applications yet. Go to Apply to create one.</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500">No applications yet. Go to Apply to create one.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
+              <tr className="text-left text-slate-500 dark:text-slate-400 border-b dark:border-white/10">
                 <th className="py-2">Company</th>
                 <th>Role</th>
                 <th>Status</th>
@@ -86,7 +86,7 @@ export default function Dashboard() {
             </thead>
             <tbody>
               {stats.recent.map(app => (
-                <tr key={app._id} className="border-b dark:border-gray-700 last:border-0">
+                <tr key={app._id} className="border-b dark:border-white/10 last:border-0">
                   <td className="py-2">{app.company}</td>
                   <td>{app.role}</td>
                   <td><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[app.status]}`}>{app.status}</span></td>
