@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useInView } from "react-intersection-observer";
-import { Send, Mail, Linkedin, Github, CheckCircle, AlertCircle, Clock, MessageSquare } from "lucide-react";
+import { ArrowUpRight, CheckCircle, AlertCircle } from "lucide-react";
 import { sendContactMessage } from "../../api/portfolioService";
 import SectionHeader from "./SectionHeader";
+
+const fieldClass =
+  "w-full bg-transparent border-0 border-b border-slate-300 dark:border-white/15 rounded-none px-0 py-2.5 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-accent transition-colors";
 
 const Contact = ({ contact = {}, meta }) => {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -21,9 +23,7 @@ const Contact = ({ contact = {}, meta }) => {
       if (result) {
         setStatus("success");
         setForm({ name: "", email: "", message: "" });
-      } else {
-        setStatus("error");
-      }
+      } else setStatus("error");
     } catch {
       setStatus("error");
     } finally {
@@ -31,154 +31,101 @@ const Contact = ({ contact = {}, meta }) => {
     }
   };
 
-  const contactLinks = [
-    contact.email && { icon: Mail, label: "Email", value: contact.email, href: `mailto:${contact.email}` },
-    contact.linkedin && { icon: Linkedin, label: "LinkedIn", value: "LinkedIn Profile", href: contact.linkedin },
-    contact.github && { icon: Github, label: "GitHub", value: "GitHub Profile", href: contact.github },
+  const links = [
+    contact.email && { label: "Email", value: contact.email, href: `mailto:${contact.email}` },
+    contact.linkedin && { label: "LinkedIn", value: "in/vikas-kannaujiya0821", href: contact.linkedin },
+    contact.github && { label: "GitHub", value: "github.com/vikas0821", href: contact.github },
   ].filter(Boolean);
 
   return (
-    <section id="contact" className="scroll-mt-20 py-28 px-6 bg-white dark:bg-[#050505]">
-      <div className="max-w-6xl mx-auto">
+    <section id="contact" className="scroll-mt-20 py-24 md:py-32 px-6 bg-white dark:bg-[#050505]">
+      <div className="max-w-5xl mx-auto">
         <SectionHeader
           meta={meta}
-          eyebrow="Get In Touch"
-          heading="Let's Work Together"
-          subtitle="Have a project in mind or just want to say hi? I'd love to hear from you."
+          eyebrow="Contact"
+          heading="Let's work together"
+          subtitle="Have a role or a project in mind? I'm open to opportunities — drop a line."
         />
 
-        <div className="grid lg:grid-cols-5 gap-8 items-start">
-          {/* Left — Info */}
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
+          {/* Left — direct channels */}
           <motion.div
-            initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            className="lg:col-span-2 space-y-5"
+            transition={{ duration: 0.6 }}
           >
-            {/* Info card */}
-            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-white/8">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-violet-500 flex items-center justify-center mb-5 shadow-lg shadow-accent/25">
-                <MessageSquare size={22} className="text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">Let's connect</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                I'm always open to discussing new projects, creative ideas, or opportunities to be part of something amazing.
-              </p>
-            </div>
+            {contact.email && (
+              <a
+                href={`mailto:${contact.email}`}
+                className="group inline-flex items-start gap-2 text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white hover:text-accent transition-colors"
+              >
+                {contact.email}
+                <ArrowUpRight size={22} className="mt-1.5 text-slate-300 dark:text-slate-600 group-hover:text-accent transition-colors" />
+              </a>
+            )}
 
-            {/* Contact links */}
-            <div className="space-y-2.5">
-              {contactLinks.map(({ icon: Icon, label, value, href }) => (
+            <div className="mt-10 space-y-0 border-t border-slate-200 dark:border-white/10">
+              {links.map((l) => (
                 <a
-                  key={label}
-                  href={href}
-                  target={href.startsWith("http") ? "_blank" : undefined}
+                  key={l.label}
+                  href={l.href}
+                  target={l.href.startsWith("http") ? "_blank" : undefined}
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3.5 p-4 rounded-xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-white/8 hover:border-accent/35 hover:bg-accent/3 group transition-all duration-200"
+                  className="group flex items-center justify-between gap-4 py-4 border-b border-slate-200 dark:border-white/10"
                 >
-                  <div className="w-9 h-9 rounded-lg bg-white dark:bg-white/5 border border-slate-200/60 dark:border-white/8 flex items-center justify-center flex-shrink-0 group-hover:bg-accent/10 group-hover:border-accent/25 transition-all">
-                    <Icon size={16} className="text-slate-500 dark:text-slate-400 group-hover:text-accent transition-colors" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">{label}</p>
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-accent transition-colors">{value}</p>
-                  </div>
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">{l.label}</span>
+                  <span className="flex items-center gap-1.5 text-slate-700 dark:text-slate-200 group-hover:text-accent transition-colors">
+                    {l.value}
+                    <ArrowUpRight size={15} className="text-slate-300 dark:text-slate-600 group-hover:text-accent transition-colors" />
+                  </span>
                 </a>
               ))}
             </div>
 
-            {/* Response time */}
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-accent/6 border border-accent/20">
-              <Clock size={16} className="text-accent flex-shrink-0" />
-              <div>
-                <p className="text-xs font-bold text-accent">Fast Response</p>
-                <p className="text-xs text-slate-600 dark:text-slate-400">Usually within 24 hours</p>
-              </div>
-            </div>
+            <p className="mt-8 text-sm text-slate-400 dark:text-slate-500">Usually replies within 24 hours.</p>
           </motion.div>
 
-          {/* Right — Form */}
+          {/* Right — minimal form */}
           <motion.form
-            initial={{ opacity: 0, x: 24 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
             onSubmit={handleSubmit}
-            className="lg:col-span-3 space-y-5 p-7 rounded-2xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-white/8"
+            className="space-y-8"
           >
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Send a message</h3>
-
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Name</label>
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Your name"
-                  required
-                  className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/40 transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Email</label>
-                <input
-                  name="email"
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="your@email.com"
-                  required
-                  className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/40 transition-all"
-                />
-              </div>
-            </div>
-
             <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Message</label>
-              <textarea
-                name="message"
-                value={form.message}
-                onChange={handleChange}
-                placeholder="Tell me about your project or just say hello..."
-                rows={5}
-                required
-                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/40 transition-all resize-none"
-              />
+              <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500 mb-1">Name</label>
+              <input name="name" value={form.name} onChange={handleChange} placeholder="Your name" required className={fieldClass} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500 mb-1">Email</label>
+              <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="your@email.com" required className={fieldClass} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500 mb-1">Message</label>
+              <textarea name="message" value={form.message} onChange={handleChange} placeholder="Tell me about it…" rows={4} required className={`${fieldClass} resize-none`} />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-xl bg-accent text-white font-bold text-sm hover:bg-accent/90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-accent/25"
+              className="group inline-flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white hover:text-accent disabled:opacity-50 transition-colors"
             >
-              {loading ? (
-                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-              ) : (
-                <Send size={16} />
-              )}
-              {loading ? "Sending..." : "Send Message"}
+              {loading ? "Sending…" : "Send message"}
+              <ArrowUpRight size={18} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </button>
 
             {status === "success" && (
-              <motion.div
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2.5 p-4 rounded-xl bg-green-50 dark:bg-green-500/10 border border-green-200/60 dark:border-green-500/20 text-green-700 dark:text-green-400 text-sm font-medium"
-              >
-                <CheckCircle size={16} /> Message sent! I'll get back to you soon.
-              </motion.div>
+              <p className="flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400">
+                <CheckCircle size={15} /> Message sent — I'll get back to you soon.
+              </p>
             )}
-
             {status === "error" && (
-              <motion.div
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2.5 p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200/60 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm font-medium"
-              >
-                <AlertCircle size={16} /> Failed to send. Please try again or email me directly.
-              </motion.div>
+              <p className="flex items-center gap-2 text-sm font-medium text-red-600 dark:text-red-400">
+                <AlertCircle size={15} /> Failed to send. Please email me directly.
+              </p>
             )}
           </motion.form>
         </div>
