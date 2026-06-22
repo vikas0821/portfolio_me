@@ -2,10 +2,8 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, Body
 from pydantic import BaseModel
-from sqlmodel import Session, select, desc
-from ..database import get_session
+from ..database import db, find, insert, get_by_id, update_by_id, delete_by_id, count, oid
 from ..auth import login as do_login, require_role
-from ..models import NoteSection, Note
 from .. import serializers as S
 
 router = APIRouter(prefix="/api/v1/notes", tags=["notes"])
@@ -23,73 +21,67 @@ def notes_login(body: LoginIn):
 
 # ── Sections ──────────────────────────────────────────────────────────────
 @router.get("/sections", dependencies=[notes_only])
-def list_sections(session: Session = Depends(get_session)):
-    rows = session.exec(select(NoteSection).order_by(NoteSection.order, NoteSection.created_at)).all()
-    return S.ok([S.note_section(s) for s in rows])
+def list_sections():
+    return S.ok([S.note_section(s) for s in find("note_sections", sort=[("order", 1), ("created_at", 1)])])
 
 
 @router.post("/sections", dependencies=[notes_only])
-def create_section(data: dict = Body(...), session: Session = Depends(get_session)):
-    count = len(session.exec(select(NoteSection)).all())
-    s = NoteSection(title=data.get("title", ""), order=data.get("order", count))
-    session.add(s); session.commit(); session.refresh(s)
+def create_section(data: dict = Body(...)):
+    s = insert("note_sections", {"title": data.get("title", ""), "order": data.get("order", count("note_sections"))})
     return S.ok(S.note_section(s))
 
 
 @router.put("/sections/{sid}", dependencies=[notes_only])
-def update_section(sid: int, data: dict = Body(...), session: Session = Depends(get_session)):
-    s = session.get(NoteSection, sid)
+def update_section(sid: str, data: dict = Body(...)):
+    changes = {}
+    if "title" in data:
+        changes["title"] = data["title"]
+    if "order" in data:
+        changes["order"] = data["order"]
+    s = update_by_id("note_sections", sid, changes) if changes else get_by_id("note_sections", sid)
     if not s:
         return S.fail("Not found")
-    s.title = data.get("title", s.title)
-    if "order" in data:
-        s.order = data["order"]
-    session.add(s); session.commit(); session.refresh(s)
     return S.ok(S.note_section(s))
 
 
 @router.delete("/sections/{sid}", dependencies=[notes_only])
-def delete_section(sid: int, session: Session = Depends(get_session)):
-    for n in session.exec(select(Note).where(Note.section_id == sid)).all():
-        session.delete(n)
-    s = session.get(NoteSection, sid)
-    if s:
-        session.delete(s)
-    session.commit()
+def delete_section(sid: str):
+    db.notes.delete_many({"section_id": oid(sid)})
+    delete_by_id("note_sections", sid)
     return S.ok({"id": sid})
 
 
 # ── Notes ──────────────────────────────────────────────────────────────────
 @router.get("/sections/{sid}/notes", dependencies=[notes_only])
-def list_notes(sid: int, session: Session = Depends(get_session)):
-    rows = session.exec(select(Note).where(Note.section_id == sid).order_by(Note.order, Note.created_at)).all()
+def list_notes(sid: str):
+    rows = find("notes", {"section_id": oid(sid)}, sort=[("order", 1), ("created_at", 1)])
     return S.ok([S.note(n) for n in rows])
 
 
 @router.post("/notes", dependencies=[notes_only])
-def create_note(data: dict = Body(...), session: Session = Depends(get_session)):
-    sid = int(data["sectionId"])
-    count = len(session.exec(select(Note).where(Note.section_id == sid)).all())
-    n = Note(section_id=sid, title=data.get("title", ""), content=data.get("content", ""), order=count)
-    session.add(n); session.commit(); session.refresh(n)
+def create_note(data: dict = Body(...)):
+    sid = oid(data["sectionId"])
+    n = insert("notes", {
+        "section_id": sid, "title": data.get("title", ""), "content": data.get("content", ""),
+        "order": count("notes", {"section_id": sid}), "updated_at": datetime.utcnow(),
+    })
     return S.ok(S.note(n))
 
 
 @router.put("/notes/{nid}", dependencies=[notes_only])
-def update_note(nid: int, data: dict = Body(...), session: Session = Depends(get_session)):
-    n = session.get(Note, nid)
+def update_note(nid: str, data: dict = Body(...)):
+    changes = {"updated_at": datetime.utcnow()}
+    if "title" in data:
+        changes["title"] = data["title"]
+    if "content" in data:
+        changes["content"] = data["content"]
+    n = update_by_id("notes", nid, changes)
     if not n:
         return S.fail("Not found")
-    n.title = data.get("title", n.title)
-    n.content = data.get("content", n.content)
-    n.updated_at = datetime.utcnow()
-    session.add(n); session.commit(); session.refresh(n)
     return S.ok(S.note(n))
 
 
 @router.delete("/notes/{nid}", dependencies=[notes_only])
-def delete_note(nid: int, session: Session = Depends(get_session)):
-    n = session.get(Note, nid)
-    if n:
-        session.delete(n); session.commit()
+def delete_note(nid: str):
+    delete_by_id("notes", nid)
     return S.ok({"id": nid})

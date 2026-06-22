@@ -1,26 +1,26 @@
 # Deploying the Unified Platform
 
-One website = **one React frontend** (Vercel) → **one FastAPI backend** (Render) → **one Postgres DB** (Neon).
+One website = **one React frontend** (Vercel) → **one FastAPI backend** (Render) → **one MongoDB** (Atlas).
 Everything (portfolio, blog, notes, resume builder, option analysis, admin) runs on this single stack.
 
 ```
 Browser ──> Vercel (static SPA)
                 │  API calls
                 ▼
-          Render (FastAPI + WeasyPrint)  ──>  Neon Postgres
+          Render (FastAPI + WeasyPrint)  ──>  MongoDB Atlas
 ```
 
 ---
 
-## 1. Database — Neon (free Postgres)
+## 1. Database — MongoDB Atlas (free tier)
 
-1. Create a project at https://neon.tech → copy the connection string.
-2. Convert it to the SQLAlchemy/psycopg2 form:
+1. Create a free M0 cluster at https://www.mongodb.com/atlas → create a database user.
+2. Network Access → allow `0.0.0.0/0` (or Render's egress IPs).
+3. Copy the connection string (the `mongodb+srv://…` form):
    ```
-   postgresql+psycopg2://USER:PASSWORD@HOST/DBNAME?sslmode=require
+   mongodb+srv://USER:PASSWORD@cluster.mongodb.net/portfolio?retryWrites=true&w=majority
    ```
-   (Neon gives `postgresql://…` — just insert `+psycopg2` after `postgresql`.)
-   Supabase's pooled connection string works the same way.
+   The database name (`portfolio`) is set separately via `MONGO_DB`.
 
 ---
 
@@ -34,7 +34,8 @@ system libs (Pango/Cairo) — no Puppeteer/Chromium needed.
 
    | Key | Value |
    |-----|-------|
-   | `DATABASE_URL` | the Neon `postgresql+psycopg2://…?sslmode=require` string |
+   | `MONGO_URI` | the Atlas `mongodb+srv://…` connection string |
+   | `MONGO_DB` | database name, e.g. `portfolio` |
    | `JWT_SECRET` | a long random string |
    | `ADMIN_PASSWORD` | your admin password |
    | `NOTES_PASSWORD` | your notes password |
@@ -84,7 +85,7 @@ The SPA reads its API base URLs at **build time**. Point them at the Render back
 docker compose up --build -d
 # frontend  → http://localhost:8080
 # backend   → http://localhost:8002  (health: /health)
-# postgres  → localhost:5433
+# mongodb   → localhost:27018
 docker exec platform_backend python -m app.seed   # first-time data
 ```
 

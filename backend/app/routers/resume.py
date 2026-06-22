@@ -7,11 +7,11 @@ import uuid
 from datetime import datetime, date
 from fastapi import APIRouter, Depends, Body, HTTPException, Query
 from fastapi.responses import JSONResponse
-from sqlmodel import Session, select, desc
-from ..database import get_session
+from pymongo import DESCENDING
+from ..database import db, find, find_one, insert, get_by_id, update_by_id, delete_by_id, oid
 from ..auth import require_role
 from ..config import settings
-from ..models import Resume, Application, EmailTemplate, EmailLog, VALID_STATUSES
+from ..models import VALID_STATUSES
 from ..services.resume_ats import analyze_keywords, tailor_resume
 from ..services.resume_render import render_resume_html, html_to_pdf_bytes
 from ..services import resume_mail as mail
@@ -35,42 +35,41 @@ RESUME_JSON = ["name", "headline", "email", "phone", "location", "linkedin", "su
 RESUME_LIST = ["skills", "certifications", "projects", "employment", "experience", "education"]
 
 
-def resume_out(r: Resume):
-    d = {"_id": str(r.id), "id": r.id, "variantName": r.variant_name, "isDefault": r.is_default,
+def resume_out(r):
+    d = {"_id": r.id, "id": r.id, "variantName": r.variant_name, "isDefault": r.is_default,
          "template": r.template, "updatedAt": r.updated_at.isoformat() if r.updated_at else None}
     for f in RESUME_JSON:
-        d[f] = getattr(r, f)
+        d[f] = r.get(f, "")
     for f in RESUME_LIST:
-        d[f] = getattr(r, f) or []
+        d[f] = r.get(f) or []
     return d
 
 
-def resume_dict(r: Resume):  # for rendering / ATS
-    return resume_out(r)
+resume_dict = resume_out  # alias used for rendering / ATS
 
 
-def apply_resume(r: Resume, b: dict):
-    r.variant_name = b.get("variantName", r.variant_name)
-    r.is_default = bool(b.get("isDefault", r.is_default))
-    r.template = b.get("template", r.template)
+def _resume_doc(b, base):
+    doc = {
+        "variant_name": b.get("variantName", base.get("variant_name", "")),
+        "is_default": bool(b.get("isDefault", base.get("is_default", False))),
+        "template": b.get("template", base.get("template", "classic")),
+        "updated_at": datetime.utcnow(),
+    }
     for f in RESUME_JSON:
-        if f in b:
-            setattr(r, f, b[f] or "")
+        doc[f] = (b[f] or "") if f in b else base.get(f, "")
     for f in RESUME_LIST:
-        if f in b:
-            setattr(r, f, b[f] or [])
-    r.updated_at = datetime.utcnow()
-    return r
+        doc[f] = (b[f] or []) if f in b else base.get(f, [])
+    return doc
 
 
-def app_out(a: Application, session: Session):
+def app_out(a):
     rv = None
     if a.resume_variant_id:
-        rr = session.get(Resume, a.resume_variant_id)
+        rr = get_by_id("resumes", a.resume_variant_id)
         if rr:
-            rv = {"_id": str(rr.id), "variantName": rr.variant_name}
+            rv = {"_id": rr.id, "variantName": rr.variant_name}
     return {
-        "_id": str(a.id), "id": a.id, "company": a.company, "role": a.role, "location": a.location,
+        "_id": a.id, "id": a.id, "company": a.company, "role": a.role, "location": a.location,
         "jobRef": a.job_ref, "jdText": a.jd_text, "resumeVariant": rv, "atsScore": a.ats_score or {},
         "status": a.status, "recruiterName": a.recruiter_name, "recruiterEmail": a.recruiter_email,
         "source": a.source, "link": a.link, "generatedFiles": a.generated_files or {},
@@ -81,75 +80,66 @@ def app_out(a: Application, session: Session):
     }
 
 
-def tpl_out(t: EmailTemplate):
-    return {"_id": str(t.id), "id": t.id, "name": t.name, "subject": t.subject,
+def tpl_out(t):
+    return {"_id": t.id, "id": t.id, "name": t.name, "subject": t.subject,
             "bodyHtml": t.body_html, "isDefault": t.is_default}
 
 
 # ── Resumes ─────────────────────────────────────────────────────────────────
 @router.get("/resumes", dependencies=[resume_only])
-def list_resumes(session: Session = Depends(get_session)):
-    rows = session.exec(select(Resume).order_by(desc(Resume.updated_at))).all()
-    return [{"_id": str(r.id), "variantName": r.variant_name, "isDefault": r.is_default,
+def list_resumes():
+    rows = find("resumes", sort=[("updated_at", DESCENDING)])
+    return [{"_id": r.id, "variantName": r.variant_name, "isDefault": r.is_default,
              "template": r.template, "name": r.name, "headline": r.headline,
              "updatedAt": r.updated_at.isoformat() if r.updated_at else None} for r in rows]
 
 
 @router.get("/resumes/{rid}", dependencies=[resume_only])
-def get_resume(rid: int, session: Session = Depends(get_session)):
-    r = session.get(Resume, rid)
+def get_resume(rid: str):
+    r = get_by_id("resumes", rid)
     if not r:
         raise HTTPException(404, "Resume not found")
     return resume_out(r)
 
 
 @router.post("/resumes", dependencies=[resume_only])
-def create_resume(data: dict = Body(...), session: Session = Depends(get_session)):
-    r = apply_resume(Resume(), data)
-    session.add(r); session.commit(); session.refresh(r)
+def create_resume(data: dict = Body(...)):
+    r = insert("resumes", _resume_doc(data, {}))
     return JSONResponse(status_code=201, content=resume_out(r))
 
 
 @router.put("/resumes/{rid}", dependencies=[resume_only])
-def update_resume(rid: int, data: dict = Body(...), session: Session = Depends(get_session)):
-    r = session.get(Resume, rid)
-    if not r:
+def update_resume(rid: str, data: dict = Body(...)):
+    base = get_by_id("resumes", rid)
+    if not base:
         raise HTTPException(404, "Resume not found")
-    apply_resume(r, data)
-    session.add(r); session.commit(); session.refresh(r)
-    return resume_out(r)
+    return resume_out(update_by_id("resumes", rid, _resume_doc(data, base)))
 
 
 @router.delete("/resumes/{rid}", dependencies=[resume_only])
-def delete_resume(rid: int, session: Session = Depends(get_session)):
-    r = session.get(Resume, rid)
-    if not r:
+def delete_resume(rid: str):
+    if not delete_by_id("resumes", rid):
         raise HTTPException(404, "Resume not found")
-    session.delete(r); session.commit()
     return {"ok": True}
 
 
 @router.post("/resumes/{rid}/default", dependencies=[resume_only])
-def set_default(rid: int, session: Session = Depends(get_session)):
-    r = session.get(Resume, rid)
+def set_default(rid: str):
+    r = get_by_id("resumes", rid)
     if not r:
         raise HTTPException(404, "Resume not found")
-    for other in session.exec(select(Resume)).all():
-        other.is_default = False
-        session.add(other)
-    r.is_default = True
-    session.add(r); session.commit(); session.refresh(r)
-    return resume_out(r)
+    db.resumes.update_many({}, {"$set": {"is_default": False}})
+    return resume_out(update_by_id("resumes", rid, {"is_default": True}))
 
 
 @router.post("/resumes/{rid}/render", dependencies=[resume_only])
-def render_resume(rid: int, data: dict = Body(default={}), session: Session = Depends(get_session)):
-    r = session.get(Resume, rid)
+def render_resume(rid: str, data: dict = Body(default={})):
+    r = get_by_id("resumes", rid)
     if not r:
         raise HTTPException(404, "Resume not found")
     template = (data or {}).get("template") or r.template or "classic"
     html = render_resume_html(resume_dict(r), template)
-    d = _ensure(os.path.join(settings.output_dir, "resumes", str(r.id)))
+    d = _ensure(os.path.join(settings.output_dir, "resumes", r.id))
     with open(os.path.join(d, "resume.html"), "w", encoding="utf-8") as f:
         f.write(html)
     with open(os.path.join(d, "resume.pdf"), "wb") as f:
@@ -162,39 +152,37 @@ def render_resume(rid: int, data: dict = Body(default={}), session: Session = De
 
 # ── ATS ─────────────────────────────────────────────────────────────────────
 @router.post("/ats/analyze", dependencies=[resume_only])
-def ats_analyze(data: dict = Body(...), session: Session = Depends(get_session)):
-    jd = data.get("jdText", "")
-    rid = data.get("resumeVariantId")
+def ats_analyze(data: dict = Body(...)):
     resume_text = ""
-    if rid:
-        r = session.get(Resume, int(rid))
+    if data.get("resumeVariantId"):
+        r = get_by_id("resumes", data["resumeVariantId"])
         if r:
             resume_text = json.dumps(resume_dict(r))
-    return analyze_keywords(jd, resume_text)
+    return analyze_keywords(data.get("jdText", ""), resume_text)
 
 
 # ── Applications ────────────────────────────────────────────────────────────
 @router.get("/applications", dependencies=[resume_only])
-def list_apps(q: str | None = Query(None), tag: str | None = Query(None), session: Session = Depends(get_session)):
-    rows = session.exec(select(Application).order_by(desc(Application.created_at))).all()
+def list_apps(q: str | None = Query(None), tag: str | None = Query(None)):
+    rows = find("applications", sort=[("created_at", DESCENDING)])
     if q:
         ql = q.lower()
         rows = [a for a in rows if ql in f"{a.company} {a.role} {a.location} {a.source} {' '.join(a.tags or [])}".lower()]
     if tag:
         rows = [a for a in rows if tag in (a.tags or [])]
-    return [app_out(a, session) for a in rows]
+    return [app_out(a) for a in rows]
 
 
 @router.get("/applications/{aid}", dependencies=[resume_only])
-def get_app(aid: int, session: Session = Depends(get_session)):
-    a = session.get(Application, aid)
+def get_app(aid: str):
+    a = get_by_id("applications", aid)
     if not a:
         raise HTTPException(404, "Application not found")
-    return app_out(a, session)
+    return app_out(a)
 
 
 @router.post("/applications", dependencies=[resume_only])
-def create_app(b: dict = Body(...), session: Session = Depends(get_session)):
+def create_app(b: dict = Body(...)):
     if not (b.get("company") and b.get("role")):
         raise HTTPException(400, "company and role are required")
     status = b.get("status")
@@ -203,7 +191,7 @@ def create_app(b: dict = Body(...), session: Session = Depends(get_session)):
 
     resume = None
     if b.get("resumeVariantId"):
-        resume = session.get(Resume, int(b["resumeVariantId"]))
+        resume = get_by_id("resumes", b["resumeVariantId"])
         if not resume:
             raise HTTPException(404, "Resume variant not found")
 
@@ -236,19 +224,19 @@ def create_app(b: dict = Body(...), session: Session = Depends(get_session)):
     if not isinstance(tags, list):
         tags = [t.strip() for t in str(tags).split(",") if t.strip()]
 
-    a = Application(
-        company=b["company"], role=b["role"], location=b.get("location", ""), job_ref=b.get("jobRef", ""),
-        jd_text=b.get("jdText", ""), resume_variant_id=resume.id if resume else None,
-        ats_score={"before": ats_before["score"], "after": ats_after["score"]},
-        recruiter_name=b.get("recruiterName", ""), recruiter_email=b.get("recruiterEmail", ""),
-        source=b.get("source", ""), link=b.get("link", ""), status=status or "applied",
-        applied_at=datetime.fromisoformat(b["appliedAt"]) if b.get("appliedAt") else datetime.utcnow(),
-        tags=tags, follow_up_date=datetime.fromisoformat(b["followUpDate"]) if b.get("followUpDate") else None,
-        cover_letter=cover, generated_files=gen,
-    )
-    session.add(a); session.commit(); session.refresh(a)
+    a = insert("applications", {
+        "company": b["company"], "role": b["role"], "location": b.get("location", ""), "job_ref": b.get("jobRef", ""),
+        "jd_text": b.get("jdText", ""), "resume_variant_id": resume["_id"] if resume else None,
+        "ats_score": {"before": ats_before["score"], "after": ats_after["score"]},
+        "recruiter_name": b.get("recruiterName", ""), "recruiter_email": b.get("recruiterEmail", ""),
+        "source": b.get("source", ""), "link": b.get("link", ""), "status": status or "applied",
+        "applied_at": datetime.fromisoformat(b["appliedAt"]) if b.get("appliedAt") else datetime.utcnow(),
+        "tags": tags, "follow_up_date": datetime.fromisoformat(b["followUpDate"]) if b.get("followUpDate") else None,
+        "follow_up_done": False, "email_sent": False, "notes": "", "note_entries": [],
+        "cover_letter": cover, "generated_files": gen,
+    })
     return JSONResponse(status_code=201, content={
-        "application": app_out(a, session),
+        "application": app_out(a),
         "ats": {"before": ats_before, "after": ats_after, "missing": ats_after["missing"]},
     })
 
@@ -269,73 +257,64 @@ PATCH_FIELDS = {"company": "company", "role": "role", "location": "location", "s
 
 
 @router.patch("/applications/{aid}", dependencies=[resume_only])
-def patch_app(aid: int, b: dict = Body(...), session: Session = Depends(get_session)):
-    a = session.get(Application, aid)
-    if not a:
+def patch_app(aid: str, b: dict = Body(...)):
+    if not get_by_id("applications", aid):
         raise HTTPException(404, "Application not found")
-    for k, col in PATCH_FIELDS.items():
-        if k in b:
-            setattr(a, col, b[k])
+    changes = {col: b[k] for k, col in PATCH_FIELDS.items() if k in b}
     if "followUpDate" in b:
-        a.follow_up_date = datetime.fromisoformat(b["followUpDate"]) if b["followUpDate"] else None
-    session.add(a); session.commit(); session.refresh(a)
-    return app_out(a, session)
+        changes["follow_up_date"] = datetime.fromisoformat(b["followUpDate"]) if b["followUpDate"] else None
+    return app_out(update_by_id("applications", aid, changes))
 
 
 @router.post("/applications/{aid}/notes", dependencies=[resume_only])
-def add_note(aid: int, b: dict = Body(...), session: Session = Depends(get_session)):
-    a = session.get(Application, aid)
+def add_note(aid: str, b: dict = Body(...)):
+    a = get_by_id("applications", aid)
     if not a:
         raise HTTPException(404, "Application not found")
     if not b.get("text"):
         raise HTTPException(400, "text is required")
     entries = list(a.note_entries or [])
     entries.append({"_id": uuid.uuid4().hex, "text": b["text"], "createdAt": datetime.utcnow().isoformat()})
-    a.note_entries = entries
-    session.add(a); session.commit(); session.refresh(a)
-    return app_out(a, session)
+    return app_out(update_by_id("applications", aid, {"note_entries": entries}))
 
 
 @router.delete("/applications/{aid}/notes/{note_id}", dependencies=[resume_only])
-def del_note(aid: int, note_id: str, session: Session = Depends(get_session)):
-    a = session.get(Application, aid)
+def del_note(aid: str, note_id: str):
+    a = get_by_id("applications", aid)
     if not a:
         raise HTTPException(404, "Application not found")
-    a.note_entries = [n for n in (a.note_entries or []) if n.get("_id") != note_id]
-    session.add(a); session.commit(); session.refresh(a)
-    return app_out(a, session)
+    entries = [n for n in (a.note_entries or []) if n.get("_id") != note_id]
+    return app_out(update_by_id("applications", aid, {"note_entries": entries}))
 
 
 @router.post("/applications/{aid}/cover-letter", dependencies=[resume_only])
-def save_cover(aid: int, b: dict = Body(...), session: Session = Depends(get_session)):
-    a = session.get(Application, aid)
+def save_cover(aid: str, b: dict = Body(...)):
+    a = get_by_id("applications", aid)
     if not a:
         raise HTTPException(404, "Application not found")
-    a.cover_letter = b.get("text", "")
+    text = b.get("text", "")
+    changes = {"cover_letter": text}
     folder = (a.generated_files or {}).get("folderName")
-    if folder and a.cover_letter.strip():
+    if folder and text.strip():
         run_dir = _ensure(os.path.join(settings.output_dir, "applications", folder))
-        _write_cover(run_dir, a.cover_letter)
+        _write_cover(run_dir, text)
         gf = dict(a.generated_files or {})
         gf["coverLetter"] = f"/api/output/applications/{folder}/cover-letter.pdf"
-        a.generated_files = gf
-    session.add(a); session.commit(); session.refresh(a)
-    return app_out(a, session)
+        changes["generated_files"] = gf
+    return app_out(update_by_id("applications", aid, changes))
 
 
 @router.delete("/applications/{aid}", dependencies=[resume_only])
-def delete_app(aid: int, session: Session = Depends(get_session)):
-    a = session.get(Application, aid)
-    if not a:
+def delete_app(aid: str):
+    if not delete_by_id("applications", aid):
         raise HTTPException(404, "Application not found")
-    session.delete(a); session.commit()
     return {"ok": True}
 
 
 # ── Dashboard ───────────────────────────────────────────────────────────────
 @router.get("/dashboard/stats", dependencies=[resume_only])
-def dashboard_stats(session: Session = Depends(get_session)):
-    rows = session.exec(select(Application).order_by(desc(Application.created_at))).all()
+def dashboard_stats():
+    rows = find("applications", sort=[("created_at", DESCENDING)])
     counts = {s: 0 for s in VALID_STATUSES}
     for a in rows:
         counts[a.status] = counts.get(a.status, 0) + 1
@@ -346,71 +325,71 @@ def dashboard_stats(session: Session = Depends(get_session)):
     due = sorted([a for a in rows if not a.follow_up_done and a.follow_up_date and a.follow_up_date <= now],
                  key=lambda a: a.follow_up_date)
     return {
-        "total": len(rows), "counts": counts, "recent": [app_out(a, session) for a in rows[:5]],
+        "total": len(rows), "counts": counts, "recent": [app_out(a) for a in rows[:5]],
         "avgBefore": avg_b, "avgAfter": avg_a, "atsImprovement": avg_a - avg_b,
-        "emailsSent": sum(1 for a in rows if a.email_sent), "followUpsDue": [app_out(a, session) for a in due],
+        "emailsSent": sum(1 for a in rows if a.email_sent), "followUpsDue": [app_out(a) for a in due],
     }
 
 
 # ── Email ───────────────────────────────────────────────────────────────────
 @router.get("/email/templates", dependencies=[resume_only])
-def list_templates(session: Session = Depends(get_session)):
-    return [tpl_out(t) for t in session.exec(select(EmailTemplate).order_by(EmailTemplate.created_at)).all()]
+def list_templates():
+    return [tpl_out(t) for t in find("email_templates", sort=[("created_at", 1)])]
 
 
 @router.post("/email/templates", dependencies=[resume_only])
-def create_template(b: dict = Body(...), session: Session = Depends(get_session)):
-    t = EmailTemplate(name=b.get("name", ""), subject=b.get("subject", ""),
-                      body_html=b.get("bodyHtml", ""), is_default=bool(b.get("isDefault")))
-    session.add(t); session.commit(); session.refresh(t)
+def create_template(b: dict = Body(...)):
+    t = insert("email_templates", {"name": b.get("name", ""), "subject": b.get("subject", ""),
+                                   "body_html": b.get("bodyHtml", ""), "is_default": bool(b.get("isDefault"))})
     return JSONResponse(status_code=201, content=tpl_out(t))
 
 
 @router.put("/email/templates/{tid}", dependencies=[resume_only])
-def update_template(tid: int, b: dict = Body(...), session: Session = Depends(get_session)):
-    t = session.get(EmailTemplate, tid)
-    if not t:
+def update_template(tid: str, b: dict = Body(...)):
+    base = get_by_id("email_templates", tid)
+    if not base:
         raise HTTPException(404, "Template not found")
-    t.name = b.get("name", t.name)
-    t.subject = b.get("subject", t.subject)
-    t.body_html = b.get("bodyHtml", t.body_html)
-    t.is_default = bool(b.get("isDefault", t.is_default))
-    session.add(t); session.commit(); session.refresh(t)
-    return tpl_out(t)
+    changes = {}
+    if "name" in b:
+        changes["name"] = b["name"]
+    if "subject" in b:
+        changes["subject"] = b["subject"]
+    if "bodyHtml" in b:
+        changes["body_html"] = b["bodyHtml"]
+    if "isDefault" in b:
+        changes["is_default"] = bool(b["isDefault"])
+    return tpl_out(update_by_id("email_templates", tid, changes))
 
 
 @router.delete("/email/templates/{tid}", dependencies=[resume_only])
-def delete_template(tid: int, session: Session = Depends(get_session)):
-    t = session.get(EmailTemplate, tid)
-    if not t:
+def delete_template(tid: str):
+    if not delete_by_id("email_templates", tid):
         raise HTTPException(404, "Template not found")
-    session.delete(t); session.commit()
     return {"ok": True}
 
 
 @router.post("/email/preview", dependencies=[resume_only])
-def email_preview(b: dict = Body(...), session: Session = Depends(get_session)):
-    a = session.get(Application, int(b["applicationId"]))
+def email_preview(b: dict = Body(...)):
+    a = get_by_id("applications", b["applicationId"])
     if not a:
         raise HTTPException(404, "Application not found")
-    t = None
-    if b.get("templateId"):
-        t = session.get(EmailTemplate, int(b["templateId"]))
+    t = get_by_id("email_templates", b["templateId"]) if b.get("templateId") else None
     if not t:
-        t = (session.exec(select(EmailTemplate).where(EmailTemplate.is_default == True)).first()
-             or session.exec(select(EmailTemplate)).first())
+        t = find_one("email_templates", {"is_default": True}) or find_one("email_templates")
     if not t:
         raise HTTPException(404, "No email template available")
-    resume = session.get(Resume, a.resume_variant_id) if a.resume_variant_id else None
+    resume = get_by_id("resumes", a.resume_variant_id) if a.resume_variant_id else None
     ctx = mail.build_context(a, resume)
-    subject = mail.render_template(t.subject, ctx)
-    body_html = mail.render_template(t.body_html, ctx)
-    return {"subject": subject, "bodyText": mail.html_to_text(body_html), "to": a.recruiter_email}
+    return {
+        "subject": mail.render_template(t.subject, ctx),
+        "bodyText": mail.html_to_text(mail.render_template(t.body_html, ctx)),
+        "to": a.recruiter_email,
+    }
 
 
 @router.post("/email/send", dependencies=[resume_only])
-def email_send(b: dict = Body(...), session: Session = Depends(get_session)):
-    a = session.get(Application, int(b["applicationId"]))
+def email_send(b: dict = Body(...)):
+    a = get_by_id("applications", b["applicationId"])
     if not a:
         raise HTTPException(404, "Application not found")
     to = b.get("to")
@@ -427,16 +406,13 @@ def email_send(b: dict = Body(...), session: Session = Depends(get_session)):
             attachments.append({"filename": "Resume.pdf", "path": os.path.join(base, "resume.pdf")})
         if "coverLetter" in fmts and (a.generated_files or {}).get("coverLetter"):
             attachments.append({"filename": "Cover Letter.pdf", "path": os.path.join(base, "cover-letter.pdf")})
+    log = {"application_id": a["_id"], "to": to, "subject": subject, "body_html": body_html,
+           "body_text": body_text, "attachments": attachments}
     try:
         mail.send_mail(to, subject, body_text, body_html, attachments)
-        log = EmailLog(application_id=a.id, to=to, subject=subject, body_html=body_html, body_text=body_text,
-                       attachments=attachments, status="sent")
-        session.add(log)
-        a.email_sent = True
-        session.add(a); session.commit()
+        insert("email_logs", {**log, "status": "sent"})
+        update_by_id("applications", a.id, {"email_sent": True})
         return {"ok": True}
     except Exception as e:
-        log = EmailLog(application_id=a.id, to=to, subject=subject, body_html=body_html, body_text=body_text,
-                       attachments=attachments, status="failed", error=str(e))
-        session.add(log); session.commit()
+        insert("email_logs", {**log, "status": "failed", "error": str(e)})
         raise HTTPException(500, str(e))

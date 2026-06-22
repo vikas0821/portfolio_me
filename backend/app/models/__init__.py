@@ -1,11 +1,11 @@
-from .portfolio import (
-    Profile, Project, Experience, Skill, Education, Certification, ContactMessage,
-)
-from .content import SiteSettings, BlogPost, NoteSection, Note
-from .resume import Resume, Application, EmailTemplate, EmailLog, VALID_STATUSES
+"""Domain constants. With MongoDB there are no ORM table classes — documents
+are plain dicts keyed by the same snake_case field names the serializers read."""
 
-__all__ = [
-    "Profile", "Project", "Experience", "Skill", "Education", "Certification", "ContactMessage",
-    "SiteSettings", "BlogPost", "NoteSection", "Note",
-    "Resume", "Application", "EmailTemplate", "EmailLog", "VALID_STATUSES",
+VALID_STATUSES = ["applied", "replied", "interview", "offer", "rejected", "ghosted"]
+
+# Collection names (single source of truth)
+COLLECTIONS = [
+    "profiles", "projects", "experiences", "skills", "education", "certifications",
+    "contact_messages", "site_settings", "blog_posts", "note_sections", "notes",
+    "resumes", "applications", "email_templates", "email_logs",
 ]

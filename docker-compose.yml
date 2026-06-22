@@ -1,20 +1,16 @@
-# Unified platform stack: Postgres + one Python FastAPI backend + one React frontend.
-# Run: docker compose up --build -d  (frontend :8080, backend :8002, db :5433)
+# Unified platform stack: MongoDB + one Python FastAPI backend + one React frontend.
+# Run: docker compose up --build -d  (frontend :8080, backend :8002, db :27018)
 services:
   db:
-    image: postgres:16-alpine
+    image: mongo:7
     container_name: platform_db
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
-      POSTGRES_DB: app
     ports:
-      - "${PG_HOST_PORT:-5433}:5432"
+      - "${MONGO_HOST_PORT:-27018}:27017"
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - mongo_data:/data/db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app"]
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
       interval: 5s
       timeout: 5s
       retries: 12
@@ -27,7 +23,8 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+psycopg2://app:app@db:5432/app
+      MONGO_URI: ${MONGO_URI:-mongodb://db:27017}
+      MONGO_DB: ${MONGO_DB:-portfolio}
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       NOTES_PASSWORD: ${NOTES_PASSWORD:-notes123}
@@ -58,4 +55,4 @@ services:
       - "${WEB_HOST_PORT:-8080}:80"
 
 volumes:
-  pg_data:
+  mongo_data:

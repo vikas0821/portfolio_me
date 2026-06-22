@@ -1,6 +1,5 @@
 """Default Site Settings (auto-created on first load)."""
-from sqlmodel import Session, select
-from .models import SiteSettings
+from .database import find_one, insert, Doc
 
 DEFAULT_SETTINGS = dict(
     accent_color="#4f46e5",
@@ -30,11 +29,8 @@ DEFAULT_SETTINGS = dict(
 )
 
 
-def get_or_create_settings(session: Session) -> SiteSettings:
-    s = session.exec(select(SiteSettings)).first()
+def get_or_create_settings() -> Doc:
+    s = find_one("site_settings")
     if not s:
-        s = SiteSettings(**DEFAULT_SETTINGS)
-        session.add(s)
-        session.commit()
-        session.refresh(s)
+        s = insert("site_settings", dict(DEFAULT_SETTINGS))
     return s

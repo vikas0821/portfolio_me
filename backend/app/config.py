@@ -5,8 +5,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    # Database (Postgres). Local docker default; override in prod (Neon/Supabase/Render).
-    database_url: str = "postgresql+psycopg2://app:app@db:5432/app"
+    # Database (MongoDB). Local docker default; override in prod (Atlas).
+    mongo_uri: str = "mongodb://db:27017"
+    mongo_db: str = "portfolio"
 
     # Auth — one JWT secret, per-section passwords.
     jwt_secret: str = "change-me-to-a-long-random-string"

@@ -1,11 +1,7 @@
-"""Seed the unified database. Run: python -m app.seed"""
-from datetime import date
-from sqlmodel import Session, select, delete
-from .database import engine, init_db
+"""Seed the unified MongoDB database. Run: python -m app.seed"""
+from datetime import datetime
+from .database import db, insert, init_db
 from .defaults import get_or_create_settings
-from .models import (
-    Profile, Project, Experience, Skill, Education, Certification, BlogPost, NoteSection, Note,
-)
 
 PROFILE = dict(
     name="Vikas Kannaujiya",
@@ -22,7 +18,7 @@ PROFILE = dict(
 
 EXPERIENCE = [
     dict(company="Integra Micro Systems (P) Ltd.", role="Senior Software Engineer", location="Bangalore, India",
-         start_date=date(2025, 7, 1), end_date=None, is_current=True,
+         start_date=datetime(2025, 7, 1), end_date=None, is_current=True,
          responsibilities=[
              "Lead backend development for pan-India fintech and banking platforms serving millions of users.",
              "Engineered a real-time transaction processing system achieving 99.9% uptime and sub-500ms API response.",
@@ -31,7 +27,7 @@ EXPERIENCE = [
          ],
          technologies=["Node.js", "Express.js", "MongoDB", "Redis", "OAuth2", "JWT", "RabbitMQ", "Docker", "Kubernetes"]),
     dict(company="Integra Micro Systems (P) Ltd.", role="Software Engineer", location="Bangalore, India",
-         start_date=date(2023, 7, 1), end_date=date(2025, 6, 30), is_current=False,
+         start_date=datetime(2023, 7, 1), end_date=datetime(2025, 6, 30), is_current=False,
          responsibilities=[
              "Developed an automated periodic KYC system processing 10,000+ customer bookings daily, integrating UIDAI biometric Aadhaar APIs for 100% RBI compliance.",
              "Hardened API security with OAuth2 + JWT authentication and end-to-end audit logging.",
@@ -83,8 +79,8 @@ EDUCATION = [
 ]
 
 CERTIFICATIONS = [
-    dict(title="Complete Node.js Developer with GraphQL & MongoDB", issuer="Udemy", platform="Udemy", year="", order=1),
-    dict(title="JavaScript Algorithms & Data Structures", issuer="freeCodeCamp", platform="freeCodeCamp", year="", order=2),
+    dict(title="Complete Node.js Developer with GraphQL & MongoDB", issuer="Udemy", platform="Udemy", year="", logo="", certificate_url="", credential_id="", order=1),
+    dict(title="JavaScript Algorithms & Data Structures", issuer="freeCodeCamp", platform="freeCodeCamp", year="", logo="", certificate_url="", credential_id="", order=2),
 ]
 
 BLOG = [dict(
@@ -92,6 +88,7 @@ BLOG = [dict(
     slug="consolidating-microservices",
     excerpt="Microservices are great at scale — but for a portfolio, a single service is simpler, cheaper, and deploys anywhere for free.",
     content="## The setup\n\nMy portfolio originally ran an API gateway + a microservice over TCP. Clean in Docker — impossible on free serverless.\n\n## The fix\n\nI collapsed it into one service. Right tool for the right scale.",
+    updated_at=datetime.utcnow(),
 )]
 
 NOTE_SECTIONS = {
@@ -104,32 +101,30 @@ NOTE_SECTIONS = {
     ],
 }
 
+PORTFOLIO_COLLECTIONS = ["profiles", "experiences", "projects", "skills", "education",
+                         "certifications", "blog_posts", "note_sections", "notes"]
+
 
 def run():
     init_db()
-    with Session(engine) as s:
-        for model in (Note, NoteSection, BlogPost, Certification, Education, Skill, Project, Experience, Profile):
-            s.exec(delete(model))
-        s.commit()
+    for coll in PORTFOLIO_COLLECTIONS:
+        db[coll].delete_many({})
 
-        s.add(Profile(**PROFILE))
-        for e in EXPERIENCE: s.add(Experience(**e))
-        for p in PROJECTS: s.add(Project(**p))
-        for sk in SKILLS: s.add(Skill(**sk))
-        for ed in EDUCATION: s.add(Education(**ed))
-        for c in CERTIFICATIONS: s.add(Certification(**c))
-        for b in BLOG: s.add(BlogPost(**b))
-        s.commit()
+    insert("profiles", dict(PROFILE))
+    for e in EXPERIENCE: insert("experiences", dict(e))
+    for p in PROJECTS: insert("projects", dict(p))
+    for sk in SKILLS: insert("skills", dict(sk))
+    for ed in EDUCATION: insert("education", dict(ed))
+    for c in CERTIFICATIONS: insert("certifications", dict(c))
+    for b in BLOG: insert("blog_posts", dict(b))
 
-        for i, (title, notes) in enumerate(NOTE_SECTIONS.items()):
-            sec = NoteSection(title=title, order=i)
-            s.add(sec); s.commit(); s.refresh(sec)
-            for j, n in enumerate(notes):
-                s.add(Note(section_id=sec.id, order=j, **n))
-        s.commit()
+    for i, (title, notes) in enumerate(NOTE_SECTIONS.items()):
+        sec = insert("note_sections", {"title": title, "order": i})
+        for j, n in enumerate(notes):
+            insert("notes", {"section_id": sec["_id"], "order": j, "updated_at": datetime.utcnow(), **n})
 
-        get_or_create_settings(s)
-        print("Seeded:", len(PROJECTS), "projects,", len(SKILLS), "skills,", len(BLOG), "posts,", len(NOTE_SECTIONS), "note sections")
+    get_or_create_settings()
+    print("Seeded:", len(PROJECTS), "projects,", len(SKILLS), "skills,", len(BLOG), "posts,", len(NOTE_SECTIONS), "note sections")
 
 
 if __name__ == "__main__":

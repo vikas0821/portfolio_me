@@ -16,12 +16,17 @@ def _id(row):
     return str(row.id) if row and row.id is not None else None
 
 
-def _fmt_period(start: date | None, end: date | None, is_current: bool) -> str:
+def _fmt_period(start, end, is_current: bool) -> str:
     def fmt(d):
         return d.strftime("%b %Y") if d else ""
     s = fmt(start)
     e = "Present" if is_current else fmt(end)
     return f"{s} – {e}"
+
+
+def _iso(d):
+    """date/datetime -> 'YYYY-MM-DD' (Mongo stores dates as datetimes)."""
+    return d.strftime("%Y-%m-%d") if d else None
 
 
 def hero(profile):
@@ -59,8 +64,7 @@ def experience(e):
         "_id": _id(e), "id": e.id, "company": e.company, "role": e.role, "location": e.location,
         "period": _fmt_period(e.start_date, e.end_date, e.is_current),
         "responsibilities": e.responsibilities or [], "technologies": e.technologies or [],
-        "startDate": e.start_date.isoformat() if e.start_date else None,
-        "endDate": e.end_date.isoformat() if e.end_date else None, "isCurrent": e.is_current,
+        "startDate": _iso(e.start_date), "endDate": _iso(e.end_date), "isCurrent": e.is_current,
     }
 
 
