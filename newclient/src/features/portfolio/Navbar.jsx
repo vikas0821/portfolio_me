@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { Menu, X, Sun, Moon, LayoutGrid } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -26,12 +26,12 @@ const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const onHome = location.pathname === "/portfolio";
+  const onHome = location.pathname === "/";
 
   // Section links: scroll if on the portfolio page, otherwise navigate there then scroll.
   const goSection = (id) => {
     if (onHome) scrollToId(id);
-    else navigate("/portfolio", { state: { scrollTo: id } });
+    else navigate("/", { state: { scrollTo: id } });
   };
 
   const handleItem = (item) => {
@@ -75,7 +75,7 @@ const Navbar = () => {
   }, [onHome]);
 
   const goHire = () => { setMobileOpen(false); goSection("contact"); };
-  const goLogo = () => { setMobileOpen(false); if (onHome) scrollToId("hero"); else navigate("/portfolio"); };
+  const goLogo = () => { setMobileOpen(false); if (onHome) scrollToId("hero"); else navigate("/"); };
 
   return (
     <>
@@ -134,6 +134,15 @@ const Navbar = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate("/studio")}
+              aria-label="Open workspace"
+              title="Workspace (private)"
+              className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-200"
+            >
+              <LayoutGrid size={18} />
+            </button>
+
             <button
               onClick={toggleTheme}
               aria-label="Toggle theme"

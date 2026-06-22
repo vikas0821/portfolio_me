@@ -15,7 +15,7 @@ export default function ResumeBuilder() {
   return (
     <AppGate
       title="Resume Builder"
-      subtitle="Private — enter password to open"
+      subtitle="My private resume builder & job tracker — owner only."
       tokenKey="resume_token"
       onLogin={resumeLogin}
       afterAuth={(d) => { if (d.resumeToken) localStorage.setItem("token", d.resumeToken); }}

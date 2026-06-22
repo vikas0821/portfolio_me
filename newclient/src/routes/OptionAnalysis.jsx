@@ -15,7 +15,7 @@ export default function OptionAnalysis() {
   return (
     <AppGate
       title="Option Analyzer"
-      subtitle="Private — enter password to open"
+      subtitle="My private NSE option-chain analyzer — owner only."
       tokenKey="option_token"
       onLogin={optionLogin}
       icon={<LineChart size={24} />}

@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { MotionConfig } from "framer-motion";
 import { Toaster } from "react-hot-toast";
-import Hub from "./routes/Hub";
 import PortfolioHome from "./routes/portfolioHome";
+import Studio from "./routes/Studio";
 import AdminPage from "./routes/AdminPage";
 import BlogPage from "./routes/BlogPage";
 import BlogPostPage from "./routes/BlogPostPage";
@@ -10,23 +11,26 @@ import OptionAnalysis from "./routes/OptionAnalysis";
 import ResumeBuilder from "./routes/ResumeBuilder";
 import Navbar from "./features/portfolio/Navbar";
 
-// Persistent portfolio navbar — shown only on the portfolio + blog pages.
-// Hidden on the hub launcher and the full-screen app routes (own layouts).
-const FULL_SCREEN = ["/admin", "/notes", "/option-analysis", "/resume-builder"];
+// Persistent portfolio navbar — shown only on the public site (portfolio + blog).
+// Hidden on the private studio launcher and the full-screen app routes.
+const PRIVATE = ["/studio", "/admin", "/notes", "/option-analysis", "/resume-builder"];
 const ChromeNavbar = () => {
   const { pathname } = useLocation();
-  const hidden = pathname === "/" || FULL_SCREEN.some((p) => pathname.startsWith(p));
+  const hidden = PRIVATE.some((p) => pathname.startsWith(p));
   return hidden ? null : <Navbar />;
 };
 
 const App = () => (
-  <>
+  <MotionConfig reducedMotion="user">
     <ChromeNavbar />
     <Routes>
-      <Route path="/" element={<Hub />} />
-      <Route path="/portfolio" element={<PortfolioHome />} />
+      {/* Public site — the front door is the portfolio */}
+      <Route path="/" element={<PortfolioHome />} />
+      <Route path="/portfolio" element={<Navigate to="/" replace />} />
       <Route path="/blog" element={<BlogPage />} />
       <Route path="/blog/:slug" element={<BlogPostPage />} />
+      {/* Private workspace */}
+      <Route path="/studio" element={<Studio />} />
       <Route path="/notes" element={<NotesPage />} />
       <Route path="/option-analysis" element={<OptionAnalysis />} />
       <Route path="/resume-builder/*" element={<ResumeBuilder />} />
@@ -45,7 +49,7 @@ const App = () => (
         },
       }}
     />
-  </>
+  </MotionConfig>
 );
 
 export default App;

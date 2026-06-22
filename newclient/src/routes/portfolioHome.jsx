@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 import usePortfolio from "../hooks/usePortfolio";
@@ -12,9 +12,17 @@ import Contact from "../features/portfolio/Contact";
 import Footer from "../features/portfolio/Footer";
 import { downloadResumePdf } from "../lib/resume";
 
-const LoadingSkeleton = () => (
-  <div className="min-h-screen bg-white dark:bg-[#050505] flex items-center justify-center">
-    <div className="text-center space-y-5">
+const LoadingSkeleton = () => {
+  // Free hosting (Render) sleeps when idle; the first request can take ~30s.
+  // After a short wait, reassure the visitor that nothing is broken.
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 6000);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+  <div className="min-h-screen bg-white dark:bg-[#050505] flex items-center justify-center px-6">
+    <div className="text-center space-y-5 max-w-xs">
       <div className="relative mx-auto w-14 h-14">
         <div className="absolute inset-0 rounded-full border-2 border-accent/20" />
         <div className="absolute inset-0 rounded-full border-2 border-t-accent animate-spin" />
@@ -23,12 +31,17 @@ const LoadingSkeleton = () => (
         </div>
       </div>
       <div>
-        <p className="text-sm font-semibold text-slate-700 dark:text-white">Loading portfolio</p>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Please wait...</p>
+        <p className="text-sm font-semibold text-slate-700 dark:text-white">
+          {slow ? "Waking up the server…" : "Loading portfolio"}
+        </p>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 leading-relaxed">
+          {slow ? "Free hosting sleeps when idle — the first load can take up to ~30s. Thanks for your patience!" : "Please wait..."}
+        </p>
       </div>
     </div>
   </div>
-);
+  );
+};
 
 const ErrorState = ({ message }) => (
   <div className="min-h-screen bg-white dark:bg-[#050505] flex items-center justify-center px-6">

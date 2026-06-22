@@ -68,7 +68,7 @@ export default function AppGate({ title, subtitle, icon, tokenKey, onLogin, afte
           </button>
         </form>
         <p className="text-center text-xs text-slate-500 dark:text-slate-600 mt-4">
-          <Link to="/portfolio" className="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-400 transition"><ArrowLeft size={12} /> Back to portfolio</Link>
+          <Link to="/" className="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-400 transition"><ArrowLeft size={12} /> Back to portfolio</Link>
         </p>
       </div>
     </div>

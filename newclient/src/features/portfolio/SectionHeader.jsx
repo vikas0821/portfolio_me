@@ -26,9 +26,10 @@ const SectionHeader = ({ meta = {}, eyebrow, heading, subtitle }) => {
           <span className="text-xs font-semibold text-accent uppercase tracking-widest">{e}</span>
         </div>
       )}
-      <h2 className="relative text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-r from-indigo-500 via-accent to-violet-500 bg-clip-text text-transparent pb-1">
+      <h2 className="relative text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
         {h}
       </h2>
+      <div className="relative mx-auto mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-indigo-500 via-accent to-violet-500" />
       {s && (
         <p className="relative mt-4 text-slate-500 dark:text-slate-400 max-w-lg mx-auto leading-relaxed">{s}</p>
       )}

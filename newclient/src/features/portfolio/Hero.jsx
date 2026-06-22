@@ -9,9 +9,9 @@ const fadeUp = (delay = 0) => ({
 });
 
 const STAT_ICONS = [
-  { icon: Code2, label: "Frontend", value: "React, Next.js" },
-  { icon: Server, label: "Backend", value: "Node.js, Express" },
-  { icon: Database, label: "Database", value: "MongoDB, SQL" },
+  { icon: Server, label: "Backend", value: "Node.js · Express" },
+  { icon: Database, label: "Data", value: "MongoDB · Redis" },
+  { icon: Code2, label: "Cloud", value: "AWS · Docker · K8s" },
 ];
 
 const Hero = ({ hero = {}, settings = {}, onDownloadResume }) => {
@@ -160,7 +160,7 @@ const Hero = ({ hero = {}, settings = {}, onDownloadResume }) => {
                     key={label}
                     animate={{ y: [0, i % 2 === 0 ? -6 : 6, 0] }}
                     transition={{ duration: 3 + i * 0.5, repeat: Infinity, ease: "easeInOut" }}
-                    className={`absolute ${positions[i]} bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 rounded-2xl px-3.5 py-2.5 shadow-xl`}
+                    className={`hidden lg:block absolute ${positions[i]} bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 rounded-2xl px-3.5 py-2.5 shadow-xl`}
                   >
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-lg bg-accent/12 flex items-center justify-center flex-shrink-0">
