@@ -1,0 +1,30 @@
+# Render Blueprint — deploys the FastAPI backend as a Docker service.
+# Render → New → Blueprint → pick this repo. It reads this file and creates the
+# service with the Docker runtime (no Node, no build command).
+services:
+  - type: web
+    name: portfolio-backend
+    runtime: docker
+    branch: main
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: MONGO_URI          # your Atlas mongodb+srv://… URI (set in dashboard)
+        sync: false
+      - key: MONGO_DB
+        value: portfolio
+      - key: JWT_SECRET         # auto-generated strong secret
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: NOTES_PASSWORD
+        sync: false
+      - key: RESUME_PASSWORD
+        sync: false
+      - key: OPTION_PASSWORD
+        sync: false
+      - key: CORS_ORIGINS       # set to your Vercel URL after the frontend deploys
+        value: "*"
