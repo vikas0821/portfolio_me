@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 
-// Editorial section masthead: left-aligned eyebrow + large heading, a hairline
-// rule, an optional running count on the right, and a roomy subtitle below.
-const SectionHeader = ({ meta = {}, eyebrow, heading, subtitle, count }) => {
+// Reusable, settings-driven section header. `meta` comes from Site Settings;
+// eyebrow/heading/subtitle props are the built-in fallbacks.
+const SectionHeader = ({ meta = {}, eyebrow, heading, subtitle }) => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
   const e = (meta?.eyebrow ?? "") || eyebrow;
   const h = (meta?.heading ?? "") || heading;
@@ -12,26 +12,26 @@ const SectionHeader = ({ meta = {}, eyebrow, heading, subtitle, count }) => {
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6 }}
-      className="mb-14 md:mb-20"
+      className="relative text-center mb-16"
     >
-      <div className="flex items-end justify-between gap-6 border-b border-slate-200 dark:border-white/10 pb-6">
-        <div>
-          {e && (
-            <span className="block text-[11px] font-semibold uppercase tracking-[0.25em] text-accent">{e}</span>
-          )}
-          <h2 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">{h}</h2>
+      {/* soft gradient glow behind the heading (matches the hub) */}
+      <div className="pointer-events-none absolute left-1/2 -top-10 -translate-x-1/2 w-[420px] h-[220px] bg-accent/10 dark:bg-accent/12 rounded-full blur-[90px]" />
+
+      {e && (
+        <div className="relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-5">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+          <span className="text-xs font-semibold text-accent uppercase tracking-widest">{e}</span>
         </div>
-        {count != null && (
-          <span className="hidden sm:block text-sm font-medium tabular-nums text-slate-400 dark:text-slate-600 pb-1.5">
-            {count}
-          </span>
-        )}
-      </div>
+      )}
+      <h2 className="relative text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
+        {h}
+      </h2>
+      <div className="relative mx-auto mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-indigo-500 via-accent to-violet-500" />
       {s && (
-        <p className="mt-6 max-w-2xl text-base md:text-lg text-slate-500 dark:text-slate-400 leading-relaxed">{s}</p>
+        <p className="relative mt-4 text-slate-500 dark:text-slate-400 max-w-lg mx-auto leading-relaxed">{s}</p>
       )}
     </motion.div>
   );
