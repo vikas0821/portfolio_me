@@ -14,6 +14,14 @@ from .routers import auth, portfolio, admin, notes, option, apps, resume
 async def lifespan(app: FastAPI):
     init_db()
     os.makedirs(settings.output_dir, exist_ok=True)
+    # First-boot convenience (needed on hosts without a shell, e.g. Render free):
+    # seed sample data only if the database is empty.
+    try:
+        from .seed import seed_if_empty
+        if seed_if_empty():
+            print("Database was empty — seeded initial data.")
+    except Exception as e:  # never block startup on a seed failure
+        print(f"Auto-seed skipped: {e}")
     yield
 
 

@@ -105,6 +105,15 @@ PORTFOLIO_COLLECTIONS = ["profiles", "experiences", "projects", "skills", "educa
                          "certifications", "blog_posts", "note_sections", "notes"]
 
 
+def seed_if_empty():
+    """Seed only when the database has no profile yet (safe on every boot)."""
+    from .database import count
+    if count("profiles") == 0:
+        run()
+        return True
+    return False
+
+
 def run():
     init_db()
     for coll in PORTFOLIO_COLLECTIONS:
