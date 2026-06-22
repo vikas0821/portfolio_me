@@ -31,8 +31,8 @@ const ProjectCard = ({ project, index }) => {
             <span className="text-sm font-black tabular-nums text-accent/60 flex-shrink-0 pt-0.5 select-none">
               {String(index + 1).padStart(2, "0")}
             </span>
-            <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">
-              <Layers size={18} className="text-accent" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-violet-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-accent/25 group-hover:scale-110 transition-transform duration-300">
+              <Layers size={18} className="text-white" />
             </div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-accent transition-colors duration-200 leading-tight min-w-0">
               {project.title}

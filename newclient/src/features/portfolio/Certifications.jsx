@@ -26,8 +26,8 @@ const CertCard = ({ cert, index }) => {
             className="w-12 h-12 object-contain rounded-xl flex-shrink-0 border border-slate-100 dark:border-white/8 p-1.5 bg-white dark:bg-zinc-800"
           />
         ) : (
-          <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">
-            <Award size={22} className="text-accent" />
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-violet-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-accent/25 group-hover:scale-110 transition-transform duration-300">
+            <Award size={22} className="text-white" />
           </div>
         )}
 

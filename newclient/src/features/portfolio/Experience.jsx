@@ -16,8 +16,8 @@ const ExperienceCard = ({ exp, index, isLast }) => {
     >
       {/* Timeline column */}
       <div className="flex flex-col items-center flex-shrink-0">
-        <div className="w-11 h-11 rounded-xl bg-accent/12 border border-accent/25 flex items-center justify-center shadow-md shadow-accent/10 z-10">
-          <Briefcase size={18} className="text-accent" />
+        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent to-violet-500 flex items-center justify-center shadow-lg shadow-accent/25 z-10">
+          <Briefcase size={18} className="text-white" />
         </div>
         {!isLast && (
           <div className="flex-1 w-px bg-gradient-to-b from-accent/30 to-slate-200 dark:to-white/5 mt-3 mb-0" style={{ minHeight: "32px" }} />

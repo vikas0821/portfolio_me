@@ -35,7 +35,7 @@ const SkillCard = ({ skill, index }) => {
       <div className="relative z-10">
         {/* Header */}
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-xl border border-slate-200/60 dark:border-white/8 group-hover:border-accent/25 transition-colors">
+          <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${meta.color} flex items-center justify-center text-xl border border-slate-200/60 dark:border-white/8 group-hover:scale-110 transition-transform duration-300`}>
             {meta.emoji}
           </div>
           <div>

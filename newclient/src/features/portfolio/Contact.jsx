@@ -58,8 +58,8 @@ const Contact = ({ contact = {}, meta }) => {
           >
             {/* Info card */}
             <div className="p-6 rounded-2xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-white/8">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-5">
-                <MessageSquare size={22} className="text-accent" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-violet-500 flex items-center justify-center mb-5 shadow-lg shadow-accent/25">
+                <MessageSquare size={22} className="text-white" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">Let's connect</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
