@@ -17,7 +17,7 @@ const BlogPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white">
       <div className="max-w-3xl mx-auto px-6 pt-28 pb-16">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-accent transition mb-10">
+        <Link to="/portfolio" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-accent transition mb-10">
           <ArrowLeft size={16} /> Back to portfolio
         </Link>
 

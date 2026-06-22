@@ -8,9 +8,13 @@ RUN npm ci
 
 COPY . .
 
-# API requests will go to /api, proxied by Nginx to the gateway
+# API requests go to /api (proxied by Nginx to the unified backend).
+# Portfolio/blog/notes/admin use VITE_API_URL; option analyzer uses VITE_OPTION_API_URL;
+# resume defaults to /api when VITE_RESUME_API_URL is unset.
 ARG VITE_API_URL=/api/v1/
 ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_OPTION_API_URL=/api/v1/option
+ENV VITE_OPTION_API_URL=$VITE_OPTION_API_URL
 
 RUN npm run build
 

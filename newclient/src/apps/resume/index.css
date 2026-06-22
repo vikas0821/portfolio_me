@@ -1,0 +1,5 @@
+/* Resume Builder styles — scoped to .resume-root so they don't leak into the
+   portfolio. Tailwind directives live in the portfolio's index.css (one build). */
+.resume-root {
+  @apply bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-100 min-h-screen;
+}

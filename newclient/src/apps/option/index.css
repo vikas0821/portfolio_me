@@ -1,0 +1,43 @@
+/* Option Analyzer styles — scoped to .option-root so they don't leak into the
+   portfolio. Tailwind directives live in the portfolio's index.css (one build). */
+
+.option-root {
+  color-scheme: dark;
+  /* Default theme tokens (Midnight) — JS overrides --c-* on :root at runtime. */
+  --c-bg: 10 14 26;
+  --c-card: 15 21 32;
+  --c-border: 30 45 69;
+  --c-bullish: 0 200 150;
+  --c-bearish: 255 69 96;
+  --c-neutral: 0 180 216;
+  --c-warning: 255 209 102;
+  --c-txt: 226 232 240;
+  --c-muted: 100 116 139;
+
+  min-height: 100vh;
+  background-color: rgb(var(--c-bg));
+  color: rgb(var(--c-txt));
+  font-family: "Inter", "Noto Sans Devanagari", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.option-root .num {
+  font-family: "JetBrains Mono", Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes optGrowBar { from { width: 0%; } }
+.option-root .bar-fill { animation: optGrowBar 0.6s ease; transition: width 0.6s ease; }
+
+@keyframes optShimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+.option-root .skeleton {
+  background: linear-gradient(90deg, rgb(var(--c-card)) 25%, rgb(var(--c-border) / 0.4) 37%, rgb(var(--c-card)) 63%);
+  background-size: 800px 100%;
+  animation: optShimmer 1.4s infinite linear;
+  background-color: rgb(var(--c-card));
+}
+
+.option-root ::-webkit-scrollbar { height: 8px; width: 8px; }
+.option-root ::-webkit-scrollbar-track { background: rgb(var(--c-bg)); }
+.option-root ::-webkit-scrollbar-thumb { background: rgb(var(--c-border)); border-radius: 4px; }

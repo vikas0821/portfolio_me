@@ -26,12 +26,12 @@ const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const onHome = location.pathname === "/";
+  const onHome = location.pathname === "/portfolio";
 
-  // Section links: scroll if on home, otherwise navigate home then scroll.
+  // Section links: scroll if on the portfolio page, otherwise navigate there then scroll.
   const goSection = (id) => {
     if (onHome) scrollToId(id);
-    else navigate("/", { state: { scrollTo: id } });
+    else navigate("/portfolio", { state: { scrollTo: id } });
   };
 
   const handleItem = (item) => {
@@ -75,7 +75,7 @@ const Navbar = () => {
   }, [onHome]);
 
   const goHire = () => { setMobileOpen(false); goSection("contact"); };
-  const goLogo = () => { setMobileOpen(false); if (onHome) scrollToId("hero"); else navigate("/"); };
+  const goLogo = () => { setMobileOpen(false); if (onHome) scrollToId("hero"); else navigate("/portfolio"); };
 
   return (
     <>

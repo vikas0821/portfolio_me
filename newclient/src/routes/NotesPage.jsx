@@ -67,7 +67,7 @@ const NotesLogin = ({ onLogin }) => {
           </button>
         </form>
         <p className="text-center text-xs text-slate-500 dark:text-slate-600 mt-4">
-          <Link to="/" className="hover:text-slate-700 dark:hover:text-slate-400 transition">← Back to portfolio</Link>
+          <Link to="/portfolio" className="hover:text-slate-700 dark:hover:text-slate-400 transition">← Back to portfolio</Link>
         </p>
       </div>
     </div>
@@ -225,7 +225,7 @@ const Workspace = ({ onLogout }) => {
         </div>
 
         <div className="px-2.5 pb-3 border-t border-slate-200 dark:border-white/8 pt-2.5">
-          <Link to="/" className="w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white mb-1"><ArrowLeft size={15} /> Portfolio</Link>
+          <Link to="/portfolio" className="w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white mb-1"><ArrowLeft size={15} /> Portfolio</Link>
           <button onClick={onLogout} className="w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm text-red-500 dark:text-red-400 hover:bg-red-500/10"><LogOut size={15} /> Lock</button>
         </div>
       </aside>

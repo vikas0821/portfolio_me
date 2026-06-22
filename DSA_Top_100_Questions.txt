@@ -1,0 +1,171 @@
+# Top 100 Most-Asked DSA Interview Questions
+
+> Format:  N. Problem (difficulty) — key approach/pattern.  → Time / Space
+> Pair this with DSA_Notes.txt for the underlying concepts. Practice each on LeetCode.
+
+============================================================
+## ARRAYS & HASHING
+============================================================
+1.  Two Sum (Easy) — hash map of complements (target - num). → O(n) / O(n)
+2.  Best Time to Buy & Sell Stock (Easy) — track min price, max profit. → O(n) / O(1)
+3.  Contains Duplicate (Easy) — store seen in a Set. → O(n) / O(n)
+4.  Valid Anagram (Easy) — char-frequency count match. → O(n) / O(1)
+5.  Group Anagrams (Medium) — key = sorted word / char-count, hashmap. → O(n·k) / O(n)
+6.  Top K Frequent Elements (Medium) — frequency map + bucket sort / heap. → O(n) / O(n)
+7.  Product of Array Except Self (Medium) — prefix × suffix products. → O(n) / O(1)
+8.  Encode & Decode Strings (Medium) — length-prefix each string. → O(n) / O(n)
+9.  Longest Consecutive Sequence (Medium) — Set; start counting only at sequence starts. → O(n) / O(n)
+10. Maximum Subarray / Kadane's (Medium) — running sum, reset when negative. → O(n) / O(1)
+11. Maximum Product Subarray (Medium) — track running max AND min (negatives). → O(n) / O(1)
+
+============================================================
+## TWO POINTERS
+============================================================
+12. Valid Palindrome (Easy) — two ends move inward, skip non-alphanumeric. → O(n) / O(1)
+13. Two Sum II – Sorted (Medium) — left/right pointers by sum. → O(n) / O(1)
+14. 3Sum (Medium) — sort, fix one, two-pointer the rest, skip dups. → O(n²) / O(1)
+15. Container With Most Water (Medium) — widest first, move shorter wall. → O(n) / O(1)
+16. Trapping Rain Water (Hard) — two pointers with left/right max. → O(n) / O(1)
+
+============================================================
+## SLIDING WINDOW
+============================================================
+17. Longest Substring Without Repeating Characters (Medium) — window + last-seen map. → O(n) / O(k)
+18. Longest Repeating Character Replacement (Medium) — window, (len - maxFreq) ≤ k. → O(n) / O(1)
+19. Permutation in String (Medium) — fixed window of char counts. → O(n) / O(1)
+20. Minimum Window Substring (Hard) — expand to satisfy, shrink to minimize. → O(n) / O(k)
+21. Sliding Window Maximum (Hard) — monotonic decreasing deque. → O(n) / O(k)
+
+============================================================
+## STACK
+============================================================
+22. Valid Parentheses (Easy) — push opens, match on close. → O(n) / O(n)
+23. Min Stack (Medium) — keep a parallel min stack. → O(1) ops
+24. Evaluate Reverse Polish Notation (Medium) — stack of operands. → O(n) / O(n)
+25. Generate Parentheses (Medium) — backtrack with open/close counts. → O(4ⁿ/√n)
+26. Daily Temperatures (Medium) — monotonic stack of indices. → O(n) / O(n)
+27. Largest Rectangle in Histogram (Hard) — monotonic increasing stack. → O(n) / O(n)
+
+============================================================
+## BINARY SEARCH
+============================================================
+28. Binary Search (Easy) — classic lo/hi/mid. → O(log n)
+29. Search a 2D Matrix (Medium) — treat as 1D / staircase. → O(log mn)
+30. Koko Eating Bananas (Medium) — binary search on the answer (speed). → O(n log m)
+31. Find Minimum in Rotated Sorted Array (Medium) — compare mid to right. → O(log n)
+32. Search in Rotated Sorted Array (Medium) — find sorted half, decide side. → O(log n)
+33. Median of Two Sorted Arrays (Hard) — partition smaller array via BS. → O(log(min(m,n)))
+
+============================================================
+## LINKED LIST
+============================================================
+34. Reverse Linked List (Easy) — iterative prev/curr/next. → O(n) / O(1)
+35. Merge Two Sorted Lists (Easy) — dummy head, splice smaller. → O(n) / O(1)
+36. Linked List Cycle (Easy) — Floyd's fast/slow pointers. → O(n) / O(1)
+37. Reorder List (Medium) — find mid, reverse 2nd half, merge. → O(n) / O(1)
+38. Remove Nth Node From End (Medium) — two pointers n apart. → O(n) / O(1)
+39. Copy List with Random Pointer (Medium) — interleave clones / hashmap. → O(n)
+40. Add Two Numbers (Medium) — digit-by-digit with carry. → O(n)
+41. LRU Cache (Medium) — hashmap + doubly linked list. → O(1) ops
+42. Merge K Sorted Lists (Hard) — min-heap or divide & conquer. → O(n log k)
+
+============================================================
+## TREES
+============================================================
+43. Invert Binary Tree (Easy) — swap children recursively. → O(n)
+44. Maximum Depth of Binary Tree (Easy) — DFS depth. → O(n)
+45. Diameter of Binary Tree (Easy) — DFS returning height, track max. → O(n)
+46. Balanced Binary Tree (Easy) — DFS height, -1 if unbalanced. → O(n)
+47. Same Tree (Easy) — compare nodes recursively. → O(n)
+48. Subtree of Another Tree (Easy) — DFS + sameTree check. → O(n·m)
+49. Lowest Common Ancestor of BST (Medium) — walk using BST order. → O(h)
+50. Binary Tree Level Order Traversal (Medium) — BFS by level. → O(n)
+51. Binary Tree Right Side View (Medium) — BFS, last of each level. → O(n)
+52. Count Good Nodes in Binary Tree (Medium) — DFS carry max-so-far. → O(n)
+53. Validate Binary Search Tree (Medium) — DFS with (min,max) range. → O(n)
+54. Kth Smallest Element in a BST (Medium) — inorder traversal. → O(n)
+55. Construct Tree from Preorder & Inorder (Medium) — recurse with index map. → O(n)
+56. Binary Tree Maximum Path Sum (Hard) — DFS return best downward path. → O(n)
+57. Serialize & Deserialize Binary Tree (Hard) — BFS/DFS with null markers. → O(n)
+
+============================================================
+## TRIES
+============================================================
+58. Implement Trie / Prefix Tree (Medium) — nested char nodes + isEnd. → O(L) per op
+59. Design Add & Search Words (wildcard '.') (Medium) — trie + DFS on '.'. → O(L)
+60. Word Search II (Hard) — build trie of words, DFS the grid. → O(m·n·4^L)
+
+============================================================
+## HEAP / PRIORITY QUEUE
+============================================================
+61. Kth Largest Element in an Array (Medium) — min-heap of size k / quickselect. → O(n log k)
+62. Last Stone Weight (Easy) — max-heap, smash two largest. → O(n log n)
+63. K Closest Points to Origin (Medium) — heap by distance. → O(n log k)
+64. Task Scheduler (Medium) — greedy by most frequent + cooldown. → O(n)
+65. Find Median from Data Stream (Hard) — two heaps (max-low, min-high). → O(log n) add
+
+============================================================
+## BACKTRACKING
+============================================================
+66. Subsets (Medium) — include/exclude each element. → O(2ⁿ)
+67. Combination Sum (Medium) — reuse allowed, prune by remaining. → O(2^t)
+68. Permutations (Medium) — used[] array, pick unused. → O(n·n!)
+69. Subsets II / dups (Medium) — sort, skip duplicates at same level. → O(2ⁿ)
+70. Word Search (Medium) — DFS from each cell, mark visited. → O(m·n·4^L)
+71. Palindrome Partitioning (Medium) — cut where prefix is palindrome. → O(n·2ⁿ)
+72. N-Queens (Hard) — place per row, track cols/diagonals. → O(n!)
+
+============================================================
+## GRAPHS
+============================================================
+73. Number of Islands (Medium) — flood fill BFS/DFS. → O(m·n)
+74. Max Area of Island (Medium) — DFS count cells. → O(m·n)
+75. Clone Graph (Medium) — DFS/BFS + visited map. → O(V+E)
+76. Pacific Atlantic Water Flow (Medium) — DFS inward from both oceans. → O(m·n)
+77. Surrounded Regions (Medium) — mark border-connected, flip rest. → O(m·n)
+78. Rotting Oranges (Medium) — multi-source BFS (time = levels). → O(m·n)
+79. Course Schedule (Medium) — detect cycle / topo sort. → O(V+E)
+80. Course Schedule II (Medium) — Kahn's topological order. → O(V+E)
+81. Number of Connected Components (Medium) — Union-Find / DFS. → O(V+E)
+82. Redundant Connection (Medium) — Union-Find, first edge that unions same set. → O(n)
+83. Word Ladder (Hard) — BFS over word transformations. → O(N·L²)
+84. Network Delay Time (Medium) — Dijkstra with min-heap. → O(E log V)
+
+============================================================
+## INTERVALS & GREEDY
+============================================================
+85. Merge Intervals (Medium) — sort by start, merge overlaps. → O(n log n)
+86. Insert Interval (Medium) — add before/overlap/after. → O(n)
+87. Non-overlapping Intervals (Medium) — sort by end, greedy keep. → O(n log n)
+88. Meeting Rooms II (Medium) — min-heap of end times / sweep line. → O(n log n)
+89. Jump Game (Medium) — greedy farthest reach. → O(n)
+
+============================================================
+## DYNAMIC PROGRAMMING
+============================================================
+90.  Climbing Stairs (Easy) — dp[i]=dp[i-1]+dp[i-2]. → O(n) / O(1)
+91.  House Robber (Medium) — dp rob vs skip. → O(n) / O(1)
+92.  House Robber II / circular (Medium) — max of two linear runs. → O(n)
+93.  Coin Change (Medium) — dp[amount] = min coins. → O(n·amount)
+94.  Longest Increasing Subsequence (Medium) — dp / patience BS. → O(n log n)
+95.  Word Break (Medium) — dp over prefixes + dict set. → O(n²)
+96.  Decode Ways (Medium) — dp on 1-digit & 2-digit options. → O(n)
+97.  Unique Paths (Medium) — grid dp / combinatorics. → O(m·n)
+98.  Longest Common Subsequence (Medium) — 2D dp table. → O(m·n)
+99.  Edit Distance (Hard) — 2D dp insert/delete/replace. → O(m·n)
+100. Partition Equal Subset Sum / 0-1 Knapsack (Medium) — subset-sum dp. → O(n·sum)
+
+============================================================
+## QUICK REVISION TIPS
+============================================================
+- Each problem maps to a PATTERN — learn the pattern, not the problem.
+- Always state brute force first, then optimize (usually with hashing/two-pointers/DP).
+- Clarify input constraints → they hint the target complexity.
+- For trees/graphs: decide DFS vs BFS early.
+- For "min/max/number of ways" → think DP. For "sorted / search space" → think binary search.
+- Re-derive complexity out loud; mention space too.
+
+Recommended order: Arrays/Hashing → Two Pointers → Sliding Window → Stack → Binary
+Search → Linked List → Trees → Tries → Heap → Backtracking → Graphs → Intervals → DP.
+
+— End —

@@ -1,68 +1,61 @@
+# Unified platform stack: Postgres + one Python FastAPI backend + one React frontend.
+# Run: docker compose up --build -d  (frontend :8080, backend :8002, db :5433)
 services:
-
-  # ── MongoDB ─────────────────────────────────────────────────────────────────
-  mongodb:
-    image: mongo:7
-    container_name: portfolio_mongodb
+  db:
+    image: postgres:16-alpine
+    container_name: platform_db
     restart: unless-stopped
-    command: ["bash", "-c", "mongod --bind_ip_all 2>&1 | grep -v '\"s\":\"I\"'"]
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
     ports:
-      - "${MONGO_HOST_PORT:-27017}:27017"
+      - "${PG_HOST_PORT:-5433}:5432"
     volumes:
-      - mongo_data:/data/db
+      - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 20s
+      test: ["CMD-SHELL", "pg_isready -U app"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
-  # ── Backend (Express API + portfolio domain, single process) ──────────────────
   backend:
-    build:
-      context: .
-      dockerfile: apigateway/Dockerfile
-    container_name: portfolio_backend
+    build: ./backend
+    container_name: platform_backend
     restart: unless-stopped
     depends_on:
-      mongodb:
+      db:
         condition: service_healthy
     environment:
-      NODE_ENV: production
-      HTTP_PORT: "3000"
-      HOST_NAME: "0.0.0.0"
-      MONGO_URI: mongodb://mongodb:27017/portfolio
-      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      DATABASE_URL: postgresql+psycopg2://app:app@db:5432/app
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
-      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-change-me-admin-secret}
       NOTES_PASSWORD: ${NOTES_PASSWORD:-notes123}
+      RESUME_PASSWORD: ${RESUME_PASSWORD:-resume123}
+      OPTION_PASSWORD: ${OPTION_PASSWORD:-option123}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      # Optional — only needed for resume → email send
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      FROM_EMAIL: ${FROM_EMAIL:-}
+      FROM_NAME: ${FROM_NAME:-Job Application}
     ports:
-      - "3000:3000"
+      - "${API_HOST_PORT:-8002}:8000"
 
-  # ── Seed (runs once then exits) ──────────────────────────────────────────────
-  seed:
-    build:
-      context: .
-      dockerfile: scripts/Dockerfile.seed
-    container_name: portfolio_seed
-    restart: "no"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    environment:
-      MONGO_URI: mongodb://mongodb:27017/portfolio
-
-  # ── Frontend (Nginx) ─────────────────────────────────────────────────────────
   frontend:
     build:
       context: ./newclient
-      dockerfile: Dockerfile
-    container_name: portfolio_frontend
+      args:
+        VITE_API_URL: /api/v1/
+        VITE_OPTION_API_URL: /api/v1/option
+    container_name: platform_frontend
     restart: unless-stopped
     depends_on:
       - backend
     ports:
-      - "80:80"
+      - "${WEB_HOST_PORT:-8080}:80"
 
 volumes:
-  mongo_data:
+  pg_data:
