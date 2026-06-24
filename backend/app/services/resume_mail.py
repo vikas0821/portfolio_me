@@ -58,11 +58,13 @@ def send_mail(to: str, subject: str, text: str, html: str, attachments=None):
             msg.add_attachment(data, maintype="application", subtype="octet-stream", filename=att["filename"])
         except OSError:
             pass
+    # Timeout so a blocked outbound SMTP port (common on free PaaS like Render)
+    # fails fast with an error instead of hanging the request forever.
     use_ssl = settings.smtp_port == 465
     if use_ssl:
-        server = smtplib.SMTP_SSL(settings.smtp_host, settings.smtp_port)
+        server = smtplib.SMTP_SSL(settings.smtp_host, settings.smtp_port, timeout=20)
     else:
-        server = smtplib.SMTP(settings.smtp_host, settings.smtp_port)
+        server = smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=20)
         server.starttls()
     with server:
         # Gmail shows App Passwords with spaces for readability — strip them so a
