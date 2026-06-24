@@ -29,6 +29,11 @@ services:
       - key: CORS_ORIGINS       # set to your Vercel URL after the frontend deploys
         value: "*"
       # Resume → Email (optional). Required only to send application emails.
+      # Recommended on Render free: Brevo HTTP API (SMTP is blocked here).
+      # Verify your sender address in Brevo, then set FROM_EMAIL to it.
+      - key: BREVO_API_KEY
+        sync: false
+      # SMTP fallback (needs a host that allows outbound SMTP):
       # Gmail: host=smtp.gmail.com port=587 user=<you>@gmail.com pass=<App Password>
       - key: SMTP_HOST
         sync: false

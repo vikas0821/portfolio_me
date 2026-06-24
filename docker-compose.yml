@@ -31,7 +31,10 @@ services:
       RESUME_PASSWORD: ${RESUME_PASSWORD:-resume123}
       OPTION_PASSWORD: ${OPTION_PASSWORD:-option123}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
-      # Optional — only needed for resume → email send
+      # Optional — only needed for resume → email send.
+      # Brevo HTTP API (works where SMTP is blocked, e.g. Render free):
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      # SMTP fallback:
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}

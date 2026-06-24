@@ -1,9 +1,20 @@
-"""Email helpers for the resume builder — mail-merge + SMTP send."""
+"""Email helpers for the resume builder — mail-merge + Brevo/SMTP send."""
 import re
+import json
+import base64
 import smtplib
+import urllib.request
+import urllib.error
 from email.message import EmailMessage
 from jinja2 import Template
 from ..config import settings
+
+
+def mail_configured() -> bool:
+    """True if an email sender (Brevo HTTP API or SMTP) is configured."""
+    if settings.brevo_api_key and settings.from_email:
+        return True
+    return bool(settings.smtp_host and settings.smtp_user and settings.smtp_pass and settings.from_email)
 
 
 def html_to_text(html: str) -> str:
@@ -42,9 +53,48 @@ def render_template(text: str, ctx: dict) -> str:
     return Template(text or "").render(**ctx)
 
 
+def _read_attachments_b64(attachments):
+    out = []
+    for att in attachments or []:
+        try:
+            with open(att["path"], "rb") as f:
+                out.append({"name": att["filename"], "content": base64.b64encode(f.read()).decode()})
+        except OSError:
+            pass  # file may be gone on ephemeral disk; send without it
+    return out
+
+
+def _send_via_brevo(to, subject, text, html, attachments):
+    payload = {
+        "sender": {"name": settings.from_name or "Job Application", "email": settings.from_email},
+        "to": [{"email": to}],
+        "subject": subject,
+        "htmlContent": html or text_to_html(text or ""),
+        "textContent": text or "",
+    }
+    atts = _read_attachments_b64(attachments)
+    if atts:
+        payload["attachment"] = atts
+    req = urllib.request.Request(
+        "https://api.brevo.com/v3/smtp/email",
+        data=json.dumps(payload).encode(),
+        headers={"api-key": settings.brevo_api_key, "content-type": "application/json", "accept": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            resp.read()
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="ignore")
+        raise RuntimeError(f"Brevo API error {e.code}: {body}")
+
+
 def send_mail(to: str, subject: str, text: str, html: str, attachments=None):
-    if not (settings.smtp_host and settings.smtp_user and settings.smtp_pass and settings.from_email):
-        raise RuntimeError("SMTP configuration is missing")
+    if not mail_configured():
+        raise RuntimeError("Email is not configured")
+    # Prefer Brevo's HTTP API (works where outbound SMTP is blocked).
+    if settings.brevo_api_key and settings.from_email:
+        return _send_via_brevo(to, subject, text, html, attachments)
     msg = EmailMessage()
     msg["From"] = f"{settings.from_name} <{settings.from_email}>"
     msg["To"] = to

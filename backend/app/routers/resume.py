@@ -406,11 +406,11 @@ def email_send(b: dict = Body(...)):
             attachments.append({"filename": "Resume.pdf", "path": os.path.join(base, "resume.pdf")})
         if "coverLetter" in fmts and (a.generated_files or {}).get("coverLetter"):
             attachments.append({"filename": "Cover Letter.pdf", "path": os.path.join(base, "cover-letter.pdf")})
-    if not (settings.smtp_host and settings.smtp_user and settings.smtp_pass and settings.from_email):
+    if not mail.mail_configured():
         raise HTTPException(
             400,
-            "Email sending isn't set up yet. Add SMTP_HOST, SMTP_PORT, SMTP_USER, "
-            "SMTP_PASS and FROM_EMAIL to the backend environment, then redeploy.",
+            "Email sending isn't set up yet. Add BREVO_API_KEY + FROM_EMAIL (recommended), "
+            "or the SMTP_* variables, to the backend environment, then redeploy.",
         )
     log = {"application_id": a["_id"], "to": to, "subject": subject, "body_html": body_html,
            "body_text": body_text, "attachments": attachments}
