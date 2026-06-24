@@ -19,11 +19,8 @@ class Settings(BaseSettings):
     # CORS — comma-separated origins, or "*"
     cors_origins: str = "*"
 
-    # Resume builder — generated file output + email
+    # Resume builder — generated file output + SMTP (email)
     output_dir: str = "/app/output"
-    # Brevo HTTP API (works on hosts that block SMTP, e.g. Render free)
-    brevo_api_key: str = ""
-    # SMTP (fallback; needs a host that allows outbound SMTP)
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""
