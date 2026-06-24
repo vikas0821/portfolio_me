@@ -132,6 +132,100 @@ def run():
         for j, n in enumerate(notes):
             insert("notes", {"section_id": sec["_id"], "order": j, "updated_at": datetime.utcnow(), **n})
 
+    seed_email_templates()  # standard résumé email templates (idempotent)
+
+
+# ── Email templates (Resume Builder → Email) ────────────────────────────────
+# Mail-merge placeholders ({{var}}) are filled per-application:
+#   recruiterName, company, role, location, jobRef,
+#   candidateName, candidateHeadline, candidateEmail, candidatePhone,
+#   candidateLinkedin, topSkills
+_SIGNATURE = (
+    "<p style=\"margin-top:18px\">Best regards,<br>"
+    "<strong>{{candidateName}}</strong><br>"
+    "{{candidateHeadline}}<br>"
+    "{{candidateEmail}} · {{candidatePhone}}<br>"
+    "<a href=\"{{candidateLinkedin}}\">{{candidateLinkedin}}</a></p>"
+)
+
+EMAIL_TEMPLATES = [
+    {
+        "name": "Job Application (with résumé)",
+        "is_default": True,
+        "subject": "Application for {{role}} — {{candidateName}}",
+        "body_html": (
+            "<p>Hi {{recruiterName}},</p>"
+            "<p>I'd like to apply for the <strong>{{role}}</strong> position at {{company}}. "
+            "I'm a Senior Software Engineer with ~3 years building secure, high-performance "
+            "Node.js backends for fintech and banking platforms serving millions of users.</p>"
+            "<p>A few things I could bring to your team:</p>"
+            "<ul>"
+            "<li>Real-time transaction systems with <strong>99.9% uptime</strong> and sub-500ms API responses.</li>"
+            "<li>~30% latency reduction via Redis caching, indexing, and query optimization.</li>"
+            "<li>Microservices, REST/GraphQL, OAuth2/JWT security, and cloud-native delivery on AWS/Docker/Kubernetes.</li>"
+            "<li>Core stack: {{topSkills}}.</li>"
+            "</ul>"
+            "<p>My résumé is attached. I'd welcome a quick chat about how I can contribute to {{company}}.</p>"
+            + _SIGNATURE
+        ),
+    },
+    {
+        "name": "Recruiter Follow-up",
+        "is_default": False,
+        "subject": "Following up — {{role}} at {{company}}",
+        "body_html": (
+            "<p>Hi {{recruiterName}},</p>"
+            "<p>I wanted to follow up on my application for the <strong>{{role}}</strong> role at {{company}} "
+            "(ref {{jobRef}}). I remain very interested and would be glad to share more about my work on "
+            "scalable, secure backend systems for fintech platforms.</p>"
+            "<p>Happy to send anything that would help, or to find a time to talk. Thanks for your consideration!</p>"
+            + _SIGNATURE
+        ),
+    },
+    {
+        "name": "Referral / Warm Intro",
+        "is_default": False,
+        "subject": "{{role}} at {{company}} — quick intro",
+        "body_html": (
+            "<p>Hi {{recruiterName}},</p>"
+            "<p>I came across the <strong>{{role}}</strong> opening at {{company}} and it lines up closely with "
+            "my background — a backend engineer focused on Node.js microservices, APIs, and cloud infrastructure "
+            "for high-volume fintech systems.</p>"
+            "<p>I've attached my résumé. If it looks like a fit, I'd love to be considered, or to be pointed to the "
+            "right person on the team. Thank you!</p>"
+            + _SIGNATURE
+        ),
+    },
+    {
+        "name": "Post-Interview Thank You",
+        "is_default": False,
+        "subject": "Thank you — {{role}} interview",
+        "body_html": (
+            "<p>Hi {{recruiterName}},</p>"
+            "<p>Thank you for taking the time to discuss the <strong>{{role}}</strong> role at {{company}} today. "
+            "I enjoyed the conversation and came away even more excited about the team and the problems you're solving.</p>"
+            "<p>The role is a strong match for my experience building reliable, secure backend systems at scale, and "
+            "I'm confident I could add value quickly. Please let me know if there's anything else I can provide.</p>"
+            + _SIGNATURE
+        ),
+    },
+]
+
+
+def seed_email_templates(force: bool = False):
+    """Insert standard résumé email templates. Idempotent: skips if any exist
+    (unless force=True, which replaces them)."""
+    from .database import count
+    if force:
+        db.email_templates.delete_many({})
+    elif count("email_templates") > 0:
+        print("Email templates already present — skipped.")
+        return False
+    for t in EMAIL_TEMPLATES:
+        insert("email_templates", {**t, "updated_at": datetime.utcnow()})
+    print(f"Seeded {len(EMAIL_TEMPLATES)} email templates.")
+    return True
+
     get_or_create_settings()
     print("Seeded:", len(PROJECTS), "projects,", len(SKILLS), "skills,", len(BLOG), "posts,", len(NOTE_SECTIONS), "note sections")
 
