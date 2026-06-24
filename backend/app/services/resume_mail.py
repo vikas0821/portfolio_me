@@ -65,5 +65,7 @@ def send_mail(to: str, subject: str, text: str, html: str, attachments=None):
         server = smtplib.SMTP(settings.smtp_host, settings.smtp_port)
         server.starttls()
     with server:
-        server.login(settings.smtp_user, settings.smtp_pass)
+        # Gmail shows App Passwords with spaces for readability — strip them so a
+        # pasted "xxxx xxxx xxxx xxxx" still authenticates.
+        server.login(settings.smtp_user, settings.smtp_pass.replace(" ", ""))
         server.send_message(msg)
