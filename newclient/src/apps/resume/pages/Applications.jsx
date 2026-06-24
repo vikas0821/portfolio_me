@@ -1,21 +1,10 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
-import { ChevronDown, ChevronRight, Trash2, FileText, Download, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trash2, FileText, Download, ExternalLink, Search, Inbox } from 'lucide-react';
+import { PageHeader, Card, Button, Field, Input, Textarea, Badge, Loading, EmptyState, STATUS_BADGE } from '../components/ui';
 
 const STATUSES = ['applied', 'replied', 'interview', 'offer', 'rejected', 'ghosted'];
-
-const STATUS_COLORS = {
-  applied: 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300',
-  replied: 'bg-blue-100 text-blue-700',
-  interview: 'bg-amber-100 text-amber-700',
-  offer: 'bg-green-100 text-green-700',
-  rejected: 'bg-red-100 text-red-700',
-  ghosted: 'bg-purple-100 text-purple-700',
-};
-
-const inputCls = 'w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400';
-const labelCls = 'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1';
 
 function isFollowUpDue(app) {
   if (!app.followUpDate || app.followUpDone) return false;
@@ -31,137 +20,94 @@ function DetailsPanel({ app, onChange }) {
   const [savingCover, setSavingCover] = useState(false);
   const [noteText, setNoteText] = useState('');
 
-  const saveTags = async () => {
-    const tags = tagsInput.split(',').map(t => t.trim()).filter(Boolean);
-    const updated = (await api.patch(`/applications/${app._id}`, { tags })).data;
-    onChange(updated);
-  };
-
-  const saveSource = async () => {
-    const updated = (await api.patch(`/applications/${app._id}`, { source: sourceInput.trim() })).data;
-    onChange(updated);
-  };
-
-  const saveLink = async () => {
-    const updated = (await api.patch(`/applications/${app._id}`, { link: linkInput.trim() })).data;
-    onChange(updated);
-  };
-
-  const saveFollowUp = async (extra = {}) => {
-    const updated = (await api.patch(`/applications/${app._id}`, { followUpDate: followUpDate || null, ...extra })).data;
-    onChange(updated);
-  };
+  const patch = async (body) => onChange((await api.patch(`/applications/${app._id}`, body)).data);
+  const saveTags = () => patch({ tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean) });
+  const saveSource = () => patch({ source: sourceInput.trim() });
+  const saveLink = () => patch({ link: linkInput.trim() });
+  const saveFollowUp = (extra = {}) => patch({ followUpDate: followUpDate || null, ...extra });
 
   const saveCoverLetter = async () => {
     setSavingCover(true);
-    try {
-      const updated = (await api.post(`/applications/${app._id}/cover-letter`, { text: coverLetter })).data;
-      onChange(updated);
-    } finally {
-      setSavingCover(false);
-    }
+    try { onChange((await api.post(`/applications/${app._id}/cover-letter`, { text: coverLetter })).data); }
+    finally { setSavingCover(false); }
   };
-
   const addNote = async () => {
     if (!noteText.trim()) return;
-    const updated = (await api.post(`/applications/${app._id}/notes`, { text: noteText })).data;
-    onChange(updated);
+    onChange((await api.post(`/applications/${app._id}/notes`, { text: noteText })).data);
     setNoteText('');
   };
-
-  const deleteNote = async (noteId) => {
-    const updated = (await api.delete(`/applications/${app._id}/notes/${noteId}`)).data;
-    onChange(updated);
-  };
+  const deleteNote = async (noteId) => onChange((await api.delete(`/applications/${app._id}/notes/${noteId}`)).data);
 
   return (
-    <div className="grid md:grid-cols-2 gap-4 p-4 bg-slate-50 dark:bg-[#0f0f0f]/40 border-t dark:border-white/10">
-      <div className="space-y-3">
-        <div>
-          <label className={labelCls}>Tags</label>
+    <div className="grid md:grid-cols-2 gap-6 p-5 bg-slate-50 dark:bg-[#0f0f0f] border-t border-slate-200 dark:border-white/10">
+      <div className="space-y-4">
+        <Field label="Tags">
           <div className="flex gap-2">
-            <input className={inputCls} value={tagsInput} onChange={e => setTagsInput(e.target.value)} placeholder="referral, linkedin" />
-            <button onClick={saveTags} className="text-sm px-3 py-1.5 rounded-lg border bg-white dark:bg-[#161616] hover:bg-slate-100 dark:bg-[#0f0f0f] shrink-0">Save</button>
+            <Input value={tagsInput} onChange={e => setTagsInput(e.target.value)} placeholder="referral, linkedin" />
+            <Button variant="secondary" size="sm" onClick={saveTags}>Save</Button>
           </div>
-        </div>
-
-        <div>
-          <label className={labelCls}>Source / Portal</label>
+        </Field>
+        <Field label="Source / Portal">
           <div className="flex gap-2">
-            <input className={inputCls} value={sourceInput} onChange={e => setSourceInput(e.target.value)} placeholder="LinkedIn, Naukri..." />
-            <button onClick={saveSource} className="text-sm px-3 py-1.5 rounded-lg border bg-white dark:bg-[#161616] hover:bg-slate-100 dark:bg-[#0f0f0f] shrink-0">Save</button>
+            <Input value={sourceInput} onChange={e => setSourceInput(e.target.value)} placeholder="LinkedIn, Naukri…" />
+            <Button variant="secondary" size="sm" onClick={saveSource}>Save</Button>
           </div>
-        </div>
-
-        <div>
-          <label className={labelCls}>Link</label>
-          <div className="flex gap-2">
-            <input className={inputCls} value={linkInput} onChange={e => setLinkInput(e.target.value)} placeholder="https://..." />
-            <button onClick={saveLink} className="text-sm px-3 py-1.5 rounded-lg border bg-white dark:bg-[#161616] hover:bg-slate-100 dark:bg-[#0f0f0f] shrink-0">Save</button>
-            {app.link && (
-              <a href={app.link} target="_blank" rel="noreferrer" className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 shrink-0 flex items-center"><ExternalLink size={16} /></a>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <label className={labelCls}>Follow-up Date</label>
+        </Field>
+        <Field label="Link">
           <div className="flex gap-2 items-center">
-            <input type="date" className={inputCls} value={followUpDate} onChange={e => setFollowUpDate(e.target.value)} />
-            <button onClick={() => saveFollowUp()} className="text-sm px-3 py-1.5 rounded-lg border bg-white dark:bg-[#161616] hover:bg-slate-100 dark:bg-[#0f0f0f] shrink-0">Save</button>
+            <Input value={linkInput} onChange={e => setLinkInput(e.target.value)} placeholder="https://…" />
+            <Button variant="secondary" size="sm" onClick={saveLink}>Save</Button>
+            {app.link && <a href={app.link} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-accent shrink-0"><ExternalLink size={16} /></a>}
+          </div>
+        </Field>
+        <Field label="Follow-up date">
+          <div className="flex gap-2 items-center">
+            <Input type="date" value={followUpDate} onChange={e => setFollowUpDate(e.target.value)} />
+            <Button variant="secondary" size="sm" onClick={() => saveFollowUp()}>Save</Button>
             {app.followUpDate && (
-              <label className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400 shrink-0">
+              <label className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 shrink-0">
                 <input type="checkbox" checked={!!app.followUpDone} onChange={e => saveFollowUp({ followUpDone: e.target.checked })} /> Done
               </label>
             )}
           </div>
-        </div>
-
-        <div>
-          <label className={labelCls}>Job Description</label>
-          {app.jdText ? (
-            <pre className="text-xs whitespace-pre-wrap bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 rounded-lg p-2 max-h-48 overflow-auto">{app.jdText}</pre>
-          ) : (
-            <p className="text-xs text-slate-400 dark:text-slate-500">No job description saved.</p>
-          )}
-        </div>
+        </Field>
+        <Field label="Job description">
+          {app.jdText
+            ? <pre className="text-xs whitespace-pre-wrap bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 rounded-lg p-3 max-h-48 overflow-auto text-slate-600 dark:text-slate-300">{app.jdText}</pre>
+            : <p className="text-xs text-slate-400 dark:text-slate-500">No job description saved.</p>}
+        </Field>
       </div>
 
-      <div className="space-y-3">
-        <div>
-          <label className={labelCls}>Cover Letter</label>
-          <textarea className={inputCls} rows={6} value={coverLetter} onChange={e => setCoverLetter(e.target.value)} placeholder="Write or paste a cover letter..." />
+      <div className="space-y-4">
+        <Field label="Cover letter">
+          <Textarea rows={6} value={coverLetter} onChange={e => setCoverLetter(e.target.value)} placeholder="Write or paste a cover letter…" />
           <div className="flex items-center gap-3 mt-2">
-            <button onClick={saveCoverLetter} disabled={savingCover} className="flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg bg-accent text-white hover:bg-accent/90 disabled:opacity-50">
-              <FileText size={14} /> {savingCover ? 'Saving...' : 'Save & Generate PDF'}
-            </button>
+            <Button variant="primary" size="sm" icon={FileText} loading={savingCover} onClick={saveCoverLetter}>
+              {savingCover ? 'Saving…' : 'Save & generate PDF'}
+            </Button>
             {app.generatedFiles?.coverLetter && (
-              <a href={app.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100 hover:underline">
-                <Download size={14} /> View PDF
-              </a>
+              <a href={app.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"><Download size={14} /> View PDF</a>
             )}
           </div>
-        </div>
-
-        <div>
-          <label className={labelCls}>Notes</label>
-          <div className="space-y-1 max-h-32 overflow-auto">
+        </Field>
+        <Field label="Notes">
+          <div className="space-y-1.5 max-h-40 overflow-auto">
             {(app.noteEntries || []).length === 0 && <p className="text-xs text-slate-400 dark:text-slate-500">No notes yet.</p>}
             {(app.noteEntries || []).slice().reverse().map(n => (
-              <div key={n._id} className="flex items-start justify-between gap-2 bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 rounded-lg px-2 py-1">
+              <div key={n._id} className="flex items-start justify-between gap-2 bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2">
                 <div>
                   <div className="text-xs text-slate-700 dark:text-slate-300">{n.text}</div>
-                  <div className="text-[10px] text-slate-400 dark:text-slate-500">{new Date(n.createdAt).toLocaleString()}</div>
+                  <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{new Date(n.createdAt).toLocaleString()}</div>
                 </div>
-                <button onClick={() => deleteNote(n._id)} className="text-red-400 hover:text-red-600 shrink-0"><Trash2 size={12} /></button>
+                <button onClick={() => deleteNote(n._id)} className="text-slate-300 hover:text-red-500 shrink-0"><Trash2 size={13} /></button>
               </div>
             ))}
           </div>
           <div className="flex gap-2 mt-2">
-            <input className={inputCls} value={noteText} onChange={e => setNoteText(e.target.value)} placeholder="Add a note..." onKeyDown={e => e.key === 'Enter' && addNote()} />
-            <button onClick={addNote} className="text-sm px-3 py-1.5 rounded-lg border bg-white dark:bg-[#161616] hover:bg-slate-100 dark:bg-[#0f0f0f] shrink-0">Add</button>
+            <Input value={noteText} onChange={e => setNoteText(e.target.value)} placeholder="Add a note…" onKeyDown={e => e.key === 'Enter' && addNote()} />
+            <Button variant="secondary" size="sm" onClick={addNote}>Add</Button>
           </div>
-        </div>
+        </Field>
       </div>
     </div>
   );
@@ -176,17 +122,13 @@ export default function Applications() {
   const [loading, setLoading] = useState(true);
 
   const load = () => api.get('/applications').then(res => { setApps(res.data); setLoading(false); });
-
   useEffect(() => { load(); }, []);
 
   const updateStatus = async (id, status) => {
     setApps(apps.map(a => a._id === id ? { ...a, status } : a));
     await api.patch(`/applications/${id}`, { status });
   };
-
-  const onAppChange = (updated) => {
-    setApps(prev => prev.map(a => a._id === updated._id ? { ...a, ...updated } : a));
-  };
+  const onAppChange = (updated) => setApps(prev => prev.map(a => a._id === updated._id ? { ...a, ...updated } : a));
 
   const allTags = useMemo(() => {
     const set = new Set();
@@ -199,132 +141,121 @@ export default function Applications() {
     if (tagFilter && !(a.tags || []).includes(tagFilter)) return false;
     if (search) {
       const q = search.toLowerCase();
-      const haystack = `${a.company} ${a.role} ${a.location || ''} ${a.source || ''} ${(a.tags || []).join(' ')}`.toLowerCase();
-      if (!haystack.includes(q)) return false;
+      const hay = `${a.company} ${a.role} ${a.location || ''} ${a.source || ''} ${(a.tags || []).join(' ')}`.toLowerCase();
+      if (!hay.includes(q)) return false;
     }
     return true;
   });
 
-  if (loading) return <div className="text-slate-500 dark:text-slate-400">Loading...</div>;
+  const pill = (active) =>
+    `px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${
+      active ? 'bg-accent text-white' : 'bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:border-accent/40'
+    }`;
+
+  if (loading) return <Loading label="Loading applications…" />;
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Applications</h1>
+    <div>
+      <PageHeader title="Applications" subtitle={`${apps.length} tracked`}>
+        <Link to="/resume-builder/apply"><Button variant="primary">New application</Button></Link>
+      </PageHeader>
 
-      <input
-        className={inputCls}
-        placeholder="Search by company, role, location, source, or tag..."
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-      />
+      <div className="relative mb-4">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <Input className="pl-9" placeholder="Search company, role, location, source, or tag…" value={search} onChange={e => setSearch(e.target.value)} />
+      </div>
 
-      <div className="flex flex-wrap gap-2">
-        <button onClick={() => setFilter('all')} className={`px-3 py-1 rounded-full text-xs font-medium ${filter === 'all' ? 'bg-accent text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}`}>All ({apps.length})</button>
+      <div className="flex flex-wrap gap-2 mb-3">
+        <button onClick={() => setFilter('all')} className={pill(filter === 'all')}>All · {apps.length}</button>
         {STATUSES.map(s => (
-          <button key={s} onClick={() => setFilter(s)} className={`px-3 py-1 rounded-full text-xs font-medium ${filter === s ? 'bg-accent text-white' : STATUS_COLORS[s]}`}>
-            {s} ({apps.filter(a => a.status === s).length})
-          </button>
+          <button key={s} onClick={() => setFilter(s)} className={pill(filter === s)}>{s} · {apps.filter(a => a.status === s).length}</button>
         ))}
       </div>
 
       {allTags.length > 0 && (
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs text-slate-400 dark:text-slate-500">Tags:</span>
-          <button onClick={() => setTagFilter(null)} className={`px-2 py-0.5 rounded-full text-xs font-medium ${!tagFilter ? 'bg-accent text-white' : 'bg-slate-100 dark:bg-[#0f0f0f] text-slate-600 dark:text-slate-400'}`}>All</button>
+        <div className="flex flex-wrap gap-2 items-center mb-5">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Tags</span>
+          <button onClick={() => setTagFilter(null)} className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${!tagFilter ? 'bg-accent text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400'}`}>All</button>
           {allTags.map(t => (
-            <button key={t} onClick={() => setTagFilter(t)} className={`px-2 py-0.5 rounded-full text-xs font-medium ${tagFilter === t ? 'bg-accent text-white' : 'bg-slate-100 dark:bg-[#0f0f0f] text-slate-600 dark:text-slate-400'}`}>{t}</button>
+            <button key={t} onClick={() => setTagFilter(t)} className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${tagFilter === t ? 'bg-accent text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400'}`}>{t}</button>
           ))}
         </div>
       )}
 
       {filtered.length === 0 ? (
-        <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-8 text-center text-slate-400 dark:text-slate-500">No applications found.</div>
+        <EmptyState icon={Inbox} title="No applications found" hint="Adjust your filters, or add a new application." />
       ) : (
-        <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-[#0f0f0f]/40">
-              <tr className="text-left text-slate-500 dark:text-slate-400">
-                <th className="py-2 px-3"></th>
-                <th className="px-3">Company</th>
-                <th className="px-3">Role</th>
-                <th className="px-3">Source</th>
-                <th className="px-3">ATS</th>
-                <th className="px-3">Tags</th>
-                <th className="px-3">Follow-up</th>
-                <th className="px-3">Email</th>
-                <th className="px-3">Status</th>
-                <th className="px-3">Files</th>
-                <th className="px-3">Applied</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(app => (
-                <Fragment key={app._id}>
-                  <tr className={`border-t dark:border-white/10 ${isFollowUpDue(app) ? 'bg-amber-50 dark:bg-amber-950/30' : ''}`}>
-                    <td className="px-3">
-                      <button onClick={() => setExpanded(expanded === app._id ? null : app._id)} className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:text-slate-300">
-                        {expanded === app._id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                      </button>
-                    </td>
-                    <td className="py-2 px-3 font-medium">
-                      <span className="flex items-center gap-1.5">
-                        {app.company}
-                        {app.link && (
-                          <a href={app.link} target="_blank" rel="noreferrer" className="text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"><ExternalLink size={13} /></a>
-                        )}
-                      </span>
-                    </td>
-                    <td className="px-3">{app.role}</td>
-                    <td className="px-3 text-slate-500 dark:text-slate-400 text-xs">{app.source || '—'}</td>
-                    <td className="px-3">{app.atsScore?.before}% → {app.atsScore?.after}%</td>
-                    <td className="px-3">
-                      <div className="flex flex-wrap gap-1">
-                        {(app.tags || []).map(t => <span key={t} className="text-[10px] bg-slate-100 dark:bg-[#0f0f0f] text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded-full">{t}</span>)}
-                      </div>
-                    </td>
-                    <td className="px-3">
-                      {app.followUpDate ? (
-                        <span className={`text-xs ${isFollowUpDue(app) ? 'text-amber-700 dark:text-amber-400 font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>
-                          {new Date(app.followUpDate).toLocaleDateString()}{app.followUpDone ? ' ✓' : ''}
-                        </span>
-                      ) : <span className="text-slate-300 text-xs">—</span>}
-                    </td>
-                    <td className="px-3">
-                      {app.emailSent ? (
-                        <span className="text-green-600 text-xs">Sent</span>
-                      ) : app.recruiterEmail ? (
-                        <Link to={`/resume-builder/email/${app._id}`} className="text-slate-900 dark:text-slate-100 text-xs hover:underline">Send</Link>
-                      ) : (
-                        <span className="text-slate-300 text-xs">—</span>
-                      )}
-                    </td>
-                    <td className="px-3">
-                      <select value={app.status} onChange={e => updateStatus(app._id, e.target.value)}
-                        className={`text-xs font-medium rounded-full px-2 py-1 border-0 ${STATUS_COLORS[app.status]}`}>
-                        {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                    </td>
-                    <td className="px-3">
-                      <div className="flex gap-2">
-                        {app.generatedFiles?.pdf && <a href={app.generatedFiles.pdf} target="_blank" rel="noreferrer" className="text-slate-900 dark:text-slate-100 hover:underline text-xs">PDF</a>}
-                        {app.generatedFiles?.docx && <a href={app.generatedFiles.docx} target="_blank" rel="noreferrer" className="text-slate-900 dark:text-slate-100 hover:underline text-xs">DOCX</a>}
-                        {app.generatedFiles?.coverLetter && <a href={app.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="text-slate-900 dark:text-slate-100 hover:underline text-xs">CL</a>}
-                      </div>
-                    </td>
-                    <td className="px-3 text-slate-500 dark:text-slate-400 text-xs">{new Date(app.appliedAt).toLocaleDateString()}</td>
-                  </tr>
-                  {expanded === app._id && (
-                    <tr>
-                      <td colSpan={11} className="p-0">
-                        <DetailsPanel app={app} onChange={onAppChange} />
+        <Card padding="p-0" className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-white/10">
+                  <th className="py-3 px-3 w-8"></th>
+                  <th className="px-3 font-semibold">Company</th>
+                  <th className="px-3 font-semibold">Role</th>
+                  <th className="px-3 font-semibold">Source</th>
+                  <th className="px-3 font-semibold">ATS</th>
+                  <th className="px-3 font-semibold">Follow-up</th>
+                  <th className="px-3 font-semibold">Email</th>
+                  <th className="px-3 font-semibold">Status</th>
+                  <th className="px-3 font-semibold">Files</th>
+                  <th className="px-3 font-semibold whitespace-nowrap">Applied</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(app => (
+                  <Fragment key={app._id}>
+                    <tr className={`border-b border-slate-100 dark:border-white/5 ${isFollowUpDue(app) ? 'bg-amber-50 dark:bg-amber-950/20' : ''}`}>
+                      <td className="px-3">
+                        <button onClick={() => setExpanded(expanded === app._id ? null : app._id)} className="text-slate-400 hover:text-accent">
+                          {expanded === app._id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                        </button>
                       </td>
+                      <td className="py-3 px-3 font-medium text-slate-800 dark:text-slate-100">
+                        <span className="flex items-center gap-1.5">
+                          {app.company}
+                          {app.link && <a href={app.link} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-accent"><ExternalLink size={13} /></a>}
+                        </span>
+                      </td>
+                      <td className="px-3 text-slate-600 dark:text-slate-300">{app.role}</td>
+                      <td className="px-3 text-slate-400 dark:text-slate-500 text-xs">{app.source || '—'}</td>
+                      <td className="px-3 tabular-nums text-slate-500 dark:text-slate-400 whitespace-nowrap">{app.atsScore?.before}% → {app.atsScore?.after}%</td>
+                      <td className="px-3">
+                        {app.followUpDate
+                          ? <span className={`text-xs whitespace-nowrap ${isFollowUpDue(app) ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>{new Date(app.followUpDate).toLocaleDateString()}{app.followUpDone ? ' ✓' : ''}</span>
+                          : <span className="text-slate-300 dark:text-slate-600 text-xs">—</span>}
+                      </td>
+                      <td className="px-3">
+                        {app.emailSent
+                          ? <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Sent</span>
+                          : app.recruiterEmail
+                            ? <Link to={`/resume-builder/email/${app._id}`} className="text-accent text-xs font-medium hover:underline">Send</Link>
+                            : <span className="text-slate-300 dark:text-slate-600 text-xs">—</span>}
+                      </td>
+                      <td className="px-3">
+                        <select value={app.status} onChange={e => updateStatus(app._id, e.target.value)}
+                          className="text-xs font-medium rounded-lg px-2 py-1 capitalize bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-accent/30">
+                          {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </td>
+                      <td className="px-3">
+                        <div className="flex gap-2">
+                          {app.generatedFiles?.pdf && <a href={app.generatedFiles.pdf} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">PDF</a>}
+                          {app.generatedFiles?.docx && <a href={app.generatedFiles.docx} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">DOCX</a>}
+                          {app.generatedFiles?.coverLetter && <a href={app.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">CL</a>}
+                        </div>
+                      </td>
+                      <td className="px-3 text-slate-400 dark:text-slate-500 text-xs whitespace-nowrap">{new Date(app.appliedAt).toLocaleDateString()}</td>
                     </tr>
-                  )}
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    {expanded === app._id && (
+                      <tr><td colSpan={10} className="p-0"><DetailsPanel app={app} onChange={onAppChange} /></td></tr>
+                    )}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       )}
     </div>
   );

@@ -1,42 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
-import { Plus, Trash2, Save, Download, Eye } from 'lucide-react';
-
-const inputCls = 'w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400';
-const labelCls = 'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1';
-
-function Field({ label, ...props }) {
-  return (
-    <div>
-      <label className={labelCls}>{label}</label>
-      <input className={inputCls} {...props} />
-    </div>
-  );
-}
-
-function TextAreaField({ label, ...props }) {
-  return (
-    <div>
-      <label className={labelCls}>{label}</label>
-      <textarea className={inputCls} rows={3} {...props} />
-    </div>
-  );
-}
+import { Plus, Trash2, Save, Download, Eye, ArrowLeft } from 'lucide-react';
+import { Card, Button, Field, Input, Select, Textarea, inputCls, labelCls, Loading } from '../components/ui';
 
 function Section({ title, children, onAdd, addLabel }) {
   return (
-    <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 space-y-3">
+    <Card className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="font-semibold">{title}</h2>
-        {onAdd && (
-          <button onClick={onAdd} className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg border hover:bg-slate-50 dark:hover:bg-accent/90">
-            <Plus size={14} /> {addLabel || 'Add'}
-          </button>
-        )}
+        <h2 className="font-semibold text-slate-900 dark:text-white">{title}</h2>
+        {onAdd && <Button variant="secondary" size="sm" icon={Plus} onClick={onAdd}>{addLabel || 'Add'}</Button>}
       </div>
       {children}
-    </div>
+    </Card>
   );
 }
 
@@ -44,17 +20,16 @@ function BulletsEditor({ bullets, onChange }) {
   const update = (i, val) => onChange(bullets.map((b, idx) => idx === i ? val : b));
   const add = () => onChange([...bullets, '']);
   const remove = (i) => onChange(bullets.filter((_, idx) => idx !== i));
-
   return (
-    <div className="space-y-1 mt-2">
+    <div className="space-y-1.5 mt-1">
       <label className={labelCls}>Bullets</label>
       {bullets.map((b, i) => (
         <div key={i} className="flex gap-2">
-          <input className={inputCls} value={b} onChange={e => update(i, e.target.value)} />
-          <button onClick={() => remove(i)} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+          <Input value={b} onChange={e => update(i, e.target.value)} />
+          <button onClick={() => remove(i)} className="text-slate-300 hover:text-red-500 shrink-0"><Trash2 size={15} /></button>
         </div>
       ))}
-      <button onClick={add} className="text-xs text-slate-900 dark:text-slate-100 hover:underline">+ Add bullet</button>
+      <button onClick={add} className="text-xs font-medium text-accent hover:underline">+ Add bullet</button>
     </div>
   );
 }
@@ -74,10 +49,7 @@ export default function ResumeEditor() {
         setResume(res.data);
       } else {
         const list = (await api.get('/resumes')).data;
-        if (list.length === 0) {
-          navigate('/resume-builder/variants');
-          return;
-        }
+        if (list.length === 0) { navigate('/resume-builder/variants'); return; }
         const target = list.find(r => r.isDefault) || list[0];
         navigate(`/resume-builder/resumes/${target._id}`, { replace: true });
       }
@@ -85,163 +57,150 @@ export default function ResumeEditor() {
     load();
   }, [id]);
 
-  if (!resume) return <div className="text-slate-500 dark:text-slate-400">Loading...</div>;
+  if (!resume) return <Loading label="Loading résumé…" />;
 
   const set = (key, val) => setResume(r => ({ ...r, [key]: val }));
   const setArr = (key, val) => setResume(r => ({ ...r, [key]: val }));
+  const mapAt = (key, i, patch) => setArr(key, resume[key].map((x, idx) => idx === i ? { ...x, ...patch } : x));
+  const removeAt = (key, i) => setArr(key, resume[key].filter((_, idx) => idx !== i));
 
   const save = async () => {
     setSaving(true);
-    try {
-      const res = await api.put(`/resumes/${resume._id}`, resume);
-      setResume(res.data);
-    } finally {
-      setSaving(false);
-    }
+    try { setResume((await api.put(`/resumes/${resume._id}`, resume)).data); }
+    finally { setSaving(false); }
   };
-
   const render = async () => {
     setRendering(true);
-    try {
-      const res = await api.post(`/resumes/${resume._id}/render`, { template: resume.template });
-      setPreviewFiles(res.data.files);
-    } finally {
-      setRendering(false);
-    }
+    try { setPreviewFiles((await api.post(`/resumes/${resume._id}/render`, { template: resume.template })).data.files); }
+    finally { setRendering(false); }
   };
+
+  const delBtn = (key, i) => (
+    <button onClick={() => removeAt(key, i)} className="text-slate-300 hover:text-red-500 mb-2 shrink-0"><Trash2 size={16} /></button>
+  );
 
   return (
     <div className="space-y-4 pb-10">
-      <div className="flex justify-between items-center sticky top-0 bg-slate-100 dark:bg-[#0f0f0f] py-2 z-10">
+      {/* Sticky action bar */}
+      <div className="flex flex-wrap justify-between items-center gap-3 sticky top-0 -mx-6 px-6 py-3 bg-[#f2efe8]/90 dark:bg-[#0a0a0a]/90 backdrop-blur z-10 border-b border-slate-200 dark:border-white/10">
         <div>
-          <h1 className="text-2xl font-bold">{resume.variantName}</h1>
-          <Link to="/resume-builder/variants" className="text-sm text-slate-900 dark:text-slate-100 hover:underline">← Back to variants</Link>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">{resume.variantName}</h1>
+          <Link to="/resume-builder/variants" className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 hover:text-accent transition-colors">
+            <ArrowLeft size={13} /> Variants
+          </Link>
         </div>
-        <div className="flex gap-2">
-          <select className={inputCls} value={resume.template} onChange={e => set('template', e.target.value)}>
+        <div className="flex items-center gap-2">
+          <Select className="w-auto" value={resume.template} onChange={e => set('template', e.target.value)}>
             <option value="classic">Classic</option>
             <option value="modern">Modern</option>
-          </select>
-          <button onClick={render} disabled={rendering} className="flex items-center gap-2 border px-4 py-2 rounded-lg text-sm hover:bg-slate-50 dark:hover:bg-accent/90 disabled:opacity-50">
-            <Eye size={16} /> {rendering ? 'Rendering...' : 'Preview / Generate'}
-          </button>
-          <button onClick={save} disabled={saving} className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-lg text-sm hover:bg-accent/90 disabled:opacity-50">
-            <Save size={16} /> {saving ? 'Saving...' : 'Save'}
-          </button>
+          </Select>
+          <Button variant="secondary" icon={Eye} loading={rendering} onClick={render}>{rendering ? 'Rendering…' : 'Preview'}</Button>
+          <Button variant="primary" icon={Save} loading={saving} onClick={save}>{saving ? 'Saving…' : 'Save'}</Button>
         </div>
       </div>
 
       {previewFiles && (
-        <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 flex items-center gap-4">
-          <span className="text-sm font-medium">Generated:</span>
-          <a href={previewFiles.html} target="_blank" rel="noreferrer" className="text-sm text-slate-900 dark:text-slate-100 hover:underline flex items-center gap-1"><Eye size={14} /> View HTML</a>
-          <a href={previewFiles.pdf} target="_blank" rel="noreferrer" className="text-sm text-slate-900 dark:text-slate-100 hover:underline flex items-center gap-1"><Download size={14} /> Download PDF</a>
-          <a href={previewFiles.docx} target="_blank" rel="noreferrer" className="text-sm text-slate-900 dark:text-slate-100 hover:underline flex items-center gap-1"><Download size={14} /> Download DOCX</a>
-        </div>
+        <Card padding="p-4" className="flex flex-wrap items-center gap-4">
+          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Generated:</span>
+          <a href={previewFiles.html} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"><Eye size={14} /> HTML</a>
+          <a href={previewFiles.pdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"><Download size={14} /> PDF</a>
+          {previewFiles.docx && <a href={previewFiles.docx} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"><Download size={14} /> DOCX</a>}
+        </Card>
       )}
 
-      {/* Variant settings */}
       <Section title="Variant">
-        <Field label="Variant Name" value={resume.variantName} onChange={e => set('variantName', e.target.value)} />
+        <Field label="Variant name"><Input value={resume.variantName} onChange={e => set('variantName', e.target.value)} /></Field>
       </Section>
 
-      {/* Personal Info */}
-      <Section title="Personal Info">
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Full Name" value={resume.name} onChange={e => set('name', e.target.value)} />
-          <Field label="Headline" value={resume.headline} onChange={e => set('headline', e.target.value)} />
-          <Field label="Email" value={resume.email} onChange={e => set('email', e.target.value)} />
-          <Field label="Phone" value={resume.phone} onChange={e => set('phone', e.target.value)} />
-          <Field label="Location" value={resume.location} onChange={e => set('location', e.target.value)} />
-          <Field label="LinkedIn" value={resume.linkedin} onChange={e => set('linkedin', e.target.value)} />
+      <Section title="Personal info">
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="Full name"><Input value={resume.name} onChange={e => set('name', e.target.value)} /></Field>
+          <Field label="Headline"><Input value={resume.headline} onChange={e => set('headline', e.target.value)} /></Field>
+          <Field label="Email"><Input value={resume.email} onChange={e => set('email', e.target.value)} /></Field>
+          <Field label="Phone"><Input value={resume.phone} onChange={e => set('phone', e.target.value)} /></Field>
+          <Field label="Location"><Input value={resume.location} onChange={e => set('location', e.target.value)} /></Field>
+          <Field label="LinkedIn"><Input value={resume.linkedin} onChange={e => set('linkedin', e.target.value)} /></Field>
         </div>
-        <TextAreaField label="Professional Summary" value={resume.summary} onChange={e => set('summary', e.target.value)} />
+        <Field label="Professional summary"><Textarea rows={3} value={resume.summary} onChange={e => set('summary', e.target.value)} /></Field>
       </Section>
 
-      {/* Skills */}
-      <Section title="Skills" addLabel="Add Skill Group" onAdd={() => setArr('skills', [...resume.skills, { label: '', value: '' }])}>
+      <Section title="Skills" addLabel="Add group" onAdd={() => setArr('skills', [...resume.skills, { label: '', value: '' }])}>
         {resume.skills.map((s, i) => (
           <div key={i} className="grid grid-cols-[1fr_2fr_auto] gap-2 items-end">
-            <Field label="Category" value={s.label} onChange={e => setArr('skills', resume.skills.map((x, idx) => idx === i ? { ...x, label: e.target.value } : x))} />
-            <Field label="Skills (comma separated)" value={s.value} onChange={e => setArr('skills', resume.skills.map((x, idx) => idx === i ? { ...x, value: e.target.value } : x))} />
-            <button onClick={() => setArr('skills', resume.skills.filter((_, idx) => idx !== i))} className="text-red-400 hover:text-red-600 mb-1.5"><Trash2 size={16} /></button>
+            <Field label="Category"><Input value={s.label} onChange={e => mapAt('skills', i, { label: e.target.value })} /></Field>
+            <Field label="Skills (comma separated)"><Input value={s.value} onChange={e => mapAt('skills', i, { value: e.target.value })} /></Field>
+            {delBtn('skills', i)}
           </div>
         ))}
       </Section>
 
-      {/* Experience */}
-      <Section title="Experience" addLabel="Add Job" onAdd={() => setArr('experience', [...resume.experience, { role: '', company: '', location: '', duration: '', bullets: [] }])}>
+      <Section title="Experience" addLabel="Add job" onAdd={() => setArr('experience', [...resume.experience, { role: '', company: '', location: '', duration: '', bullets: [] }])}>
         {resume.experience.map((exp, i) => (
-          <div key={i} className="border border-slate-200 dark:border-white/10 rounded-lg p-3 space-y-2">
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Role" value={exp.role} onChange={e => setArr('experience', resume.experience.map((x, idx) => idx === i ? { ...x, role: e.target.value } : x))} />
-              <Field label="Company" value={exp.company} onChange={e => setArr('experience', resume.experience.map((x, idx) => idx === i ? { ...x, company: e.target.value } : x))} />
-              <Field label="Location" value={exp.location} onChange={e => setArr('experience', resume.experience.map((x, idx) => idx === i ? { ...x, location: e.target.value } : x))} />
-              <Field label="Duration" value={exp.duration} onChange={e => setArr('experience', resume.experience.map((x, idx) => idx === i ? { ...x, duration: e.target.value } : x))} />
+          <div key={i} className="border border-slate-200 dark:border-white/10 rounded-xl p-4 space-y-3">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Role"><Input value={exp.role} onChange={e => mapAt('experience', i, { role: e.target.value })} /></Field>
+              <Field label="Company"><Input value={exp.company} onChange={e => mapAt('experience', i, { company: e.target.value })} /></Field>
+              <Field label="Location"><Input value={exp.location} onChange={e => mapAt('experience', i, { location: e.target.value })} /></Field>
+              <Field label="Duration"><Input value={exp.duration} onChange={e => mapAt('experience', i, { duration: e.target.value })} /></Field>
             </div>
-            <BulletsEditor bullets={exp.bullets} onChange={(bullets) => setArr('experience', resume.experience.map((x, idx) => idx === i ? { ...x, bullets } : x))} />
-            <button onClick={() => setArr('experience', resume.experience.filter((_, idx) => idx !== i))} className="text-xs text-red-500 hover:underline">Remove this job</button>
+            <BulletsEditor bullets={exp.bullets} onChange={(bullets) => mapAt('experience', i, { bullets })} />
+            <button onClick={() => removeAt('experience', i)} className="text-xs font-medium text-red-500 hover:underline">Remove this job</button>
           </div>
         ))}
       </Section>
 
-      {/* Projects */}
-      <Section title="Projects" addLabel="Add Project" onAdd={() => setArr('projects', [...resume.projects, { name: '', tech: '', bullets: [] }])}>
+      <Section title="Projects" addLabel="Add project" onAdd={() => setArr('projects', [...resume.projects, { name: '', tech: '', bullets: [] }])}>
         {resume.projects.map((p, i) => (
-          <div key={i} className="border border-slate-200 dark:border-white/10 rounded-lg p-3 space-y-2">
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Project Name" value={p.name} onChange={e => setArr('projects', resume.projects.map((x, idx) => idx === i ? { ...x, name: e.target.value } : x))} />
-              <Field label="Tech Stack" value={p.tech} onChange={e => setArr('projects', resume.projects.map((x, idx) => idx === i ? { ...x, tech: e.target.value } : x))} />
+          <div key={i} className="border border-slate-200 dark:border-white/10 rounded-xl p-4 space-y-3">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Project name"><Input value={p.name} onChange={e => mapAt('projects', i, { name: e.target.value })} /></Field>
+              <Field label="Tech stack"><Input value={p.tech} onChange={e => mapAt('projects', i, { tech: e.target.value })} /></Field>
             </div>
-            <BulletsEditor bullets={p.bullets} onChange={(bullets) => setArr('projects', resume.projects.map((x, idx) => idx === i ? { ...x, bullets } : x))} />
-            <button onClick={() => setArr('projects', resume.projects.filter((_, idx) => idx !== i))} className="text-xs text-red-500 hover:underline">Remove project</button>
+            <BulletsEditor bullets={p.bullets} onChange={(bullets) => mapAt('projects', i, { bullets })} />
+            <button onClick={() => removeAt('projects', i)} className="text-xs font-medium text-red-500 hover:underline">Remove project</button>
           </div>
         ))}
       </Section>
 
-      {/* Employment Summary */}
-      <Section title="Employment Summary" addLabel="Add Row" onAdd={() => setArr('employment', [...resume.employment, { company: '', role: '', period: '', location: '' }])}>
+      <Section title="Employment summary" addLabel="Add row" onAdd={() => setArr('employment', [...resume.employment, { company: '', role: '', period: '', location: '' }])}>
         {resume.employment.map((e2, i) => (
-          <div key={i} className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] gap-2 items-end">
-            <Field label="Company" value={e2.company} onChange={e => setArr('employment', resume.employment.map((x, idx) => idx === i ? { ...x, company: e.target.value } : x))} />
-            <Field label="Role" value={e2.role} onChange={e => setArr('employment', resume.employment.map((x, idx) => idx === i ? { ...x, role: e.target.value } : x))} />
-            <Field label="Period" value={e2.period} onChange={e => setArr('employment', resume.employment.map((x, idx) => idx === i ? { ...x, period: e.target.value } : x))} />
-            <Field label="Location" value={e2.location} onChange={e => setArr('employment', resume.employment.map((x, idx) => idx === i ? { ...x, location: e.target.value } : x))} />
-            <button onClick={() => setArr('employment', resume.employment.filter((_, idx) => idx !== i))} className="text-red-400 hover:text-red-600 mb-1.5"><Trash2 size={16} /></button>
+          <div key={i} className="grid grid-cols-2 md:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-2 items-end">
+            <Field label="Company"><Input value={e2.company} onChange={e => mapAt('employment', i, { company: e.target.value })} /></Field>
+            <Field label="Role"><Input value={e2.role} onChange={e => mapAt('employment', i, { role: e.target.value })} /></Field>
+            <Field label="Period"><Input value={e2.period} onChange={e => mapAt('employment', i, { period: e.target.value })} /></Field>
+            <Field label="Location"><Input value={e2.location} onChange={e => mapAt('employment', i, { location: e.target.value })} /></Field>
+            {delBtn('employment', i)}
           </div>
         ))}
       </Section>
 
-      {/* Education */}
-      <Section title="Education" addLabel="Add Education" onAdd={() => setArr('education', [...resume.education, { degree: '', institute: '', score: '', year: '' }])}>
+      <Section title="Education" addLabel="Add education" onAdd={() => setArr('education', [...resume.education, { degree: '', institute: '', score: '', year: '' }])}>
         {resume.education.map((ed, i) => (
-          <div key={i} className="grid grid-cols-[2fr_2fr_1fr_1fr_auto] gap-2 items-end">
-            <Field label="Degree" value={ed.degree} onChange={e => setArr('education', resume.education.map((x, idx) => idx === i ? { ...x, degree: e.target.value } : x))} />
-            <Field label="Institute" value={ed.institute} onChange={e => setArr('education', resume.education.map((x, idx) => idx === i ? { ...x, institute: e.target.value } : x))} />
-            <Field label="Score" value={ed.score} onChange={e => setArr('education', resume.education.map((x, idx) => idx === i ? { ...x, score: e.target.value } : x))} />
-            <Field label="Year" value={ed.year} onChange={e => setArr('education', resume.education.map((x, idx) => idx === i ? { ...x, year: e.target.value } : x))} />
-            <button onClick={() => setArr('education', resume.education.filter((_, idx) => idx !== i))} className="text-red-400 hover:text-red-600 mb-1.5"><Trash2 size={16} /></button>
+          <div key={i} className="grid grid-cols-2 md:grid-cols-[2fr_2fr_1fr_1fr_auto] gap-2 items-end">
+            <Field label="Degree"><Input value={ed.degree} onChange={e => mapAt('education', i, { degree: e.target.value })} /></Field>
+            <Field label="Institute"><Input value={ed.institute} onChange={e => mapAt('education', i, { institute: e.target.value })} /></Field>
+            <Field label="Score"><Input value={ed.score} onChange={e => mapAt('education', i, { score: e.target.value })} /></Field>
+            <Field label="Year"><Input value={ed.year} onChange={e => mapAt('education', i, { year: e.target.value })} /></Field>
+            {delBtn('education', i)}
           </div>
         ))}
       </Section>
 
-      {/* Certifications */}
-      <Section title="Certifications" addLabel="Add Certification" onAdd={() => setArr('certifications', [...resume.certifications, { label: '', value: '' }])}>
+      <Section title="Certifications" addLabel="Add certification" onAdd={() => setArr('certifications', [...resume.certifications, { label: '', value: '' }])}>
         {resume.certifications.map((c, i) => (
           <div key={i} className="grid grid-cols-[1fr_2fr_auto] gap-2 items-end">
-            <Field label="Authority" value={c.label} onChange={e => setArr('certifications', resume.certifications.map((x, idx) => idx === i ? { ...x, label: e.target.value } : x))} />
-            <Field label="Certification" value={c.value} onChange={e => setArr('certifications', resume.certifications.map((x, idx) => idx === i ? { ...x, value: e.target.value } : x))} />
-            <button onClick={() => setArr('certifications', resume.certifications.filter((_, idx) => idx !== i))} className="text-red-400 hover:text-red-600 mb-1.5"><Trash2 size={16} /></button>
+            <Field label="Authority"><Input value={c.label} onChange={e => mapAt('certifications', i, { label: e.target.value })} /></Field>
+            <Field label="Certification"><Input value={c.value} onChange={e => mapAt('certifications', i, { value: e.target.value })} /></Field>
+            {delBtn('certifications', i)}
           </div>
         ))}
       </Section>
 
-      {/* Personal */}
-      <Section title="Personal Details">
-        <div className="grid grid-cols-3 gap-3">
-          <Field label="Languages" value={resume.languages} onChange={e => set('languages', e.target.value)} />
-          <Field label="Gender" value={resume.gender} onChange={e => set('gender', e.target.value)} />
-          <Field label="Nationality" value={resume.nationality} onChange={e => set('nationality', e.target.value)} />
+      <Section title="Personal details">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <Field label="Languages"><Input value={resume.languages} onChange={e => set('languages', e.target.value)} /></Field>
+          <Field label="Gender"><Input value={resume.gender} onChange={e => set('gender', e.target.value)} /></Field>
+          <Field label="Nationality"><Input value={resume.nationality} onChange={e => set('nationality', e.target.value)} /></Field>
         </div>
       </Section>
     </div>

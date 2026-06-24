@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
-import { Send, Loader2 } from 'lucide-react';
-
-const inputCls = 'w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400';
-const labelCls = 'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1';
+import { Send, CheckCircle2, ArrowRight } from 'lucide-react';
+import { PageHeader, Card, Button, Field, Input, Textarea, Select, Loading } from '../components/ui';
 
 export default function EmailComposer() {
   const { applicationId } = useParams();
@@ -38,20 +36,14 @@ export default function EmailComposer() {
     api.post('/email/preview', { applicationId, templateId }).then(res => setEmail(res.data));
   }, [templateId, applicationId]);
 
-  if (loading || !app) return <div className="text-slate-500 dark:text-slate-400">Loading...</div>;
-  if (!email) return <div className="text-slate-500 dark:text-slate-400">Loading email preview...</div>;
+  if (loading || !app) return <Loading label="Loading…" />;
+  if (!email) return <Loading label="Loading preview…" />;
 
   const send = async () => {
     setSending(true);
     try {
       const formats = Object.entries(attachFormats).filter(([, v]) => v).map(([k]) => k);
-      await api.post('/email/send', {
-        applicationId,
-        to: email.to,
-        subject: email.subject,
-        bodyText: email.bodyText,
-        attachFormats: formats,
-      });
+      await api.post('/email/send', { applicationId, to: email.to, subject: email.subject, bodyText: email.bodyText, attachFormats: formats });
       setSent(true);
     } catch (err) {
       alert(err.response?.data?.detail || err.response?.data?.error || err.message);
@@ -61,62 +53,43 @@ export default function EmailComposer() {
   };
 
   return (
-    <div className="space-y-4 max-w-2xl">
-      <div>
-        <h1 className="text-2xl font-bold">Compose Email</h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400">{app.role} at {app.company}</p>
-      </div>
+    <div className="max-w-3xl">
+      <PageHeader title="Compose email" subtitle={`${app.role} at ${app.company}`} />
 
       {sent ? (
-        <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 rounded-xl p-4">
-          Email sent to {email.to} successfully.
-          <div className="mt-2"><Link to="/resume-builder/applications" className="text-slate-900 dark:text-slate-100 hover:underline text-sm">Back to applications</Link></div>
-        </div>
+        <Card className="border-emerald-300/70 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20">
+          <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-semibold">
+            <CheckCircle2 size={18} /> Email sent to {email.to}
+          </div>
+          <Link to="/resume-builder/applications" className="inline-flex items-center gap-1 mt-3 text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:gap-2 transition-all">
+            Back to applications <ArrowRight size={14} />
+          </Link>
+        </Card>
       ) : (
-        <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 space-y-3">
-          <div>
-            <label className={labelCls}>Email Template</label>
-            <select className={inputCls} value={templateId} onChange={e => setTemplateId(e.target.value)}>
+        <Card className="space-y-4">
+          <Field label="Email template">
+            <Select value={templateId} onChange={e => setTemplateId(e.target.value)}>
               {templates.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
-            </select>
-          </div>
+            </Select>
+          </Field>
+          <Field label="To"><Input value={email.to} onChange={e => setEmail({ ...email, to: e.target.value })} /></Field>
+          <Field label="Subject"><Input value={email.subject} onChange={e => setEmail({ ...email, subject: e.target.value })} /></Field>
+          <Field label="Body"><Textarea rows={12} value={email.bodyText} onChange={e => setEmail({ ...email, bodyText: e.target.value })} /></Field>
 
-          <div>
-            <label className={labelCls}>To</label>
-            <input className={inputCls} value={email.to} onChange={e => setEmail({ ...email, to: e.target.value })} />
-          </div>
-
-          <div>
-            <label className={labelCls}>Subject</label>
-            <input className={inputCls} value={email.subject} onChange={e => setEmail({ ...email, subject: e.target.value })} />
-          </div>
-
-          <div>
-            <label className={labelCls}>Body</label>
-            <textarea className={inputCls} rows={12} value={email.bodyText} onChange={e => setEmail({ ...email, bodyText: e.target.value })} />
-          </div>
-
-          <div>
-            <label className={labelCls}>Preview</label>
-            <div className="border rounded-lg p-3 bg-slate-50 dark:bg-[#0f0f0f]/40 text-sm whitespace-pre-wrap">{email.bodyText}</div>
-          </div>
-
-          <div>
-            <label className={labelCls}>Attachments</label>
-            <div className="flex gap-4 text-sm">
-              <label className="flex items-center gap-1"><input type="checkbox" checked={attachFormats.pdf} onChange={e => setAttachFormats(a => ({ ...a, pdf: e.target.checked }))} /> Resume (PDF)</label>
-              <label className="flex items-center gap-1"><input type="checkbox" checked={attachFormats.docx} onChange={e => setAttachFormats(a => ({ ...a, docx: e.target.checked }))} /> Resume (DOCX)</label>
+          <Field label="Attachments">
+            <div className="flex flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-300">
+              <label className="flex items-center gap-2"><input type="checkbox" checked={attachFormats.pdf} onChange={e => setAttachFormats(a => ({ ...a, pdf: e.target.checked }))} /> Résumé (PDF)</label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={attachFormats.docx} onChange={e => setAttachFormats(a => ({ ...a, docx: e.target.checked }))} /> Résumé (DOCX)</label>
               {app.generatedFiles?.coverLetter && (
-                <label className="flex items-center gap-1"><input type="checkbox" checked={attachFormats.coverLetter} onChange={e => setAttachFormats(a => ({ ...a, coverLetter: e.target.checked }))} /> Cover Letter (PDF)</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={attachFormats.coverLetter} onChange={e => setAttachFormats(a => ({ ...a, coverLetter: e.target.checked }))} /> Cover letter (PDF)</label>
               )}
             </div>
-          </div>
+          </Field>
 
-          <button onClick={send} disabled={sending || !email.to}
-            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 disabled:opacity-50">
-            {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />} {sending ? 'Sending...' : 'Send Email'}
-          </button>
-        </div>
+          <Button variant="success" icon={Send} loading={sending} disabled={!email.to} onClick={send}>
+            {sending ? 'Sending…' : 'Send email'}
+          </Button>
+        </Card>
       )}
     </div>
   );

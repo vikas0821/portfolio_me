@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { Plus, Star, Trash2, Pencil } from 'lucide-react';
+import { Plus, Star, Trash2, Pencil, Copy, Layers, FileText } from 'lucide-react';
+import { PageHeader, Card, Button, Badge, EmptyState, Loading } from '../components/ui';
 
 const BLANK_RESUME = {
   variantName: 'New Resume',
@@ -17,7 +18,6 @@ export default function ResumeVariants() {
   const navigate = useNavigate();
 
   const load = () => api.get('/resumes').then(res => { setResumes(res.data); setLoading(false); });
-
   useEffect(() => { load(); }, []);
 
   const createNew = async () => {
@@ -38,59 +38,51 @@ export default function ResumeVariants() {
     navigate(`/resume-builder/resumes/${res.data._id}`);
   };
 
-  const setDefault = async (id) => {
-    await api.post(`/resumes/${id}/default`);
-    load();
-  };
-
+  const setDefault = async (id) => { await api.post(`/resumes/${id}/default`); load(); };
   const remove = async (id) => {
     if (!confirm('Delete this resume variant?')) return;
-    await api.delete(`/resumes/${id}`);
-    load();
+    await api.delete(`/resumes/${id}`); load();
   };
 
-  if (loading) return <div className="text-slate-500 dark:text-slate-400">Loading...</div>;
+  if (loading) return <Loading label="Loading resumes…" />;
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Resume Variants</h1>
-        <button onClick={createNew} className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-lg text-sm hover:bg-accent/90">
-          <Plus size={16} /> New Variant
-        </button>
-      </div>
+    <div>
+      <PageHeader title="Resume Variants" subtitle="Tailor different versions of your résumé for different roles.">
+        <Button variant="primary" icon={Plus} onClick={createNew}>New Variant</Button>
+      </PageHeader>
 
       {resumes.length === 0 ? (
-        <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-8 text-center text-slate-400 dark:text-slate-500">
-          No resumes yet. Create your first variant to get started.
-        </div>
+        <EmptyState
+          icon={Layers}
+          title="No résumés yet"
+          hint="Create your first variant to start applying."
+          action={<Button variant="primary" icon={Plus} onClick={createNew}>New Variant</Button>}
+        />
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
           {resumes.map(r => (
-            <div key={r._id} className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 flex flex-col gap-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="font-semibold flex items-center gap-2">
-                    {r.variantName}
-                    {r.isDefault && <Star size={14} className="text-amber-400 fill-amber-400" />}
+            <Card key={r._id} className="flex flex-col group hover:border-accent/40 transition-colors">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
+                  <FileText size={18} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-900 dark:text-white truncate">{r.variantName}</span>
+                    {r.isDefault && <Badge color="amber" className="gap-1"><Star size={11} className="fill-current" /> Default</Badge>}
                   </div>
-                  <div className="text-sm text-slate-500 dark:text-slate-400">{r.name || 'Unnamed'} — {r.headline || 'No headline'}</div>
-                  <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">Template: {r.template}</div>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{r.name || 'Unnamed'} — {r.headline || 'No headline'}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 capitalize">{r.template} template</p>
                 </div>
               </div>
-              <div className="flex gap-2 mt-2">
-                <Link to={`/resume-builder/resumes/${r._id}`} className="flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg border hover:bg-slate-50 dark:hover:bg-accent/90">
-                  <Pencil size={14} /> Edit
-                </Link>
-                <button onClick={() => clone(r._id)} className="text-sm px-3 py-1.5 rounded-lg border hover:bg-slate-50 dark:hover:bg-accent/90">Clone</button>
-                {!r.isDefault && (
-                  <button onClick={() => setDefault(r._id)} className="text-sm px-3 py-1.5 rounded-lg border hover:bg-slate-50 dark:hover:bg-accent/90">Set Default</button>
-                )}
-                <button onClick={() => remove(r._id)} className="flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 ml-auto">
-                  <Trash2 size={14} />
-                </button>
+              <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-white/5">
+                <Button variant="secondary" size="sm" icon={Pencil} onClick={() => navigate(`/resume-builder/resumes/${r._id}`)}>Edit</Button>
+                <Button variant="ghost" size="sm" icon={Copy} onClick={() => clone(r._id)}>Clone</Button>
+                {!r.isDefault && <Button variant="ghost" size="sm" icon={Star} onClick={() => setDefault(r._id)}>Set default</Button>}
+                <Button variant="danger" size="sm" icon={Trash2} className="ml-auto" onClick={() => remove(r._id)} />
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}

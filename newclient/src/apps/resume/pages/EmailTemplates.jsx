@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
-import { Plus, Save, Trash2, Star } from 'lucide-react';
+import { Plus, Save, Trash2, Star, Mail } from 'lucide-react';
 import HtmlBodyEditor from '../components/HtmlBodyEditor';
+import { PageHeader, Card, Button, Field, Input, Badge, Loading, EmptyState } from '../components/ui';
 
-const inputCls = 'w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400';
-const labelCls = 'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1';
-
-const PLACEHOLDERS = ['recruiterName', 'company', 'role', 'location', 'jobRef', 'candidateName', 'candidateHeadline', 'candidateEmail', 'candidatePhone', 'candidateLinkedin', 'topSkills', 'topSkillsList'];
+const PLACEHOLDERS = ['recruiterName', 'company', 'role', 'location', 'jobRef', 'candidateName', 'candidateHeadline', 'candidateEmail', 'candidatePhone', 'candidateLinkedin', 'topSkills'];
 
 export default function EmailTemplates() {
   const [templates, setTemplates] = useState([]);
@@ -16,73 +14,60 @@ export default function EmailTemplates() {
   useEffect(() => { load(); }, []);
 
   const update = (id, key, val) => setTemplates(templates.map(t => t._id === id ? { ...t, [key]: val } : t));
-
-  const save = async (tpl) => {
-    await api.put(`/email/templates/${tpl._id}`, tpl);
-    load();
-  };
-
+  const save = async (tpl) => { await api.put(`/email/templates/${tpl._id}`, tpl); load(); };
   const setDefault = async (tpl) => {
     await Promise.all(templates.filter(t => t.isDefault).map(t => api.put(`/email/templates/${t._id}`, { ...t, isDefault: false })));
     await api.put(`/email/templates/${tpl._id}`, { ...tpl, isDefault: true });
     load();
   };
-
-  const remove = async (id) => {
-    if (!confirm('Delete this template?')) return;
-    await api.delete(`/email/templates/${id}`);
-    load();
-  };
-
+  const remove = async (id) => { if (!confirm('Delete this template?')) return; await api.delete(`/email/templates/${id}`); load(); };
   const create = async () => {
     await api.post('/email/templates', {
       name: 'New Template',
       subject: 'Application for {{role}} at {{company}}',
-      bodyHtml: '<p>Dear {{recruiterName}},</p><p>...</p>',
+      bodyHtml: '<p>Dear {{recruiterName}},</p><p>…</p>',
     });
     load();
   };
 
-  if (loading) return <div className="text-slate-500 dark:text-slate-400">Loading...</div>;
+  if (loading) return <Loading label="Loading templates…" />;
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Email Templates</h1>
-        <button onClick={create} className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-lg text-sm hover:bg-accent/90">
-          <Plus size={16} /> New Template
-        </button>
-      </div>
+    <div>
+      <PageHeader title="Email Templates" subtitle="Reusable, mail-merged messages for recruiters.">
+        <Button variant="primary" icon={Plus} onClick={create}>New Template</Button>
+      </PageHeader>
 
-      <div className="bg-slate-50 dark:bg-[#0f0f0f]/40 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-xs text-slate-700 dark:text-slate-300">
-        Available placeholders: {PLACEHOLDERS.map(p => `{{${p}}}`).join(', ')}
-      </div>
+      <Card padding="p-4" className="mb-5 bg-slate-50 dark:bg-[#0f0f0f]">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-2">Available placeholders</p>
+        <div className="flex flex-wrap gap-1.5">
+          {PLACEHOLDERS.map(p => <code key={p} className="text-xs px-2 py-0.5 rounded-md bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-accent">{`{{${p}}}`}</code>)}
+        </div>
+      </Card>
 
-      <div className="space-y-4">
-        {templates.map(tpl => (
-          <div key={tpl._id} className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 space-y-3">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2 flex-1">
-                <input className={inputCls + ' font-semibold'} value={tpl.name} onChange={e => update(tpl._id, 'name', e.target.value)} />
-                {tpl.isDefault && <Star size={16} className="text-amber-400 fill-amber-400 shrink-0" />}
+      {templates.length === 0 ? (
+        <EmptyState icon={Mail} title="No templates yet" hint="Create one to speed up recruiter outreach." action={<Button variant="primary" icon={Plus} onClick={create}>New Template</Button>} />
+      ) : (
+        <div className="space-y-4">
+          {templates.map(tpl => (
+            <Card key={tpl._id} className="space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+                  <Input className="font-semibold" value={tpl.name} onChange={e => update(tpl._id, 'name', e.target.value)} />
+                  {tpl.isDefault && <Badge color="amber" className="gap-1 shrink-0"><Star size={11} className="fill-current" /> Default</Badge>}
+                </div>
+                <div className="flex items-center gap-2">
+                  {!tpl.isDefault && <Button variant="ghost" size="sm" icon={Star} onClick={() => setDefault(tpl)}>Set default</Button>}
+                  <Button variant="primary" size="sm" icon={Save} onClick={() => save(tpl)}>Save</Button>
+                  <Button variant="danger" size="sm" icon={Trash2} onClick={() => remove(tpl._id)} />
+                </div>
               </div>
-              <div className="flex gap-2 ml-3">
-                {!tpl.isDefault && <button onClick={() => setDefault(tpl)} className="text-xs px-3 py-1.5 rounded-lg border hover:bg-slate-50 dark:hover:bg-accent/90">Set Default</button>}
-                <button onClick={() => save(tpl)} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-accent text-white hover:bg-accent/90"><Save size={14} /> Save</button>
-                <button onClick={() => remove(tpl._id)} className="text-red-400 hover:text-red-600 px-2"><Trash2 size={16} /></button>
-              </div>
-            </div>
-            <div>
-              <label className={labelCls}>Subject</label>
-              <input className={inputCls} value={tpl.subject} onChange={e => update(tpl._id, 'subject', e.target.value)} />
-            </div>
-            <div>
-              <label className={labelCls}>Body (HTML)</label>
-              <HtmlBodyEditor value={tpl.bodyHtml} onChange={val => update(tpl._id, 'bodyHtml', val)} rows={8} />
-            </div>
-          </div>
-        ))}
-      </div>
+              <Field label="Subject"><Input value={tpl.subject} onChange={e => update(tpl._id, 'subject', e.target.value)} /></Field>
+              <Field label="Body (HTML)"><HtmlBodyEditor value={tpl.bodyHtml} onChange={val => update(tpl._id, 'bodyHtml', val)} rows={8} /></Field>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,22 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import { Send, FileSearch, Download, Mail, ListPlus } from 'lucide-react';
+import { Send, FileSearch, Download, Mail, ListPlus, ArrowRight } from 'lucide-react';
+import { PageHeader, Card, Button, Field, Input, Select, Textarea, Segmented, Badge } from '../components/ui';
 
-const inputCls = 'w-full border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400';
-const labelCls = 'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1';
 const STATUSES = ['applied', 'replied', 'interview', 'offer', 'rejected', 'ghosted'];
 const SOURCES = ['LinkedIn', 'Naukri', 'Indeed', 'Company Website', 'Referral', 'AngelList/Wellfound', 'Other'];
-
-function Field({ label, ...props }) {
-  return (
-    <div>
-      <label className={labelCls}>{label}</label>
-      <input className={inputCls} {...props} />
-    </div>
-  );
-}
-
 const today = () => new Date().toISOString().slice(0, 10);
 
 export default function Apply() {
@@ -67,160 +56,155 @@ export default function Apply() {
       const res = await api.post('/applications', payload);
       setResult(res.data);
     } catch (err) {
-      alert(err.response?.data?.error || err.message);
+      alert(err.response?.data?.detail || err.response?.data?.error || err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">New Application</h1>
+    <div>
+      <PageHeader title="New Application" subtitle="Generate a tailored résumé, or log one you applied to elsewhere." />
 
-      <div className="flex gap-2">
-        <button type="button" onClick={() => setMode('generate')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${mode === 'generate' ? 'bg-accent text-white' : 'border text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-accent/90'}`}>
-          <FileSearch size={16} /> Generate Resume & Apply
-        </button>
-        <button type="button" onClick={() => setMode('external')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${mode === 'external' ? 'bg-accent text-white' : 'border text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-accent/90'}`}>
-          <ListPlus size={16} /> Track External Application
-        </button>
-      </div>
+      <Segmented
+        value={mode}
+        onChange={setMode}
+        options={[
+          { value: 'generate', label: 'Generate & Apply', icon: FileSearch },
+          { value: 'external', label: 'Track External', icon: ListPlus },
+        ]}
+      />
       {mode === 'external' && (
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          For jobs you already applied to elsewhere (LinkedIn, Naukri, a company site, etc.). This just logs it for tracking — no resume file is generated.
+        <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+          For jobs you already applied to elsewhere (LinkedIn, Naukri, a company site…). This just logs it — no résumé file is generated.
         </p>
       )}
 
-      <form onSubmit={submit} className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 space-y-3">
-          <h2 className="font-semibold">Job Details</h2>
+      <form onSubmit={submit} className="grid lg:grid-cols-[1.5fr_1fr] gap-6 mt-5">
+        <Card>
+          <h2 className="font-semibold text-slate-900 dark:text-white mb-4">Job details</h2>
 
           {mode === 'external' ? (
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Company *" required value={form.company} onChange={e => update('company', e.target.value)} />
-              <Field label="Role *" required value={form.role} onChange={e => update('role', e.target.value)} />
-              <div>
-                <label className={labelCls}>Source / Portal</label>
-                <input className={inputCls} list="sources" value={form.source} onChange={e => update('source', e.target.value)} placeholder="LinkedIn, Naukri..." />
-                <datalist id="sources">
-                  {SOURCES.map(s => <option key={s} value={s} />)}
-                </datalist>
-              </div>
-              <Field label="Link" type="url" placeholder="https://..." value={form.link} onChange={e => update('link', e.target.value)} />
-              <div>
-                <label className={labelCls}>Status</label>
-                <select className={inputCls} value={form.status} onChange={e => update('status', e.target.value)}>
-                  {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <Field label="Applied Date" type="date" value={form.appliedAt} onChange={e => update('appliedAt', e.target.value)} />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Company *"><Input required value={form.company} onChange={e => update('company', e.target.value)} /></Field>
+              <Field label="Role *"><Input required value={form.role} onChange={e => update('role', e.target.value)} /></Field>
+              <Field label="Source / Portal">
+                <Input list="sources" value={form.source} onChange={e => update('source', e.target.value)} placeholder="LinkedIn, Naukri…" />
+                <datalist id="sources">{SOURCES.map(s => <option key={s} value={s} />)}</datalist>
+              </Field>
+              <Field label="Link"><Input type="url" placeholder="https://…" value={form.link} onChange={e => update('link', e.target.value)} /></Field>
+              <Field label="Status"><Select value={form.status} onChange={e => update('status', e.target.value)}>{STATUSES.map(s => <option key={s} value={s}>{s}</option>)}</Select></Field>
+              <Field label="Applied date"><Input type="date" value={form.appliedAt} onChange={e => update('appliedAt', e.target.value)} /></Field>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Company *" required value={form.company} onChange={e => update('company', e.target.value)} />
-              <Field label="Role *" required value={form.role} onChange={e => update('role', e.target.value)} />
-              <Field label="Location" value={form.location} onChange={e => update('location', e.target.value)} />
-              <Field label="Job Ref" value={form.jobRef} onChange={e => update('jobRef', e.target.value)} />
-              <Field label="Recruiter Name" value={form.recruiterName} onChange={e => update('recruiterName', e.target.value)} />
-              <Field label="Recruiter Email" type="email" value={form.recruiterEmail} onChange={e => update('recruiterEmail', e.target.value)} />
-              <Field label="Tags (comma separated)" placeholder="referral, linkedin" value={form.tags} onChange={e => update('tags', e.target.value)} />
-              <Field label="Follow-up Date" type="date" value={form.followUpDate} onChange={e => update('followUpDate', e.target.value)} />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Company *"><Input required value={form.company} onChange={e => update('company', e.target.value)} /></Field>
+              <Field label="Role *"><Input required value={form.role} onChange={e => update('role', e.target.value)} /></Field>
+              <Field label="Location"><Input value={form.location} onChange={e => update('location', e.target.value)} /></Field>
+              <Field label="Job ref"><Input value={form.jobRef} onChange={e => update('jobRef', e.target.value)} /></Field>
+              <Field label="Recruiter name"><Input value={form.recruiterName} onChange={e => update('recruiterName', e.target.value)} /></Field>
+              <Field label="Recruiter email"><Input type="email" value={form.recruiterEmail} onChange={e => update('recruiterEmail', e.target.value)} /></Field>
+              <Field label="Tags"><Input placeholder="referral, linkedin" value={form.tags} onChange={e => update('tags', e.target.value)} /></Field>
+              <Field label="Follow-up date"><Input type="date" value={form.followUpDate} onChange={e => update('followUpDate', e.target.value)} /></Field>
             </div>
           )}
 
           {mode === 'generate' && (
-            <>
-              <div>
-                <label className={labelCls}>Resume Variant</label>
-                <select className={inputCls} value={form.resumeVariantId} onChange={e => update('resumeVariantId', e.target.value)}>
+            <div className="grid sm:grid-cols-2 gap-4 mt-4">
+              <Field label="Résumé variant">
+                <Select value={form.resumeVariantId} onChange={e => update('resumeVariantId', e.target.value)}>
                   {resumes.map(r => <option key={r._id} value={r._id}>{r.variantName}{r.isDefault ? ' (default)' : ''}</option>)}
-                </select>
-              </div>
-
-              <div>
-                <label className={labelCls}>Template</label>
-                <select className={inputCls} value={form.template} onChange={e => update('template', e.target.value)}>
+                </Select>
+              </Field>
+              <Field label="Template">
+                <Select value={form.template} onChange={e => update('template', e.target.value)}>
                   <option value="classic">Classic</option>
                   <option value="modern">Modern</option>
-                </select>
-              </div>
-            </>
-          )}
-
-          <div>
-            <label className={labelCls}>Job Description {mode === 'external' && '(optional)'}</label>
-            <textarea className={inputCls} rows={10} value={form.jdText} onChange={e => update('jdText', e.target.value)} placeholder="Paste the job description here..." />
-          </div>
-
-          {mode === 'generate' && (
-            <div>
-              <label className={labelCls}>Cover Letter (optional)</label>
-              <textarea className={inputCls} rows={6} value={form.coverLetter} onChange={e => update('coverLetter', e.target.value)} placeholder="Write or paste a cover letter to attach as a PDF..." />
+                </Select>
+              </Field>
             </div>
           )}
 
-          <div className="flex gap-2">
+          <Field label={`Job description${mode === 'external' ? ' (optional)' : ''}`} className="mt-4">
+            <Textarea rows={9} value={form.jdText} onChange={e => update('jdText', e.target.value)} placeholder="Paste the job description here…" />
+          </Field>
+
+          {mode === 'generate' && (
+            <Field label="Cover letter (optional)" className="mt-4">
+              <Textarea rows={5} value={form.coverLetter} onChange={e => update('coverLetter', e.target.value)} placeholder="Write or paste a cover letter to attach as a PDF…" />
+            </Field>
+          )}
+
+          <div className="flex flex-wrap gap-2 mt-5">
             {mode === 'generate' && (
-              <button type="button" onClick={analyze} disabled={analyzing || !form.jdText || !form.resumeVariantId}
-                className="flex items-center gap-2 border px-4 py-2 rounded-lg text-sm hover:bg-slate-50 dark:hover:bg-accent/90 disabled:opacity-50">
-                <FileSearch size={16} /> {analyzing ? 'Analyzing...' : 'Check ATS Score'}
-              </button>
+              <Button type="button" variant="secondary" icon={FileSearch} loading={analyzing}
+                disabled={!form.jdText || !form.resumeVariantId} onClick={analyze}>
+                {analyzing ? 'Analyzing…' : 'Check ATS score'}
+              </Button>
             )}
-            <button type="submit" disabled={loading}
-              className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-lg text-sm hover:bg-accent/90 disabled:opacity-50">
-              <Send size={16} /> {loading ? 'Saving...' : mode === 'external' ? 'Add to Tracker' : 'Generate Application'}
-            </button>
+            <Button type="submit" variant="primary" icon={Send} loading={loading}>
+              {loading ? 'Saving…' : mode === 'external' ? 'Add to tracker' : 'Generate application'}
+            </Button>
           </div>
-        </div>
+        </Card>
 
         <div className="space-y-4">
           {atsPreview && (
-            <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4">
-              <h2 className="font-semibold mb-2">ATS Match (current resume)</h2>
-              <div className="text-3xl font-bold">{atsPreview.score}%</div>
-              <div className="text-sm text-slate-500 dark:text-slate-400">{atsPreview.matched.length} / {atsPreview.total} keywords matched</div>
+            <Card>
+              <h2 className="font-semibold text-slate-900 dark:text-white mb-1">ATS match</h2>
+              <div className="text-4xl font-bold text-accent tabular-nums">{atsPreview.score}%</div>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{atsPreview.matched.length} / {atsPreview.total} keywords matched</p>
               {atsPreview.missing.length > 0 && (
-                <div className="mt-2">
-                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Missing keywords:</div>
-                  <div className="flex flex-wrap gap-1">
-                    {atsPreview.missing.map(kw => <span key={kw} className="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded-full">{kw}</span>)}
+                <div className="mt-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-2">Missing keywords</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {atsPreview.missing.map(kw => <Badge key={kw} color="red">{kw}</Badge>)}
                   </div>
                 </div>
               )}
-            </div>
+            </Card>
           )}
 
           {result && (
-            <div className="bg-white dark:bg-[#161616] rounded-xl border border-slate-200 dark:border-white/10 p-4 space-y-3">
-              <h2 className="font-semibold">{result.application.generatedFiles?.pdf ? 'Application Generated' : 'Application Added'}</h2>
+            <Card>
+              <h2 className="font-semibold text-slate-900 dark:text-white mb-3">
+                {result.application.generatedFiles?.pdf ? 'Application generated' : 'Application added'}
+              </h2>
               {result.application.generatedFiles?.pdf && (
-                <div className="flex gap-4 text-sm">
+                <div className="flex gap-6 mb-4">
                   <div>
-                    <div className="text-slate-500 dark:text-slate-400 text-xs">ATS Before</div>
-                    <div className="text-xl font-bold">{result.ats.before.score}%</div>
+                    <div className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">ATS before</div>
+                    <div className="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">{result.ats.before.score}%</div>
                   </div>
                   <div>
-                    <div className="text-slate-500 dark:text-slate-400 text-xs">ATS After</div>
-                    <div className="text-xl font-bold">{result.ats.after.score}%</div>
+                    <div className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">ATS after</div>
+                    <div className="text-2xl font-bold tabular-nums text-accent">{result.ats.after.score}%</div>
                   </div>
                 </div>
               )}
-              <div className="flex flex-wrap gap-3">
-                {result.application.generatedFiles?.pdf && <a href={result.application.generatedFiles.pdf} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100 hover:underline"><Download size={14} /> PDF</a>}
-                {result.application.generatedFiles?.docx && <a href={result.application.generatedFiles.docx} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100 hover:underline"><Download size={14} /> DOCX</a>}
-                {result.application.generatedFiles?.html && <a href={result.application.generatedFiles.html} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100 hover:underline"><Download size={14} /> HTML</a>}
-                {result.application.generatedFiles?.coverLetter && <a href={result.application.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-sm text-slate-900 dark:text-slate-100 hover:underline"><Download size={14} /> Cover Letter</a>}
+              <div className="flex flex-wrap gap-3 text-sm">
+                {result.application.generatedFiles?.pdf && <a href={result.application.generatedFiles.pdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-accent hover:underline"><Download size={14} /> PDF</a>}
+                {result.application.generatedFiles?.docx && <a href={result.application.generatedFiles.docx} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-accent hover:underline"><Download size={14} /> DOCX</a>}
+                {result.application.generatedFiles?.html && <a href={result.application.generatedFiles.html} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-accent hover:underline"><Download size={14} /> HTML</a>}
+                {result.application.generatedFiles?.coverLetter && <a href={result.application.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-accent hover:underline"><Download size={14} /> Cover letter</a>}
               </div>
               {form.recruiterEmail && (
-                <button onClick={() => navigate(`/resume-builder/email/${result.application._id}`)}
-                  className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
-                  <Mail size={16} /> Compose & Send Email to Recruiter
-                </button>
+                <Button variant="success" icon={Mail} className="mt-4 w-full" onClick={() => navigate(`/resume-builder/email/${result.application._id}`)}>
+                  Compose &amp; send email
+                </Button>
               )}
-              <button onClick={() => navigate('/resume-builder/applications')} className="text-sm text-slate-900 dark:text-slate-100 hover:underline">Go to Applications tracker</button>
-            </div>
+              <button onClick={() => navigate('/resume-builder/applications')} className="inline-flex items-center gap-1 mt-3 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-accent transition-colors">
+                Go to tracker <ArrowRight size={14} />
+              </button>
+            </Card>
+          )}
+
+          {!atsPreview && !result && (
+            <Card className="text-sm text-slate-400 dark:text-slate-500">
+              {mode === 'generate'
+                ? 'Run an ATS check or generate the application — results show here.'
+                : 'Fill in the details and add it to your tracker.'}
+            </Card>
           )}
         </div>
       </form>

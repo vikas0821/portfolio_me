@@ -1,25 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
-
-function StatCard({ label, value, sub }) {
-  return (
-    <div className="bg-white dark:bg-[#161616] rounded-xl shadow-sm p-5 border border-slate-200 dark:border-white/10">
-      <div className="text-sm text-slate-500 dark:text-slate-400">{label}</div>
-      <div className="text-3xl font-bold mt-1">{value}</div>
-      {sub && <div className="text-xs text-slate-400 dark:text-slate-500 mt-1">{sub}</div>}
-    </div>
-  );
-}
-
-const STATUS_COLORS = {
-  applied: 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300',
-  replied: 'bg-blue-100 text-blue-700',
-  interview: 'bg-amber-100 text-amber-700',
-  offer: 'bg-green-100 text-green-700',
-  rejected: 'bg-red-100 text-red-700',
-  ghosted: 'bg-purple-100 text-purple-700',
-};
+import { FileText, CalendarClock, TrendingUp, Mail, ArrowRight } from 'lucide-react';
+import { PageHeader, Card, StatCard, Badge, Loading, STATUS_BADGE } from '../components/ui';
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -28,75 +11,85 @@ export default function Dashboard() {
     api.get('/dashboard/stats').then(res => setStats(res.data));
   }, []);
 
-  if (!stats) return <div className="text-slate-500 dark:text-slate-400">Loading...</div>;
+  if (!stats) return <Loading label="Loading dashboard…" />;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+    <div>
+      <PageHeader title="Dashboard" subtitle="Your job search at a glance." />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Total Applications" value={stats.total} />
-        <StatCard label="Interviews" value={stats.counts.interview || 0} />
-        <StatCard label="Avg ATS Improvement" value={`${stats.atsImprovement >= 0 ? '+' : ''}${stats.atsImprovement}%`} sub={`${stats.avgBefore}% → ${stats.avgAfter}%`} />
-        <StatCard label="Emails Sent" value={stats.emailsSent} />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Applications" value={stats.total} icon={FileText} accent />
+        <StatCard label="Interviews" value={stats.counts.interview || 0} icon={CalendarClock} />
+        <StatCard
+          label="Avg ATS lift"
+          value={`${stats.atsImprovement >= 0 ? '+' : ''}${stats.atsImprovement}%`}
+          sub={`${stats.avgBefore}% → ${stats.avgAfter}%`}
+          icon={TrendingUp}
+        />
+        <StatCard label="Emails sent" value={stats.emailsSent} icon={Mail} />
       </div>
 
       {stats.followUpsDue.length > 0 && (
-        <div className="bg-amber-50 dark:bg-amber-950/40 rounded-xl shadow-sm p-5 border border-amber-200 dark:border-amber-800">
-          <h2 className="font-semibold mb-3 text-amber-800 dark:text-amber-300">Follow-ups Due ({stats.followUpsDue.length})</h2>
-          <ul className="space-y-1">
+        <Card className="mt-6 border-amber-300/70 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/20">
+          <div className="flex items-center gap-2 mb-3">
+            <CalendarClock size={16} className="text-amber-600 dark:text-amber-400" />
+            <h2 className="font-semibold text-amber-800 dark:text-amber-300">Follow-ups due ({stats.followUpsDue.length})</h2>
+          </div>
+          <ul className="divide-y divide-amber-200/60 dark:divide-amber-500/10">
             {stats.followUpsDue.map(app => (
-              <li key={app._id} className="flex justify-between text-sm">
-                <span>{app.company} — {app.role}</span>
-                <span className="text-amber-700 dark:text-amber-400">{new Date(app.followUpDate).toLocaleDateString()}</span>
+              <li key={app._id} className="flex justify-between items-center py-2 text-sm">
+                <span className="text-slate-700 dark:text-slate-200">{app.company} — <span className="text-slate-500 dark:text-slate-400">{app.role}</span></span>
+                <span className="text-amber-700 dark:text-amber-400 font-medium tabular-nums">{new Date(app.followUpDate).toLocaleDateString()}</span>
               </li>
             ))}
           </ul>
-          <Link to="/resume-builder/applications" className="text-sm text-amber-800 dark:text-amber-300 hover:underline mt-2 inline-block">View applications →</Link>
-        </div>
+          <Link to="/resume-builder/applications" className="inline-flex items-center gap-1 mt-3 text-sm font-semibold text-amber-800 dark:text-amber-300 hover:gap-2 transition-all">
+            View applications <ArrowRight size={14} />
+          </Link>
+        </Card>
       )}
 
-      <div className="bg-white dark:bg-[#161616] rounded-xl shadow-sm p-5 border border-slate-200 dark:border-white/10">
-        <h2 className="font-semibold mb-3">Status Breakdown</h2>
+      <Card className="mt-6">
+        <h2 className="font-semibold text-slate-900 dark:text-white mb-4">Status breakdown</h2>
         <div className="flex flex-wrap gap-2">
           {Object.entries(stats.counts).map(([status, count]) => (
-            <span key={status} className={`px-3 py-1 rounded-full text-sm font-medium ${STATUS_COLORS[status] || 'bg-slate-100 dark:bg-[#0f0f0f]'}`}>
-              {status}: {count}
-            </span>
+            <Badge key={status} color={STATUS_BADGE[status] || 'slate'} className="capitalize">
+              {status} · {count}
+            </Badge>
           ))}
         </div>
-      </div>
+      </Card>
 
-      <div className="bg-white dark:bg-[#161616] rounded-xl shadow-sm p-5 border border-slate-200 dark:border-white/10">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="font-semibold">Recent Applications</h2>
-          <Link to="/resume-builder/applications" className="text-sm text-slate-900 dark:text-slate-100 hover:underline">View all</Link>
+      <Card className="mt-6" padding="p-0">
+        <div className="flex justify-between items-center px-5 py-4 border-b border-slate-200 dark:border-white/10">
+          <h2 className="font-semibold text-slate-900 dark:text-white">Recent applications</h2>
+          <Link to="/resume-builder/applications" className="text-sm font-medium text-accent hover:underline">View all</Link>
         </div>
         {stats.recent.length === 0 ? (
-          <p className="text-sm text-slate-400 dark:text-slate-500">No applications yet. Go to Apply to create one.</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500 p-8 text-center">No applications yet. Head to <Link to="/resume-builder/apply" className="text-accent hover:underline">Apply</Link> to create one.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-slate-500 dark:text-slate-400 border-b dark:border-white/10">
-                <th className="py-2">Company</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>ATS</th>
+              <tr className="text-left text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-white/5">
+                <th className="py-2.5 px-5 font-semibold">Company</th>
+                <th className="px-3 font-semibold">Role</th>
+                <th className="px-3 font-semibold">Status</th>
+                <th className="px-5 font-semibold text-right">ATS</th>
               </tr>
             </thead>
             <tbody>
               {stats.recent.map(app => (
-                <tr key={app._id} className="border-b dark:border-white/10 last:border-0">
-                  <td className="py-2">{app.company}</td>
-                  <td>{app.role}</td>
-                  <td><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[app.status]}`}>{app.status}</span></td>
-                  <td>{app.atsScore?.before}% → {app.atsScore?.after}%</td>
+                <tr key={app._id} className="border-b border-slate-100 dark:border-white/5 last:border-0">
+                  <td className="py-3 px-5 font-medium text-slate-800 dark:text-slate-100">{app.company}</td>
+                  <td className="px-3 text-slate-500 dark:text-slate-400">{app.role}</td>
+                  <td className="px-3"><Badge color={STATUS_BADGE[app.status] || 'slate'} className="capitalize">{app.status}</Badge></td>
+                  <td className="px-5 text-right tabular-nums text-slate-500 dark:text-slate-400">{app.atsScore?.before}% → {app.atsScore?.after}%</td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
-      </div>
+      </Card>
     </div>
   );
 }
