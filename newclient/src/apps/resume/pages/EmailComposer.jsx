@@ -54,7 +54,7 @@ export default function EmailComposer() {
       });
       setSent(true);
     } catch (err) {
-      alert(err.response?.data?.error || err.message);
+      alert(err.response?.data?.detail || err.response?.data?.error || err.message);
     } finally {
       setSending(false);
     }

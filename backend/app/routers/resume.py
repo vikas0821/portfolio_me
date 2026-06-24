@@ -406,6 +406,12 @@ def email_send(b: dict = Body(...)):
             attachments.append({"filename": "Resume.pdf", "path": os.path.join(base, "resume.pdf")})
         if "coverLetter" in fmts and (a.generated_files or {}).get("coverLetter"):
             attachments.append({"filename": "Cover Letter.pdf", "path": os.path.join(base, "cover-letter.pdf")})
+    if not (settings.smtp_host and settings.smtp_user and settings.smtp_pass and settings.from_email):
+        raise HTTPException(
+            400,
+            "Email sending isn't set up yet. Add SMTP_HOST, SMTP_PORT, SMTP_USER, "
+            "SMTP_PASS and FROM_EMAIL to the backend environment, then redeploy.",
+        )
     log = {"application_id": a["_id"], "to": to, "subject": subject, "body_html": body_html,
            "body_text": body_text, "attachments": attachments}
     try:
@@ -415,4 +421,4 @@ def email_send(b: dict = Body(...)):
         return {"ok": True}
     except Exception as e:
         insert("email_logs", {**log, "status": "failed", "error": str(e)})
-        raise HTTPException(500, str(e))
+        raise HTTPException(502, f"Email failed to send — check the SMTP credentials. ({e})")

@@ -28,3 +28,17 @@ services:
         sync: false
       - key: CORS_ORIGINS       # set to your Vercel URL after the frontend deploys
         value: "*"
+      # Resume → Email (optional). Required only to send application emails.
+      # Gmail: host=smtp.gmail.com port=587 user=<you>@gmail.com pass=<App Password>
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
+      - key: FROM_NAME
+        value: Vikas Kannaujiya
