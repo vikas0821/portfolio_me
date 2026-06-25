@@ -64,7 +64,7 @@ export default function HtmlBodyEditor({ value, onChange, rows = 10 }) {
 
   return (
     <div className="border border-slate-300 dark:border-slate-600 rounded-lg overflow-hidden">
-      <div className="flex items-center justify-between bg-slate-50 dark:bg-[#0f0f0f]/40 border-b border-slate-300 dark:border-slate-600 px-2">
+      <div className="flex flex-wrap items-center justify-between gap-1 bg-slate-50 dark:bg-[#0f0f0f]/40 border-b border-slate-300 dark:border-slate-600 px-2">
         <div className="flex">
           <button type="button" onClick={() => setTab('write')}
             className={`px-3 py-1.5 text-sm font-medium border-b-2 -mb-px ${tab === 'write' ? 'border-slate-900 dark:border-slate-100 text-slate-900 dark:text-slate-100' : 'border-transparent text-slate-500 dark:text-slate-400'}`}>
@@ -76,10 +76,10 @@ export default function HtmlBodyEditor({ value, onChange, rows = 10 }) {
           </button>
         </div>
         {tab === 'write' && (
-          <div className="flex items-center gap-0.5 py-1">
+          <div className="flex flex-wrap items-center gap-0.5 py-1">
             {actions.map(({ icon: Icon, title, onClick }) => (
               <button key={title} type="button" title={title} onClick={onClick}
-                className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-accent/90 text-slate-600 dark:text-slate-300">
+                className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300">
                 <Icon size={15} />
               </button>
             ))}

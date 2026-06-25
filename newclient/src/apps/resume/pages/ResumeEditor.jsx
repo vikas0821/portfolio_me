@@ -82,7 +82,7 @@ export default function ResumeEditor() {
   return (
     <div className="space-y-4 pb-10">
       {/* Sticky action bar */}
-      <div className="flex flex-wrap justify-between items-center gap-3 sticky top-0 -mx-6 px-6 py-3 bg-[#f2efe8]/90 dark:bg-[#0a0a0a]/90 backdrop-blur z-10 border-b border-slate-200 dark:border-white/10">
+      <div className="flex flex-wrap justify-between items-center gap-3 sticky top-14 lg:top-0 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-[#f2efe8]/90 dark:bg-[#0a0a0a]/90 backdrop-blur z-10 border-b border-slate-200 dark:border-white/10">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">{resume.variantName}</h1>
           <Link to="/resume-builder/variants" className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 hover:text-accent transition-colors">
@@ -126,7 +126,7 @@ export default function ResumeEditor() {
 
       <Section title="Skills" addLabel="Add group" onAdd={() => setArr('skills', [...resume.skills, { label: '', value: '' }])}>
         {resume.skills.map((s, i) => (
-          <div key={i} className="grid grid-cols-[1fr_2fr_auto] gap-2 items-end">
+          <div key={i} className="grid grid-cols-1 sm:grid-cols-[1fr_2fr_auto] gap-2 items-end">
             <Field label="Category"><Input value={s.label} onChange={e => mapAt('skills', i, { label: e.target.value })} /></Field>
             <Field label="Skills (comma separated)"><Input value={s.value} onChange={e => mapAt('skills', i, { value: e.target.value })} /></Field>
             {delBtn('skills', i)}
@@ -164,7 +164,7 @@ export default function ResumeEditor() {
 
       <Section title="Employment summary" addLabel="Add row" onAdd={() => setArr('employment', [...resume.employment, { company: '', role: '', period: '', location: '' }])}>
         {resume.employment.map((e2, i) => (
-          <div key={i} className="grid grid-cols-2 md:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-2 items-end">
+          <div key={i} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-2 items-end">
             <Field label="Company"><Input value={e2.company} onChange={e => mapAt('employment', i, { company: e.target.value })} /></Field>
             <Field label="Role"><Input value={e2.role} onChange={e => mapAt('employment', i, { role: e.target.value })} /></Field>
             <Field label="Period"><Input value={e2.period} onChange={e => mapAt('employment', i, { period: e.target.value })} /></Field>
@@ -176,7 +176,7 @@ export default function ResumeEditor() {
 
       <Section title="Education" addLabel="Add education" onAdd={() => setArr('education', [...resume.education, { degree: '', institute: '', score: '', year: '' }])}>
         {resume.education.map((ed, i) => (
-          <div key={i} className="grid grid-cols-2 md:grid-cols-[2fr_2fr_1fr_1fr_auto] gap-2 items-end">
+          <div key={i} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[2fr_2fr_1fr_1fr_auto] gap-2 items-end">
             <Field label="Degree"><Input value={ed.degree} onChange={e => mapAt('education', i, { degree: e.target.value })} /></Field>
             <Field label="Institute"><Input value={ed.institute} onChange={e => mapAt('education', i, { institute: e.target.value })} /></Field>
             <Field label="Score"><Input value={ed.score} onChange={e => mapAt('education', i, { score: e.target.value })} /></Field>
@@ -188,7 +188,7 @@ export default function ResumeEditor() {
 
       <Section title="Certifications" addLabel="Add certification" onAdd={() => setArr('certifications', [...resume.certifications, { label: '', value: '' }])}>
         {resume.certifications.map((c, i) => (
-          <div key={i} className="grid grid-cols-[1fr_2fr_auto] gap-2 items-end">
+          <div key={i} className="grid grid-cols-1 sm:grid-cols-[1fr_2fr_auto] gap-2 items-end">
             <Field label="Authority"><Input value={c.label} onChange={e => mapAt('certifications', i, { label: e.target.value })} /></Field>
             <Field label="Certification"><Input value={c.value} onChange={e => mapAt('certifications', i, { value: e.target.value })} /></Field>
             {delBtn('certifications', i)}
@@ -197,7 +197,7 @@ export default function ResumeEditor() {
       </Section>
 
       <Section title="Personal details">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <Field label="Languages"><Input value={resume.languages} onChange={e => set('languages', e.target.value)} /></Field>
           <Field label="Gender"><Input value={resume.gender} onChange={e => set('gender', e.target.value)} /></Field>
           <Field label="Nationality"><Input value={resume.nationality} onChange={e => set('nationality', e.target.value)} /></Field>

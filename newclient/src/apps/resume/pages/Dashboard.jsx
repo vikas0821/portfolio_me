@@ -17,7 +17,7 @@ export default function Dashboard() {
     <div>
       <PageHeader title="Dashboard" subtitle="Your job search at a glance." />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Applications" value={stats.total} icon={FileText} accent />
         <StatCard label="Interviews" value={stats.counts.interview || 0} icon={CalendarClock} />
         <StatCard
@@ -68,7 +68,8 @@ export default function Dashboard() {
         {stats.recent.length === 0 ? (
           <p className="text-sm text-slate-400 dark:text-slate-500 p-8 text-center">No applications yet. Head to <Link to="/resume-builder/apply" className="text-accent hover:underline">Apply</Link> to create one.</p>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[420px]">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-white/5">
                 <th className="py-2.5 px-5 font-semibold">Company</th>
@@ -88,6 +89,7 @@ export default function Dashboard() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </Card>
     </div>

@@ -52,7 +52,7 @@ export default function EmailTemplates() {
           {templates.map(tpl => (
             <Card key={tpl._id} className="space-y-4">
               <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+                <div className="flex items-center gap-2 flex-1 min-w-[150px]">
                   <Input className="font-semibold" value={tpl.name} onChange={e => update(tpl._id, 'name', e.target.value)} />
                   {tpl.isDefault && <Badge color="amber" className="gap-1 shrink-0"><Star size={11} className="fill-current" /> Default</Badge>}
                 </div>

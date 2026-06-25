@@ -52,7 +52,7 @@ export default function App() {
     <div className="min-h-screen bg-bg text-txt">
       {/* Navbar */}
       <header className="sticky top-0 z-20 border-b border-border bg-bg/90 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 flex flex-wrap items-center justify-between gap-2">
           <button
             onClick={reset}
             className="flex items-center gap-2 group"
@@ -69,7 +69,7 @@ export default function App() {
             </div>
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             {/* Global light/dark toggle */}
             <button
               onClick={toggleTheme}

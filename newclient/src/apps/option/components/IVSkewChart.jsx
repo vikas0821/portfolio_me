@@ -116,7 +116,7 @@ export default function IVSkewChart({ data, iv, atm }) {
         </ResponsiveContainer>
       </div>
 
-      <div className="grid grid-cols-4 gap-2 mt-2 text-center text-[11px]">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2 text-center text-[11px]">
         <IvBox label="ATM Call" value={iv?.atm_call_iv} />
         <IvBox label="ATM Put" value={iv?.atm_put_iv} />
         <IvBox label="OTM Call" value={iv?.otm_call_iv} />

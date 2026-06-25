@@ -88,7 +88,7 @@ export const STATUS_BADGE = { applied: 'slate', replied: 'blue', interview: 'amb
 // ── Empty / loading ─────────────────────────────────────────────────────────
 export function EmptyState({ icon: Icon, title, hint, action }) {
   return (
-    <Card className="text-center" padding="p-12">
+    <Card className="text-center" padding="p-8 sm:p-12">
       {Icon && <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-4 text-slate-400"><Icon size={22} /></div>}
       <p className="font-semibold text-slate-700 dark:text-slate-200">{title}</p>
       {hint && <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">{hint}</p>}
@@ -122,17 +122,17 @@ export function StatCard({ label, value, sub, icon: Icon, accent }) {
 // ── Segmented control (tabs) ──────────────────────────────────────────────────
 export function Segmented({ options, value, onChange }) {
   return (
-    <div className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+    <div className="flex w-full sm:w-auto sm:inline-flex p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
-          className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+          className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
             value === o.value ? 'bg-white dark:bg-[#222] text-accent shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
-          {o.icon && <o.icon size={15} />} {o.label}
+          {o.icon && <o.icon size={15} className="shrink-0" />} {o.label}
         </button>
       ))}
     </div>

@@ -113,6 +113,61 @@ function DetailsPanel({ app, onChange }) {
   );
 }
 
+// Mobile card (shown < lg instead of the wide table)
+function AppCard({ app, expanded, onToggle, updateStatus, onAppChange }) {
+  const files = app.generatedFiles || {};
+  return (
+    <Card padding="p-0" className={`overflow-hidden ${isFollowUpDue(app) ? 'border-amber-300/70 dark:border-amber-500/30' : ''}`}>
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+              <span className="truncate">{app.company}</span>
+              {app.link && <a href={app.link} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-accent shrink-0"><ExternalLink size={13} /></a>}
+            </div>
+            <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{app.role}</p>
+          </div>
+          <button onClick={onToggle} className="text-slate-400 hover:text-accent shrink-0 p-1 -m-1">
+            {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+          </button>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <select value={app.status} onChange={e => updateStatus(app._id, e.target.value)}
+            className="text-xs font-medium rounded-lg px-2 py-1 capitalize bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-accent/30">
+            {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <Badge color="slate" className="tabular-nums">ATS {app.atsScore?.before}%→{app.atsScore?.after}%</Badge>
+          {app.emailSent
+            ? <Badge color="green">Email sent</Badge>
+            : app.recruiterEmail ? <Link to={`/resume-builder/email/${app._id}`} className="text-accent text-xs font-medium hover:underline">Send email</Link> : null}
+        </div>
+
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400 dark:text-slate-500">
+          {app.source && <span>{app.source}</span>}
+          <span>Applied {new Date(app.appliedAt).toLocaleDateString()}</span>
+          {app.followUpDate && <span className={isFollowUpDue(app) ? 'text-amber-600 dark:text-amber-400 font-semibold' : ''}>Follow-up {new Date(app.followUpDate).toLocaleDateString()}{app.followUpDone ? ' ✓' : ''}</span>}
+        </div>
+
+        {(files.pdf || files.docx || files.coverLetter) && (
+          <div className="mt-2 flex gap-3 text-xs">
+            {files.pdf && <a href={files.pdf} target="_blank" rel="noreferrer" className="text-accent hover:underline">PDF</a>}
+            {files.docx && <a href={files.docx} target="_blank" rel="noreferrer" className="text-accent hover:underline">DOCX</a>}
+            {files.coverLetter && <a href={files.coverLetter} target="_blank" rel="noreferrer" className="text-accent hover:underline">Cover letter</a>}
+          </div>
+        )}
+
+        {(app.tags || []).length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {(app.tags || []).map(t => <span key={t} className="text-[10px] bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded-full">{t}</span>)}
+          </div>
+        )}
+      </div>
+      {expanded && <DetailsPanel app={app} onChange={onAppChange} />}
+    </Card>
+  );
+}
+
 export default function Applications() {
   const [apps, setApps] = useState([]);
   const [filter, setFilter] = useState('all');
@@ -185,7 +240,9 @@ export default function Applications() {
       {filtered.length === 0 ? (
         <EmptyState icon={Inbox} title="No applications found" hint="Adjust your filters, or add a new application." />
       ) : (
-        <Card padding="p-0" className="overflow-hidden">
+        <>
+        {/* Desktop table */}
+        <Card padding="p-0" className="hidden lg:block overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -256,6 +313,21 @@ export default function Applications() {
             </table>
           </div>
         </Card>
+
+        {/* Mobile cards */}
+        <div className="lg:hidden space-y-3">
+          {filtered.map(app => (
+            <AppCard
+              key={app._id}
+              app={app}
+              expanded={expanded === app._id}
+              onToggle={() => setExpanded(expanded === app._id ? null : app._id)}
+              updateStatus={updateStatus}
+              onAppChange={onAppChange}
+            />
+          ))}
+        </div>
+        </>
       )}
     </div>
   );

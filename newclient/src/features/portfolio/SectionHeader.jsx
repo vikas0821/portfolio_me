@@ -18,7 +18,7 @@ const SectionHeader = ({ meta = {}, eyebrow, heading, subtitle }) => {
       className="relative text-center mb-16"
     >
       {/* soft gradient glow behind the heading (matches the hub) */}
-      <div className="pointer-events-none absolute left-1/2 -top-10 -translate-x-1/2 w-[420px] h-[220px] bg-accent/10 dark:bg-accent/12 rounded-full blur-[90px]" />
+      <div className="pointer-events-none absolute left-1/2 -top-10 -translate-x-1/2 w-[min(420px,90vw)] h-[220px] bg-accent/10 dark:bg-accent/12 rounded-full blur-[90px]" />
 
       {e && (
         <div className="relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-5">

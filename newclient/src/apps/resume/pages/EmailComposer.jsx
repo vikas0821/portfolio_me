@@ -77,7 +77,7 @@ export default function EmailComposer() {
           <Field label="Body"><Textarea rows={12} value={email.bodyText} onChange={e => setEmail({ ...email, bodyText: e.target.value })} /></Field>
 
           <Field label="Attachments">
-            <div className="flex flex-wrap gap-4 text-sm text-slate-600 dark:text-slate-300">
+            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-600 dark:text-slate-300">
               <label className="flex items-center gap-2"><input type="checkbox" checked={attachFormats.pdf} onChange={e => setAttachFormats(a => ({ ...a, pdf: e.target.checked }))} /> Résumé (PDF)</label>
               <label className="flex items-center gap-2"><input type="checkbox" checked={attachFormats.docx} onChange={e => setAttachFormats(a => ({ ...a, docx: e.target.checked }))} /> Résumé (DOCX)</label>
               {app.generatedFiles?.coverLetter && (

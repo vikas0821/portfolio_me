@@ -139,7 +139,7 @@ const Hero = ({ hero = {}, settings = {}, onDownloadResume }) => {
               />
 
               {/* Photo */}
-              <div className="relative w-72 h-72 md:w-88 md:h-88 rounded-full overflow-hidden border-4 border-white/90 dark:border-white/8 shadow-2xl shadow-black/30">
+              <div className="relative w-56 h-56 sm:w-72 sm:h-72 md:w-88 md:h-88 rounded-full overflow-hidden border-4 border-white/90 dark:border-white/8 shadow-2xl shadow-black/30">
                 <img
                   src={profileImg}
                   alt={hero.name || "Vikas Kannaujiya"}
