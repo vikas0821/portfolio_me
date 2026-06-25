@@ -1,57 +1,38 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 function DropZone({ label, file, onFile }) {
-  const inputRef = useRef(null);
-  const [hover, setHover] = useState(false);
-
-  function handleDrop(e) {
-    e.preventDefault();
-    setHover(false);
-    const f = e.dataTransfer.files?.[0];
-    if (f) onFile(f);
-  }
-
+  // A transparent, full-size native <input type="file"> overlays the zone so a
+  // tap/click hits the real input directly (programmatically clicking a hidden
+  // input is blocked on mobile browsers). It also handles drag-drop natively.
   return (
-    <div
-      onClick={() => inputRef.current?.click()}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setHover(true);
-      }}
-      onDragLeave={() => setHover(false)}
-      onDrop={handleDrop}
-      className={
-        "cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors " +
-        (hover
-          ? "border-neutral bg-neutral/10"
-          : "border-border bg-card hover:border-neutral/60")
-      }
-    >
+    <div className="relative rounded-xl border-2 border-dashed border-border bg-card p-8 text-center transition-colors hover:border-neutral/60 focus-within:border-neutral">
       <input
-        ref={inputRef}
         type="file"
-        accept=".csv,text/csv"
-        className="hidden"
+        accept=".csv,text/csv,application/vnd.ms-excel"
         onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
+        aria-label={label || "Upload CSV"}
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
       />
-      <div className="text-3xl mb-2">{file ? "✅" : "📁"}</div>
-      {label && (
-        <div className="text-xs uppercase tracking-wide text-muted mb-1">
-          {label}
-        </div>
-      )}
-      {file ? (
-        <div className="text-sm font-semibold text-bullish break-all">
-          {file.name}
-        </div>
-      ) : (
-        <>
-          <div className="text-sm font-medium text-txt">
-            Drag &amp; drop CSV here
+      <div className="pointer-events-none">
+        <div className="text-3xl mb-2">{file ? "✅" : "📁"}</div>
+        {label && (
+          <div className="text-xs uppercase tracking-wide text-muted mb-1">
+            {label}
           </div>
-          <div className="text-xs text-muted mt-1">or click to browse</div>
-        </>
-      )}
+        )}
+        {file ? (
+          <div className="text-sm font-semibold text-bullish break-all">
+            {file.name}
+          </div>
+        ) : (
+          <>
+            <div className="text-sm font-medium text-txt">
+              Drag &amp; drop CSV here
+            </div>
+            <div className="text-xs text-muted mt-1">or tap to browse</div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
