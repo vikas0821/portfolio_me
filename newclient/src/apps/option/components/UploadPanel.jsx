@@ -6,9 +6,10 @@ function DropZone({ label, file, onFile }) {
   // input is blocked on mobile browsers). It also handles drag-drop natively.
   return (
     <div className="relative rounded-xl border-2 border-dashed border-border bg-card p-8 text-center transition-colors hover:border-neutral/60 focus-within:border-neutral">
+      {/* No `accept` filter — Android file pickers wrongly grey out valid .csv
+          files; the backend validates/parses the CSV instead. */}
       <input
         type="file"
-        accept=".csv,text/csv,application/vnd.ms-excel"
         onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
         aria-label={label || "Upload CSV"}
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
