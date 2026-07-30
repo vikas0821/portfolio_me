@@ -38,7 +38,7 @@ const Contact = ({ contact = {}, meta }) => {
   ].filter(Boolean);
 
   return (
-    <section id="contact" className="scroll-mt-20 py-28 px-6 bg-white dark:bg-[#050505]">
+    <section id="contact" className="scroll-mt-20 py-28 px-6 bg-paper halftone-bg">
       <div className="max-w-6xl mx-auto">
         <SectionHeader
           meta={meta}
@@ -56,44 +56,44 @@ const Contact = ({ contact = {}, meta }) => {
             transition={{ duration: 0.6, delay: 0.15 }}
             className="lg:col-span-2 space-y-5"
           >
-            {/* Info card */}
-            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-white/8">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-violet-500 flex items-center justify-center mb-5 shadow-lg shadow-accent/25">
-                <MessageSquare size={22} className="text-white" />
+            {/* Info card as speech bubble */}
+            <div className="speech-bubble p-6">
+              <div className="w-12 h-12 rounded-xl bg-comic-yellow border-[3px] border-ink flex items-center justify-center mb-5 -rotate-3">
+                <MessageSquare size={22} className="text-ink" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">Let's connect</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              <h3 className="font-display text-xl tracking-wide text-ink dark:text-white mb-1.5">Let's connect</h3>
+              <p className="text-sm text-ink/70 dark:text-white/70 leading-relaxed font-sans">
                 I'm always open to discussing new projects, creative ideas, or opportunities to be part of something amazing.
               </p>
             </div>
 
             {/* Contact links */}
-            <div className="space-y-2.5">
-              {contactLinks.map(({ icon: Icon, label, value, href }) => (
+            <div className="space-y-3">
+              {contactLinks.map(({ icon: Icon, label, value, href }, i) => (
                 <a
                   key={label}
                   href={href}
                   target={href.startsWith("http") ? "_blank" : undefined}
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3.5 p-4 rounded-xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-white/8 hover:border-accent/35 hover:bg-accent/3 group transition-all duration-200"
+                  className={`comic-panel flex items-center gap-3.5 p-4 group ${i % 2 === 0 ? "-rotate-1" : "rotate-1"} hover:rotate-0`}
                 >
-                  <div className="w-9 h-9 rounded-lg bg-white dark:bg-white/5 border border-slate-200/60 dark:border-white/8 flex items-center justify-center flex-shrink-0 group-hover:bg-accent/10 group-hover:border-accent/25 transition-all">
-                    <Icon size={16} className="text-slate-500 dark:text-slate-400 group-hover:text-accent transition-colors" />
+                  <div className="w-9 h-9 rounded-lg bg-comic-blue/20 border-2 border-ink flex items-center justify-center flex-shrink-0 group-hover:bg-comic-blue/40 transition-all">
+                    <Icon size={16} className="text-ink dark:text-white" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide">{label}</p>
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-accent transition-colors">{value}</p>
+                    <p className="text-xs font-bold text-ink/50 dark:text-white/50 uppercase tracking-wide">{label}</p>
+                    <p className="text-sm font-bold text-ink dark:text-white group-hover:text-accent transition-colors">{value}</p>
                   </div>
                 </a>
               ))}
             </div>
 
             {/* Response time */}
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-accent/6 border border-accent/20">
-              <Clock size={16} className="text-accent flex-shrink-0" />
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-comic-green/20 border-2 border-ink rotate-1">
+              <Clock size={16} className="text-ink dark:text-white flex-shrink-0" />
               <div>
-                <p className="text-xs font-bold text-accent">Fast Response</p>
-                <p className="text-xs text-slate-600 dark:text-slate-400">Usually within 24 hours</p>
+                <p className="text-xs font-bold text-ink dark:text-white">Fast Response</p>
+                <p className="text-xs text-ink/60 dark:text-white/60">Usually within 24 hours</p>
               </div>
             </div>
           </motion.div>
@@ -105,24 +105,24 @@ const Contact = ({ contact = {}, meta }) => {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
             onSubmit={handleSubmit}
-            className="lg:col-span-3 space-y-5 p-7 rounded-2xl bg-slate-50 dark:bg-zinc-900/80 border border-slate-200/80 dark:border-white/8"
+            className="comic-panel lg:col-span-3 space-y-5 p-7"
           >
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Send a message</h3>
+            <h3 className="font-display text-xl tracking-wide text-ink dark:text-white">Send a message</h3>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Name</label>
+                <label className="block text-xs font-bold text-ink/60 dark:text-white/60 mb-2 uppercase tracking-wide">Name</label>
                 <input
                   name="name"
                   value={form.name}
                   onChange={handleChange}
                   placeholder="Your name"
                   required
-                  className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/40 transition-all"
+                  className="w-full px-4 py-3 rounded-xl bg-paper border-2 border-ink dark:border-white/60 text-ink dark:text-white text-sm placeholder:text-ink/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Email</label>
+                <label className="block text-xs font-bold text-ink/60 dark:text-white/60 mb-2 uppercase tracking-wide">Email</label>
                 <input
                   name="email"
                   type="email"
@@ -130,13 +130,13 @@ const Contact = ({ contact = {}, meta }) => {
                   onChange={handleChange}
                   placeholder="your@email.com"
                   required
-                  className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/40 transition-all"
+                  className="w-full px-4 py-3 rounded-xl bg-paper border-2 border-ink dark:border-white/60 text-ink dark:text-white text-sm placeholder:text-ink/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Message</label>
+              <label className="block text-xs font-bold text-ink/60 dark:text-white/60 mb-2 uppercase tracking-wide">Message</label>
               <textarea
                 name="message"
                 value={form.message}
@@ -144,14 +144,14 @@ const Contact = ({ contact = {}, meta }) => {
                 placeholder="Tell me about your project or just say hello..."
                 rows={5}
                 required
-                className="w-full px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/40 transition-all resize-none"
+                className="w-full px-4 py-3 rounded-xl bg-paper border-2 border-ink dark:border-white/60 text-ink dark:text-white text-sm placeholder:text-ink/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all resize-none"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-xl bg-accent text-white font-bold text-sm hover:bg-accent/90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-accent/25"
+              className="wobble-hover w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-xl bg-accent border-[3px] border-ink text-white font-display text-lg tracking-wide disabled:opacity-60 disabled:cursor-not-allowed shadow-comic-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all duration-150"
             >
               {loading ? (
                 <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -165,7 +165,7 @@ const Contact = ({ contact = {}, meta }) => {
               <motion.div
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2.5 p-4 rounded-xl bg-green-50 dark:bg-green-500/10 border border-green-200/60 dark:border-green-500/20 text-green-700 dark:text-green-400 text-sm font-medium"
+                className="flex items-center gap-2.5 p-4 rounded-xl bg-comic-green/20 border-2 border-ink text-ink dark:text-white text-sm font-bold"
               >
                 <CheckCircle size={16} /> Message sent! I'll get back to you soon.
               </motion.div>
@@ -175,7 +175,7 @@ const Contact = ({ contact = {}, meta }) => {
               <motion.div
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2.5 p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200/60 dark:border-red-500/20 text-red-600 dark:text-red-400 text-sm font-medium"
+                className="flex items-center gap-2.5 p-4 rounded-xl bg-comic-red/20 border-2 border-ink text-ink dark:text-white text-sm font-bold"
               >
                 <AlertCircle size={16} /> Failed to send. Please try again or email me directly.
               </motion.div>

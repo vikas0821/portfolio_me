@@ -39,7 +39,7 @@ function DetailsPanel({ app, onChange }) {
   const deleteNote = async (noteId) => onChange((await api.delete(`/applications/${app._id}/notes/${noteId}`)).data);
 
   return (
-    <div className="grid md:grid-cols-2 gap-6 p-5 bg-slate-50 dark:bg-[#0f0f0f] border-t border-slate-200 dark:border-white/10">
+    <div className="grid md:grid-cols-2 gap-6 p-5 bg-paper border-t-2 border-ink/20 dark:border-white/20">
       <div className="space-y-4">
         <Field label="Tags">
           <div className="flex gap-2">
@@ -57,7 +57,7 @@ function DetailsPanel({ app, onChange }) {
           <div className="flex gap-2 items-center">
             <Input value={linkInput} onChange={e => setLinkInput(e.target.value)} placeholder="https://…" />
             <Button variant="secondary" size="sm" onClick={saveLink}>Save</Button>
-            {app.link && <a href={app.link} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-accent shrink-0"><ExternalLink size={16} /></a>}
+            {app.link && <a href={app.link} target="_blank" rel="noreferrer" className="text-ink/40 dark:text-white/40 hover:text-accent shrink-0"><ExternalLink size={16} /></a>}
           </div>
         </Field>
         <Field label="Follow-up date">
@@ -65,7 +65,7 @@ function DetailsPanel({ app, onChange }) {
             <Input type="date" value={followUpDate} onChange={e => setFollowUpDate(e.target.value)} />
             <Button variant="secondary" size="sm" onClick={() => saveFollowUp()}>Save</Button>
             {app.followUpDate && (
-              <label className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 shrink-0">
+              <label className="flex items-center gap-1.5 text-xs text-ink/60 dark:text-white/60 shrink-0">
                 <input type="checkbox" checked={!!app.followUpDone} onChange={e => saveFollowUp({ followUpDone: e.target.checked })} /> Done
               </label>
             )}
@@ -73,8 +73,8 @@ function DetailsPanel({ app, onChange }) {
         </Field>
         <Field label="Job description">
           {app.jdText
-            ? <pre className="text-xs whitespace-pre-wrap bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 rounded-lg p-3 max-h-48 overflow-auto text-slate-600 dark:text-slate-300">{app.jdText}</pre>
-            : <p className="text-xs text-slate-400 dark:text-slate-500">No job description saved.</p>}
+            ? <pre className="text-xs whitespace-pre-wrap bg-paper border-2 border-ink/20 dark:border-white/20 rounded-lg p-3 max-h-48 overflow-auto text-ink/70 dark:text-white/70">{app.jdText}</pre>
+            : <p className="text-xs text-ink/50 dark:text-white/50">No job description saved.</p>}
         </Field>
       </div>
 
@@ -92,14 +92,14 @@ function DetailsPanel({ app, onChange }) {
         </Field>
         <Field label="Notes">
           <div className="space-y-1.5 max-h-40 overflow-auto">
-            {(app.noteEntries || []).length === 0 && <p className="text-xs text-slate-400 dark:text-slate-500">No notes yet.</p>}
+            {(app.noteEntries || []).length === 0 && <p className="text-xs text-ink/50 dark:text-white/50">No notes yet.</p>}
             {(app.noteEntries || []).slice().reverse().map(n => (
-              <div key={n._id} className="flex items-start justify-between gap-2 bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 rounded-lg px-3 py-2">
+              <div key={n._id} className="flex items-start justify-between gap-2 bg-paper border-2 border-ink/20 dark:border-white/20 rounded-lg px-3 py-2">
                 <div>
-                  <div className="text-xs text-slate-700 dark:text-slate-300">{n.text}</div>
-                  <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{new Date(n.createdAt).toLocaleString()}</div>
+                  <div className="text-xs text-ink/80 dark:text-white/80">{n.text}</div>
+                  <div className="text-[10px] text-ink/40 dark:text-white/40 mt-0.5">{new Date(n.createdAt).toLocaleString()}</div>
                 </div>
-                <button onClick={() => deleteNote(n._id)} className="text-slate-300 hover:text-red-500 shrink-0"><Trash2 size={13} /></button>
+                <button onClick={() => deleteNote(n._id)} className="text-ink/30 dark:text-white/30 hover:text-comic-red shrink-0"><Trash2 size={13} /></button>
               </div>
             ))}
           </div>
@@ -117,24 +117,24 @@ function DetailsPanel({ app, onChange }) {
 function AppCard({ app, expanded, onToggle, updateStatus, onAppChange }) {
   const files = app.generatedFiles || {};
   return (
-    <Card padding="p-0" className={`overflow-hidden ${isFollowUpDue(app) ? 'border-amber-300/70 dark:border-amber-500/30' : ''}`}>
+    <Card padding="p-0" className="overflow-hidden">
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+            <div className="font-bold text-ink dark:text-white flex items-center gap-1.5">
               <span className="truncate">{app.company}</span>
-              {app.link && <a href={app.link} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-accent shrink-0"><ExternalLink size={13} /></a>}
+              {app.link && <a href={app.link} target="_blank" rel="noreferrer" className="text-ink/40 dark:text-white/40 hover:text-accent shrink-0"><ExternalLink size={13} /></a>}
             </div>
-            <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{app.role}</p>
+            <p className="text-sm text-ink/60 dark:text-white/60 truncate font-sans">{app.role}</p>
           </div>
-          <button onClick={onToggle} className="text-slate-400 hover:text-accent shrink-0 p-1 -m-1">
+          <button onClick={onToggle} className="text-ink/40 dark:text-white/40 hover:text-accent shrink-0 p-1 -m-1">
             {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
           </button>
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <select value={app.status} onChange={e => updateStatus(app._id, e.target.value)}
-            className="text-xs font-medium rounded-lg px-2 py-1 capitalize bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-accent/30">
+            className="text-xs font-bold rounded-lg px-2 py-1 capitalize bg-paper border-2 border-ink dark:border-white/50 text-ink dark:text-white focus:outline-none focus:ring-2 focus:ring-accent/40">
             {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
           <Badge color="slate" className="tabular-nums">ATS {app.atsScore?.before}%→{app.atsScore?.after}%</Badge>
@@ -143,10 +143,10 @@ function AppCard({ app, expanded, onToggle, updateStatus, onAppChange }) {
             : app.recruiterEmail ? <Link to={`/resume-builder/email/${app._id}`} className="text-accent text-xs font-medium hover:underline">Send email</Link> : null}
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400 dark:text-slate-500">
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink/50 dark:text-white/50">
           {app.source && <span>{app.source}</span>}
           <span>Applied {new Date(app.appliedAt).toLocaleDateString()}</span>
-          {app.followUpDate && <span className={isFollowUpDue(app) ? 'text-amber-600 dark:text-amber-400 font-semibold' : ''}>Follow-up {new Date(app.followUpDate).toLocaleDateString()}{app.followUpDone ? ' ✓' : ''}</span>}
+          {app.followUpDate && <span className={isFollowUpDue(app) ? 'text-ink dark:text-white font-bold' : ''}>Follow-up {new Date(app.followUpDate).toLocaleDateString()}{app.followUpDone ? ' ✓' : ''}</span>}
         </div>
 
         {(files.pdf || files.docx || files.coverLetter) && (
@@ -159,7 +159,7 @@ function AppCard({ app, expanded, onToggle, updateStatus, onAppChange }) {
 
         {(app.tags || []).length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
-            {(app.tags || []).map(t => <span key={t} className="text-[10px] bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded-full">{t}</span>)}
+            {(app.tags || []).map(t => <span key={t} className="text-[10px] bg-paper border border-ink/20 dark:border-white/20 text-ink/70 dark:text-white/70 px-1.5 py-0.5 rounded-full">{t}</span>)}
           </div>
         )}
       </div>
@@ -203,8 +203,8 @@ export default function Applications() {
   });
 
   const pill = (active) =>
-    `px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors ${
-      active ? 'bg-accent text-white' : 'bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:border-accent/40'
+    `px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors border-2 ${
+      active ? 'bg-comic-yellow border-ink text-ink' : 'bg-paper border-ink/20 dark:border-white/20 text-ink/70 dark:text-white/70 hover:border-ink dark:hover:border-white/60'
     }`;
 
   if (loading) return <Loading label="Loading applications…" />;
@@ -216,7 +216,7 @@ export default function Applications() {
       </PageHeader>
 
       <div className="relative mb-4">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/40 dark:text-white/40" />
         <Input className="pl-9" placeholder="Search company, role, location, source, or tag…" value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
@@ -229,10 +229,10 @@ export default function Applications() {
 
       {allTags.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center mb-5">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Tags</span>
-          <button onClick={() => setTagFilter(null)} className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${!tagFilter ? 'bg-accent text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400'}`}>All</button>
+          <span className="text-xs font-bold uppercase tracking-wide text-ink/50 dark:text-white/50">Tags</span>
+          <button onClick={() => setTagFilter(null)} className={`px-2.5 py-0.5 rounded-full text-xs font-bold border-2 ${!tagFilter ? 'bg-comic-yellow border-ink text-ink' : 'bg-paper border-ink/20 dark:border-white/20 text-ink/60 dark:text-white/60'}`}>All</button>
           {allTags.map(t => (
-            <button key={t} onClick={() => setTagFilter(t)} className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${tagFilter === t ? 'bg-accent text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400'}`}>{t}</button>
+            <button key={t} onClick={() => setTagFilter(t)} className={`px-2.5 py-0.5 rounded-full text-xs font-bold border-2 ${tagFilter === t ? 'bg-comic-yellow border-ink text-ink' : 'bg-paper border-ink/20 dark:border-white/20 text-ink/60 dark:text-white/60'}`}>{t}</button>
           ))}
         </div>
       )}
@@ -246,52 +246,52 @@ export default function Applications() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500 border-b border-slate-200 dark:border-white/10">
+                <tr className="text-left text-xs uppercase tracking-wide text-ink/50 dark:text-white/50 border-b-2 border-ink/20 dark:border-white/20">
                   <th className="py-3 px-3 w-8"></th>
-                  <th className="px-3 font-semibold">Company</th>
-                  <th className="px-3 font-semibold">Role</th>
-                  <th className="px-3 font-semibold">Source</th>
-                  <th className="px-3 font-semibold">ATS</th>
-                  <th className="px-3 font-semibold">Follow-up</th>
-                  <th className="px-3 font-semibold">Email</th>
-                  <th className="px-3 font-semibold">Status</th>
-                  <th className="px-3 font-semibold">Files</th>
-                  <th className="px-3 font-semibold whitespace-nowrap">Applied</th>
+                  <th className="px-3 font-bold">Company</th>
+                  <th className="px-3 font-bold">Role</th>
+                  <th className="px-3 font-bold">Source</th>
+                  <th className="px-3 font-bold">ATS</th>
+                  <th className="px-3 font-bold">Follow-up</th>
+                  <th className="px-3 font-bold">Email</th>
+                  <th className="px-3 font-bold">Status</th>
+                  <th className="px-3 font-bold">Files</th>
+                  <th className="px-3 font-bold whitespace-nowrap">Applied</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map(app => (
                   <Fragment key={app._id}>
-                    <tr className={`border-b border-slate-100 dark:border-white/5 ${isFollowUpDue(app) ? 'bg-amber-50 dark:bg-amber-950/20' : ''}`}>
+                    <tr className={`border-b border-ink/10 dark:border-white/10 ${isFollowUpDue(app) ? 'bg-comic-yellow/15' : ''}`}>
                       <td className="px-3">
-                        <button onClick={() => setExpanded(expanded === app._id ? null : app._id)} className="text-slate-400 hover:text-accent">
+                        <button onClick={() => setExpanded(expanded === app._id ? null : app._id)} className="text-ink/40 dark:text-white/40 hover:text-accent">
                           {expanded === app._id ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                         </button>
                       </td>
-                      <td className="py-3 px-3 font-medium text-slate-800 dark:text-slate-100">
+                      <td className="py-3 px-3 font-bold text-ink dark:text-white">
                         <span className="flex items-center gap-1.5">
                           {app.company}
-                          {app.link && <a href={app.link} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-accent"><ExternalLink size={13} /></a>}
+                          {app.link && <a href={app.link} target="_blank" rel="noreferrer" className="text-ink/40 dark:text-white/40 hover:text-accent"><ExternalLink size={13} /></a>}
                         </span>
                       </td>
-                      <td className="px-3 text-slate-600 dark:text-slate-300">{app.role}</td>
-                      <td className="px-3 text-slate-400 dark:text-slate-500 text-xs">{app.source || '—'}</td>
-                      <td className="px-3 tabular-nums text-slate-500 dark:text-slate-400 whitespace-nowrap">{app.atsScore?.before}% → {app.atsScore?.after}%</td>
+                      <td className="px-3 text-ink/70 dark:text-white/70">{app.role}</td>
+                      <td className="px-3 text-ink/50 dark:text-white/50 text-xs">{app.source || '—'}</td>
+                      <td className="px-3 tabular-nums text-ink/60 dark:text-white/60 whitespace-nowrap">{app.atsScore?.before}% → {app.atsScore?.after}%</td>
                       <td className="px-3">
                         {app.followUpDate
-                          ? <span className={`text-xs whitespace-nowrap ${isFollowUpDue(app) ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>{new Date(app.followUpDate).toLocaleDateString()}{app.followUpDone ? ' ✓' : ''}</span>
-                          : <span className="text-slate-300 dark:text-slate-600 text-xs">—</span>}
+                          ? <span className={`text-xs whitespace-nowrap ${isFollowUpDue(app) ? 'text-ink dark:text-white font-bold' : 'text-ink/60 dark:text-white/60'}`}>{new Date(app.followUpDate).toLocaleDateString()}{app.followUpDone ? ' ✓' : ''}</span>
+                          : <span className="text-ink/30 dark:text-white/30 text-xs">—</span>}
                       </td>
                       <td className="px-3">
                         {app.emailSent
-                          ? <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Sent</span>
+                          ? <span className="text-comic-green text-xs font-bold">Sent</span>
                           : app.recruiterEmail
                             ? <Link to={`/resume-builder/email/${app._id}`} className="text-accent text-xs font-medium hover:underline">Send</Link>
-                            : <span className="text-slate-300 dark:text-slate-600 text-xs">—</span>}
+                            : <span className="text-ink/30 dark:text-white/30 text-xs">—</span>}
                       </td>
                       <td className="px-3">
                         <select value={app.status} onChange={e => updateStatus(app._id, e.target.value)}
-                          className="text-xs font-medium rounded-lg px-2 py-1 capitalize bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-accent/30">
+                          className="text-xs font-bold rounded-lg px-2 py-1 capitalize bg-paper border-2 border-ink dark:border-white/50 text-ink dark:text-white focus:outline-none focus:ring-2 focus:ring-accent/40">
                           {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </td>
@@ -302,7 +302,7 @@ export default function Applications() {
                           {app.generatedFiles?.coverLetter && <a href={app.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">CL</a>}
                         </div>
                       </td>
-                      <td className="px-3 text-slate-400 dark:text-slate-500 text-xs whitespace-nowrap">{new Date(app.appliedAt).toLocaleDateString()}</td>
+                      <td className="px-3 text-ink/50 dark:text-white/50 text-xs whitespace-nowrap">{new Date(app.appliedAt).toLocaleDateString()}</td>
                     </tr>
                     {expanded === app._id && (
                       <tr><td colSpan={10} className="p-0"><DetailsPanel app={app} onChange={onAppChange} /></td></tr>

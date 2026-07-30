@@ -75,14 +75,14 @@ export default function Apply() {
         ]}
       />
       {mode === 'external' && (
-        <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+        <p className="mt-3 text-sm text-ink/60 dark:text-white/60 font-sans">
           For jobs you already applied to elsewhere (LinkedIn, Naukri, a company site…). This just logs it — no résumé file is generated.
         </p>
       )}
 
       <form onSubmit={submit} className="grid lg:grid-cols-[1.5fr_1fr] gap-6 mt-5">
         <Card>
-          <h2 className="font-semibold text-slate-900 dark:text-white mb-4">Job details</h2>
+          <h2 className="font-display text-lg tracking-wide text-ink dark:text-white mb-4">Job details</h2>
 
           {mode === 'external' ? (
             <div className="grid sm:grid-cols-2 gap-4">
@@ -151,12 +151,12 @@ export default function Apply() {
         <div className="space-y-4">
           {atsPreview && (
             <Card>
-              <h2 className="font-semibold text-slate-900 dark:text-white mb-1">ATS match</h2>
+              <h2 className="font-display text-lg tracking-wide text-ink dark:text-white mb-1">ATS match</h2>
               <div className="text-4xl font-bold text-accent tabular-nums">{atsPreview.score}%</div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{atsPreview.matched.length} / {atsPreview.total} keywords matched</p>
+              <p className="text-sm text-ink/60 dark:text-white/60 font-sans">{atsPreview.matched.length} / {atsPreview.total} keywords matched</p>
               {atsPreview.missing.length > 0 && (
                 <div className="mt-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-2">Missing keywords</p>
+                  <p className="text-xs font-bold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-2">Missing keywords</p>
                   <div className="flex flex-wrap gap-1.5">
                     {atsPreview.missing.map(kw => <Badge key={kw} color="red">{kw}</Badge>)}
                   </div>
@@ -167,17 +167,17 @@ export default function Apply() {
 
           {result && (
             <Card>
-              <h2 className="font-semibold text-slate-900 dark:text-white mb-3">
+              <h2 className="font-display text-lg tracking-wide text-ink dark:text-white mb-3">
                 {result.application.generatedFiles?.pdf ? 'Application generated' : 'Application added'}
               </h2>
               {result.application.generatedFiles?.pdf && (
                 <div className="flex gap-6 mb-4">
                   <div>
-                    <div className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">ATS before</div>
-                    <div className="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">{result.ats.before.score}%</div>
+                    <div className="text-xs uppercase tracking-wide text-ink/50 dark:text-white/50">ATS before</div>
+                    <div className="text-2xl font-bold tabular-nums text-ink dark:text-white">{result.ats.before.score}%</div>
                   </div>
                   <div>
-                    <div className="text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">ATS after</div>
+                    <div className="text-xs uppercase tracking-wide text-ink/50 dark:text-white/50">ATS after</div>
                     <div className="text-2xl font-bold tabular-nums text-accent">{result.ats.after.score}%</div>
                   </div>
                 </div>
@@ -193,14 +193,14 @@ export default function Apply() {
                   Compose &amp; send email
                 </Button>
               )}
-              <button onClick={() => navigate('/resume-builder/applications')} className="inline-flex items-center gap-1 mt-3 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-accent transition-colors">
+              <button onClick={() => navigate('/resume-builder/applications')} className="inline-flex items-center gap-1 mt-3 text-sm font-bold text-ink/60 dark:text-white/60 hover:text-accent transition-colors">
                 Go to tracker <ArrowRight size={14} />
               </button>
             </Card>
           )}
 
           {!atsPreview && !result && (
-            <Card className="text-sm text-slate-400 dark:text-slate-500">
+            <Card className="text-sm text-ink/50 dark:text-white/50 font-sans">
               {mode === 'generate'
                 ? 'Run an ATS check or generate the application — results show here.'
                 : 'Fill in the details and add it to your tracker.'}

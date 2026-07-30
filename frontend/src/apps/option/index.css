@@ -17,9 +17,14 @@
   min-height: 100vh;
   background-color: rgb(var(--c-bg));
   color: rgb(var(--c-txt));
-  font-family: "Inter", "Noto Sans Devanagari", system-ui, sans-serif;
+  font-family: "Comic Neue", "Noto Sans Devanagari", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.option-root .halftone-bg {
+  background-image: radial-gradient(rgb(var(--c-border) / 0.12) 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
 }
 
 .option-root .num {

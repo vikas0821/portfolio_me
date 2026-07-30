@@ -63,15 +63,15 @@ export default function HtmlBodyEditor({ value, onChange, rows = 10 }) {
   ];
 
   return (
-    <div className="border border-slate-300 dark:border-slate-600 rounded-lg overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-1 bg-slate-50 dark:bg-[#0f0f0f]/40 border-b border-slate-300 dark:border-slate-600 px-2">
+    <div className="border-2 border-ink dark:border-white/60 rounded-lg overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-1 bg-paper border-b-2 border-ink dark:border-white/60 px-2">
         <div className="flex">
           <button type="button" onClick={() => setTab('write')}
-            className={`px-3 py-1.5 text-sm font-medium border-b-2 -mb-px ${tab === 'write' ? 'border-slate-900 dark:border-slate-100 text-slate-900 dark:text-slate-100' : 'border-transparent text-slate-500 dark:text-slate-400'}`}>
+            className={`px-3 py-1.5 text-sm font-bold border-b-2 -mb-px ${tab === 'write' ? 'border-accent text-ink dark:text-white' : 'border-transparent text-ink/50 dark:text-white/50'}`}>
             Write
           </button>
           <button type="button" onClick={() => setTab('preview')}
-            className={`px-3 py-1.5 text-sm font-medium border-b-2 -mb-px ${tab === 'preview' ? 'border-slate-900 dark:border-slate-100 text-slate-900 dark:text-slate-100' : 'border-transparent text-slate-500 dark:text-slate-400'}`}>
+            className={`px-3 py-1.5 text-sm font-bold border-b-2 -mb-px ${tab === 'preview' ? 'border-accent text-ink dark:text-white' : 'border-transparent text-ink/50 dark:text-white/50'}`}>
             Preview
           </button>
         </div>
@@ -79,7 +79,7 @@ export default function HtmlBodyEditor({ value, onChange, rows = 10 }) {
           <div className="flex flex-wrap items-center gap-0.5 py-1">
             {actions.map(({ icon: Icon, title, onClick }) => (
               <button key={title} type="button" title={title} onClick={onClick}
-                className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300">
+                className="p-1.5 rounded hover:bg-ink/10 dark:hover:bg-white/10 text-ink/70 dark:text-white/70">
                 <Icon size={15} />
               </button>
             ))}
@@ -90,19 +90,19 @@ export default function HtmlBodyEditor({ value, onChange, rows = 10 }) {
       {tab === 'write' ? (
         <textarea
           ref={textareaRef}
-          className="w-full px-3 py-2 text-sm font-mono focus:outline-none bg-white dark:bg-[#161616] dark:text-slate-100"
+          className="w-full px-3 py-2 text-sm font-mono focus:outline-none bg-paper text-ink dark:text-white"
           rows={rows}
           value={value}
           onChange={e => onChange(e.target.value)}
         />
       ) : (
         <div
-          className="px-3 py-2 text-sm bg-white dark:bg-[#161616] dark:text-slate-100 min-h-[160px]
+          className="px-3 py-2 text-sm bg-paper text-ink dark:text-white min-h-[160px]
             [&_h1]:text-xl [&_h1]:font-bold [&_h1]:mb-2 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:mb-2
             [&_p]:mb-2 [&_strong]:font-semibold [&_em]:italic
-            [&_a]:text-blue-600 [&_a]:underline [&_code]:bg-slate-100 [&_code]:dark:bg-slate-700 [&_code]:px-1 [&_code]:rounded
+            [&_a]:text-accent [&_a]:underline [&_code]:bg-ink/10 [&_code]:dark:bg-white/10 [&_code]:px-1 [&_code]:rounded
             [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-2
-            [&_blockquote]:border-l-4 [&_blockquote]:border-slate-300 [&_blockquote]:dark:border-slate-600 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_blockquote]:dark:text-slate-400"
+            [&_blockquote]:border-l-4 [&_blockquote]:border-ink/30 [&_blockquote]:dark:border-white/30 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-ink/70 [&_blockquote]:dark:text-white/70"
           style={{ minHeight: `${rows * 1.5}em` }}
           dangerouslySetInnerHTML={{ __html: softRenderPreview(value) }}
         />

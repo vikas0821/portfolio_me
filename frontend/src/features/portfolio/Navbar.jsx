@@ -80,9 +80,9 @@ const Navbar = () => {
   return (
     <>
       {/* Scroll progress bar */}
-      <div className="fixed top-0 left-0 right-0 h-0.5 z-[60] bg-transparent">
+      <div className="fixed top-0 left-0 right-0 h-1 z-[60] bg-transparent">
         <motion.div
-          className="h-full bg-gradient-to-r from-accent via-violet-500 to-accent"
+          className="h-full bg-comic-red"
           style={{ width: `${scrollProgress}%` }}
           transition={{ duration: 0.1 }}
         />
@@ -94,36 +94,40 @@ const Navbar = () => {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${
           scrolled || !onHome
-            ? "bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-slate-200/60 dark:border-white/8 shadow-sm"
+            ? "bg-paper border-b-[3px] border-ink dark:border-white/85 shadow-comic-sm"
             : "bg-transparent"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between">
           {/* Logo */}
           <button
             onClick={goLogo}
-            className="flex items-center gap-1 text-lg font-bold tracking-tight group"
+            className="flex items-center gap-2.5 group"
           >
-            <span className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-white text-xs font-black">V</span>
-            <span className="text-slate-800 dark:text-white group-hover:text-accent transition-colors duration-200">Kannaujiya</span>
+            <span className="w-9 h-9 -rotate-6 rounded-xl bg-comic-yellow border-[3px] border-ink dark:border-white/85 shadow-comic-sm flex items-center justify-center text-ink text-base font-display group-hover:rotate-6 transition-transform duration-300">
+              V
+            </span>
+            <span className="font-display text-xl tracking-wide text-ink dark:text-white group-hover:text-accent transition-colors duration-200">
+              KANNAUJIYA
+            </span>
           </button>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-0.5">
+          <div className="hidden md:flex items-center gap-1">
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.label}
                 onClick={() => handleItem(item)}
-                className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
+                className={`relative px-3.5 py-2 text-sm font-bold rounded-lg transition-colors duration-200 ${
                   isActive(item)
-                    ? "text-accent"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    ? "text-ink"
+                    : "text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white"
                 }`}
               >
                 {isActive(item) && (
                   <motion.span
                     layoutId="nav-pill"
-                    className="absolute inset-0 bg-accent/10 dark:bg-accent/12 rounded-lg"
+                    className="absolute inset-0 -rotate-1 bg-comic-yellow border-2 border-ink rounded-lg"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
                   />
                 )}
@@ -138,7 +142,7 @@ const Navbar = () => {
               onClick={() => navigate("/studio")}
               aria-label="Open workspace"
               title="Workspace (private)"
-              className="p-2 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-200"
+              className="p-2 rounded-lg text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white hover:bg-ink/5 dark:hover:bg-white/5 transition-all duration-200"
             >
               <LayoutGrid size={18} />
             </button>
@@ -146,21 +150,21 @@ const Navbar = () => {
             <button
               onClick={toggleTheme}
               aria-label="Toggle theme"
-              className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-200"
+              className="p-2 rounded-lg text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white hover:bg-ink/5 dark:hover:bg-white/5 transition-all duration-200"
             >
               {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
             </button>
 
             <button
               onClick={goHire}
-              className="hidden md:inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 active:scale-95 transition-all duration-200 shadow-lg shadow-accent/25"
+              className="wobble-hover hidden md:inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-accent border-[3px] border-ink dark:border-white/85 text-white text-sm font-bold shadow-comic-sm hover:shadow-comic active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all duration-150"
             >
               Hire Me
             </button>
 
             <button
               onClick={() => setMobileOpen((o) => !o)}
-              className="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition"
+              className="md:hidden p-2 rounded-lg text-ink dark:text-white/80 hover:bg-ink/5 dark:hover:bg-white/5 transition"
               aria-label="Open menu"
             >
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
@@ -178,17 +182,17 @@ const Navbar = () => {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="fixed top-[65px] left-0 right-0 z-40 bg-white dark:bg-[#0a0a0a] border-b border-slate-200 dark:border-white/10 shadow-2xl md:hidden overflow-hidden"
+            className="fixed top-[61px] left-0 right-0 z-40 bg-paper border-b-[3px] border-ink dark:border-white/85 shadow-comic-lg md:hidden overflow-hidden"
           >
-            <div className="flex flex-col p-4 gap-1">
+            <div className="flex flex-col p-4 gap-1.5">
               {NAV_ITEMS.map((item) => (
                 <button
                   key={item.label}
                   onClick={() => handleItem(item)}
-                  className={`text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+                  className={`text-left px-4 py-3 rounded-xl font-bold transition-all duration-200 ${
                     isActive(item)
-                      ? "bg-accent/10 text-accent"
-                      : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5"
+                      ? "bg-comic-yellow border-2 border-ink text-ink"
+                      : "text-ink/80 dark:text-white/80 hover:bg-ink/5 dark:hover:bg-white/5"
                   }`}
                 >
                   {item.label}
@@ -196,7 +200,7 @@ const Navbar = () => {
               ))}
               <button
                 onClick={goHire}
-                className="mt-2 px-4 py-3 rounded-xl bg-accent text-white font-semibold text-center active:scale-95 transition-all"
+                className="mt-2 px-4 py-3 rounded-xl bg-accent border-[3px] border-ink text-white font-bold text-center shadow-comic-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
               >
                 Hire Me
               </button>

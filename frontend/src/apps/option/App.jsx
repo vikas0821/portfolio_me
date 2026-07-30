@@ -49,21 +49,21 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-bg text-txt">
+    <div className="min-h-screen bg-bg text-txt halftone-bg">
       {/* Navbar */}
-      <header className="sticky top-0 z-20 border-b border-border bg-bg/90 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b-[3px] border-border bg-bg">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 flex flex-wrap items-center justify-between gap-2">
           <button
             onClick={reset}
-            className="flex items-center gap-2 group"
+            className="flex items-center gap-2.5 group"
             title="Back to upload"
           >
-            <span className="text-2xl">📊</span>
+            <span className="text-2xl w-10 h-10 flex items-center justify-center -rotate-6 rounded-xl bg-warning border-[3px] border-border group-hover:rotate-6 transition-transform duration-300">📊</span>
             <div className="text-left leading-tight">
-              <div className="font-extrabold text-lg tracking-tight">
-                Option Chain <span className="text-neutral">Analyzer</span>
+              <div className="font-display text-lg tracking-wide">
+                OPTION CHAIN <span className="text-neutral">ANALYZER</span>
               </div>
-              <div className="text-[11px] text-muted">
+              <div className="text-[11px] text-muted font-sans">
                 NIFTY · OI · Probability · Strategy
               </div>
             </div>
@@ -75,7 +75,7 @@ export default function App() {
               onClick={toggleTheme}
               title="Toggle theme"
               aria-label="Toggle theme"
-              className="p-2 rounded-lg border border-border bg-card text-muted hover:text-txt transition-colors"
+              className="p-2 rounded-lg border-2 border-border bg-card text-muted hover:text-txt transition-colors"
             >
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
             </button>
@@ -84,7 +84,7 @@ export default function App() {
             <button
               onClick={toggleLang}
               title="Switch teaching language / सीखने की भाषा बदलें"
-              className="flex items-center rounded-lg text-xs font-bold border border-border bg-card overflow-hidden"
+              className="flex items-center rounded-lg text-xs font-bold border-2 border-border bg-card overflow-hidden"
             >
               <span
                 className={
@@ -109,9 +109,9 @@ export default function App() {
               onClick={toggleBeginner}
               title="Show plain-English explanations across the dashboard"
               className={
-                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors " +
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold border-2 transition-colors " +
                 (beginner
-                  ? "bg-bullish/15 border-bullish/50 text-bullish"
+                  ? "bg-bullish/15 border-bullish text-bullish"
                   : "bg-card border-border text-muted hover:text-txt")
               }
             >
@@ -134,12 +134,12 @@ export default function App() {
             {/* Learn / glossary */}
             <button
               onClick={() => openGlossary("")}
-              className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-card border border-border text-neutral hover:bg-neutral/10"
+              className="wobble-hover px-3 py-1.5 rounded-lg text-sm font-bold bg-comic-yellow border-2 border-border text-ink shadow-comic-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
             >
               📚 <span className="hidden sm:inline">Learn</span>
             </button>
 
-            <div className="flex items-center gap-1 bg-card border border-border rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-card border-2 border-border rounded-lg p-1">
               <ModeButton active={mode === "single"} onClick={() => setMode("single")}>
                 Single
               </ModeButton>
@@ -167,7 +167,7 @@ export default function App() {
           <div>
             <button
               onClick={reset}
-              className="mb-4 text-sm text-neutral hover:underline flex items-center gap-1"
+              className="mb-4 text-sm font-bold text-neutral hover:underline flex items-center gap-1"
             >
               ← New analysis
             </button>
@@ -176,7 +176,7 @@ export default function App() {
         )}
       </main>
 
-      <footer className="max-w-7xl mx-auto px-4 py-6 text-center text-xs text-muted">
+      <footer className="max-w-7xl mx-auto px-4 py-6 text-center text-xs text-muted font-sans">
         Local analytical tool · Not investment advice · For educational use only.
       </footer>
     </div>
@@ -188,7 +188,7 @@ function ModeButton({ active, onClick, children }) {
     <button
       onClick={onClick}
       className={
-        "px-3 py-1.5 rounded-md text-sm font-semibold transition-colors " +
+        "px-3 py-1.5 rounded-md text-sm font-bold transition-colors " +
         (active
           ? "bg-neutral/20 text-neutral"
           : "text-muted hover:text-txt")

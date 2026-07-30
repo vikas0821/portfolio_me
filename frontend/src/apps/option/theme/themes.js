@@ -85,17 +85,18 @@ export const DEFAULT_THEME = "midnight";
 
 // Portfolio-aligned token sets so the Option Analyzer matches the rest of the
 // site and follows the global light/dark toggle (instead of its own picker).
-// `neutral` is the portfolio's indigo accent. Light mirrors the linen canvas.
+// `neutral` is the portfolio's indigo accent. Comic paper/ink to match the
+// portfolio's comic-book redesign (halftone cream / noir black "paper").
 export const PORTFOLIO_OPTION_THEMES = {
   dark: {
-    bg: "#0a0a0a", card: "#141414", border: "#262626",
-    bullish: "#10b981", bearish: "#f43f5e", neutral: "#6366f1", warning: "#f59e0b",
-    txt: "#f1f5f9", muted: "#94a3b8",
+    bg: "#0f0d14", card: "#1b1722", border: "#f4f4f5",
+    bullish: "#2bb673", bearish: "#ff3b30", neutral: "#6366f1", warning: "#ffd23f",
+    txt: "#f1f5f9", muted: "#a3a3ad",
   },
   light: {
-    bg: "#f2efe8", card: "#fffdf8", border: "#e8e1d3",
-    bullish: "#059669", bearish: "#e11d48", neutral: "#4f46e5", warning: "#d97706",
-    txt: "#2c2922", muted: "#6b7280",
+    bg: "#fff4e0", card: "#fffaf0", border: "#141118",
+    bullish: "#2bb673", bearish: "#ff3b30", neutral: "#4f46e5", warning: "#d97706",
+    txt: "#141118", muted: "#6b6b75",
   },
 };
 

@@ -19,9 +19,9 @@ const BlogPostPage = () => {
   }, [slug]);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white">
+    <div className="min-h-screen bg-paper halftone-bg text-ink dark:text-white">
       <div className="max-w-3xl mx-auto px-6 pt-28 pb-16">
-        <Link to="/blog" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-accent transition mb-10">
+        <Link to="/blog" className="wobble-hover inline-flex items-center gap-2 text-sm font-bold text-ink/60 dark:text-white/60 hover:text-accent transition mb-10">
           <ArrowLeft size={16} /> All posts
         </Link>
 
@@ -30,16 +30,21 @@ const BlogPostPage = () => {
             <div className="w-8 h-8 border-2 border-accent/20 border-t-accent rounded-full animate-spin" />
           </div>
         ) : !post ? (
-          <div className="py-20 text-center">
-            <p className="text-slate-400 dark:text-slate-500 mb-4">Post not found.</p>
-            <Link to="/blog" className="text-accent font-semibold">Back to blog</Link>
+          <div className="comic-panel py-16 px-8 text-center">
+            <p className="text-ink/50 dark:text-white/50 mb-4 font-sans">Post not found.</p>
+            <Link to="/blog" className="text-accent font-bold">Back to blog</Link>
           </div>
         ) : (
-          <article>
-            <div className="flex items-center gap-1.5 text-sm text-slate-400 dark:text-slate-500 mb-3">
+          <article className="comic-panel p-6 sm:p-10">
+            <div className="flex items-center gap-1.5 text-sm font-bold text-ink/50 dark:text-white/50 mb-3">
               <Calendar size={14} /> {fmt(post.createdAt)}
             </div>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-8 leading-tight">{post.title}</h1>
+            <h1
+              className="font-display text-4xl md:text-5xl uppercase tracking-wide mb-8 leading-tight"
+              style={{ textShadow: "4px 4px 0 rgb(var(--accent-rgb))" }}
+            >
+              {post.title}
+            </h1>
             <Markdown>{post.content}</Markdown>
           </article>
         )}

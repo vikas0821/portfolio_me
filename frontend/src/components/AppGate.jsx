@@ -35,40 +35,45 @@ export default function AppGate({ title, subtitle, icon, tokenKey, onLogin, afte
   if (authed) return children;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white flex items-center justify-center px-4">
+    <div className="min-h-screen bg-paper halftone-bg text-ink dark:text-white flex items-center justify-center px-4">
       <button onClick={toggleTheme} aria-label="Toggle theme"
-        className="absolute top-4 right-4 p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition text-sm">
+        className="absolute top-4 right-4 p-2 rounded-lg text-ink/60 dark:text-white/60 hover:bg-ink/5 dark:hover:bg-white/5 transition text-sm">
         {theme === "light" ? "🌙" : "☀️"}
       </button>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 mb-4 text-accent">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-comic-yellow border-[3px] border-ink shadow-comic-sm mb-4 -rotate-3 text-ink">
             {icon || <Lock size={24} />}
           </div>
-          <h1 className="text-2xl font-bold">{title}</h1>
-          {subtitle && <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{subtitle}</p>}
+          <h1
+            className="font-display text-3xl uppercase tracking-wide text-ink dark:text-white"
+            style={{ textShadow: "3px 3px 0 rgb(var(--accent-rgb))" }}
+          >
+            {title}
+          </h1>
+          {subtitle && <p className="text-ink/60 dark:text-white/60 text-sm mt-2 font-sans">{subtitle}</p>}
         </div>
-        <form onSubmit={submit} className="bg-white dark:bg-[#141414] border border-slate-200 dark:border-white/8 rounded-2xl p-6 shadow-xl space-y-4">
+        <form onSubmit={submit} className="comic-panel p-6 space-y-4">
           <div className="relative">
-            <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/50 dark:text-white/50" />
             <input
               type={show ? "text" : "password"}
               value={pw}
               onChange={(e) => setPw(e.target.value)}
               placeholder="Password"
               required
-              className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-slate-50 dark:bg-[#0f0f0f] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/30 text-sm"
+              className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-paper border-2 border-ink dark:border-white/60 text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-accent/40 text-sm"
             />
-            <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+            <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/50 dark:text-white/50 hover:text-ink dark:hover:text-white">
               {show ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
-          <button type="submit" disabled={loading} className="w-full py-2.5 rounded-lg bg-accent text-white font-semibold text-sm hover:bg-accent/90 active:scale-95 transition disabled:opacity-50">
+          <button type="submit" disabled={loading} className="wobble-hover w-full py-2.5 rounded-lg bg-accent border-[3px] border-ink text-white font-display tracking-wide text-base shadow-comic-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-50">
             {loading ? "…" : "Unlock"}
           </button>
         </form>
-        <p className="text-center text-xs text-slate-500 dark:text-slate-600 mt-4">
-          <Link to="/studio" className="inline-flex items-center gap-1 hover:text-slate-700 dark:hover:text-slate-400 transition"><ArrowLeft size={12} /> Back to workspace</Link>
+        <p className="text-center text-xs text-ink/50 dark:text-white/50 mt-4 font-sans">
+          <Link to="/studio" className="inline-flex items-center gap-1 hover:text-accent transition"><ArrowLeft size={12} /> Back to workspace</Link>
         </p>
       </div>
     </div>

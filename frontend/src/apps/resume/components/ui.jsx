@@ -1,22 +1,22 @@
 // Shared UI kit for the Resume Builder — one consistent design language
-// (slate + accent, light/dark) used by every page.
+// (comic-panel + accent, light/dark) used by every page.
 import { Loader2 } from 'lucide-react';
 
 // ── Inputs ──────────────────────────────────────────────────────────────────
 export const inputCls =
-  'w-full bg-white dark:bg-[#0f0f0f] border border-slate-300 dark:border-white/10 rounded-lg px-3 py-2 text-sm ' +
-  'text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 ' +
-  'focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/60 transition';
+  'w-full bg-paper border-2 border-ink dark:border-white/60 rounded-lg px-3 py-2 text-sm ' +
+  'text-ink dark:text-white placeholder:text-ink/40 dark:placeholder:text-white/40 ' +
+  'focus:outline-none focus:ring-2 focus:ring-accent/40 transition';
 
 export const labelCls =
-  'block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1.5';
+  'block text-xs font-bold uppercase tracking-wide text-ink/60 dark:text-white/60 mb-1.5';
 
 export function Field({ label, hint, children, className = '' }) {
   return (
     <div className={className}>
       {label && <label className={labelCls}>{label}</label>}
       {children}
-      {hint && <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-ink/50 dark:text-white/50 font-sans">{hint}</p>}
     </div>
   );
 }
@@ -28,7 +28,7 @@ export const Select = (props) => <select {...props} className={`${inputCls} ${pr
 // ── Card ────────────────────────────────────────────────────────────────────
 export function Card({ children, className = '', padding = 'p-5' }) {
   return (
-    <div className={`bg-white dark:bg-[#161616] border border-slate-200 dark:border-white/10 rounded-2xl ${padding} ${className}`}>
+    <div className={`comic-panel ${padding} ${className}`}>
       {children}
     </div>
   );
@@ -36,11 +36,11 @@ export function Card({ children, className = '', padding = 'p-5' }) {
 
 // ── Button ──────────────────────────────────────────────────────────────────
 const VARIANTS = {
-  primary: 'bg-accent text-white hover:bg-accent/90 shadow-sm shadow-accent/20',
-  secondary: 'border border-slate-300 dark:border-white/15 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5',
-  ghost: 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white',
-  danger: 'border border-red-300 dark:border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10',
-  success: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-600/20',
+  primary: 'wobble-hover bg-accent border-[3px] border-ink text-white shadow-comic-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none',
+  secondary: 'border-2 border-ink dark:border-white/60 text-ink dark:text-white hover:bg-ink/5 dark:hover:bg-white/5',
+  ghost: 'text-ink/60 dark:text-white/60 hover:bg-ink/5 dark:hover:bg-white/5 hover:text-ink dark:hover:text-white',
+  danger: 'border-2 border-comic-red text-comic-red hover:bg-comic-red/10',
+  success: 'wobble-hover bg-comic-green border-[3px] border-ink text-ink shadow-comic-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none',
 };
 const SIZES = { sm: 'px-3 py-1.5 text-xs gap-1.5', md: 'px-4 py-2 text-sm gap-2', lg: 'px-5 py-2.5 text-sm gap-2' };
 
@@ -49,7 +49,7 @@ export function Button({ variant = 'secondary', size = 'md', loading, icon: Icon
     <button
       {...props}
       disabled={props.disabled || loading}
-      className={`inline-flex items-center justify-center font-semibold rounded-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
+      className={`inline-flex items-center justify-center font-bold rounded-lg transition-all disabled:opacity-50 disabled:pointer-events-none ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
     >
       {loading ? <Loader2 size={size === 'sm' ? 13 : 15} className="animate-spin" /> : Icon && <Icon size={size === 'sm' ? 13 : 15} />}
       {children}
@@ -62,8 +62,13 @@ export function PageHeader({ title, subtitle, children }) {
   return (
     <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>}
+        <h1
+          className="font-display text-3xl tracking-wide text-ink dark:text-white"
+          style={{ textShadow: '3px 3px 0 rgb(var(--accent-rgb))' }}
+        >
+          {title}
+        </h1>
+        {subtitle && <p className="mt-2 text-sm text-ink/60 dark:text-white/60 font-sans">{subtitle}</p>}
       </div>
       {children && <div className="flex items-center gap-2">{children}</div>}
     </div>
@@ -72,16 +77,16 @@ export function PageHeader({ title, subtitle, children }) {
 
 // ── Badge ───────────────────────────────────────────────────────────────────
 const BADGE = {
-  slate: 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300',
-  accent: 'bg-accent/10 text-accent',
-  blue: 'bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300',
-  amber: 'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300',
-  green: 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-  red: 'bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-300',
-  purple: 'bg-purple-100 dark:bg-purple-500/15 text-purple-700 dark:text-purple-300',
+  slate: 'bg-paper border-ink dark:border-white/50 text-ink dark:text-white',
+  accent: 'bg-accent/15 border-accent/50 text-accent',
+  blue: 'bg-comic-blue/20 border-ink dark:border-white/50 text-ink dark:text-white',
+  amber: 'bg-comic-yellow/40 border-ink dark:border-white/50 text-ink dark:text-white',
+  green: 'bg-comic-green/25 border-ink dark:border-white/50 text-ink dark:text-white',
+  red: 'bg-comic-red/20 border-ink dark:border-white/50 text-ink dark:text-white',
+  purple: 'bg-comic-pink/20 border-ink dark:border-white/50 text-ink dark:text-white',
 };
 export function Badge({ color = 'slate', className = '', children }) {
-  return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${BADGE[color]} ${className}`}>{children}</span>;
+  return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border-2 ${BADGE[color]} ${className}`}>{children}</span>;
 }
 export const STATUS_BADGE = { applied: 'slate', replied: 'blue', interview: 'amber', offer: 'green', rejected: 'red', ghosted: 'purple' };
 
@@ -89,9 +94,9 @@ export const STATUS_BADGE = { applied: 'slate', replied: 'blue', interview: 'amb
 export function EmptyState({ icon: Icon, title, hint, action }) {
   return (
     <Card className="text-center" padding="p-8 sm:p-12">
-      {Icon && <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-4 text-slate-400"><Icon size={22} /></div>}
-      <p className="font-semibold text-slate-700 dark:text-slate-200">{title}</p>
-      {hint && <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">{hint}</p>}
+      {Icon && <div className="w-14 h-14 rounded-2xl bg-comic-yellow border-[3px] border-ink flex items-center justify-center mx-auto mb-4 text-ink rotate-3"><Icon size={22} /></div>}
+      <p className="font-display text-lg tracking-wide text-ink dark:text-white">{title}</p>
+      {hint && <p className="mt-1 text-sm text-ink/50 dark:text-white/50 font-sans">{hint}</p>}
       {action && <div className="mt-5 flex justify-center">{action}</div>}
     </Card>
   );
@@ -99,7 +104,7 @@ export function EmptyState({ icon: Icon, title, hint, action }) {
 
 export function Loading({ label = 'Loading…' }) {
   return (
-    <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500 py-12 justify-center">
+    <div className="flex items-center gap-2 text-ink/50 dark:text-white/50 py-12 justify-center font-sans">
       <Loader2 size={16} className="animate-spin" /> {label}
     </div>
   );
@@ -110,11 +115,11 @@ export function StatCard({ label, value, sub, icon: Icon, accent }) {
   return (
     <Card padding="p-5">
       <div className="flex items-start justify-between">
-        <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</div>
-        {Icon && <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${accent ? 'bg-accent/10 text-accent' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}><Icon size={15} /></div>}
+        <div className="text-xs font-bold uppercase tracking-wide text-ink/50 dark:text-white/50">{label}</div>
+        {Icon && <div className={`w-9 h-9 rounded-lg flex items-center justify-center border-2 border-ink ${accent ? 'bg-comic-yellow text-ink' : 'bg-paper text-ink/50 dark:text-white/50'}`}><Icon size={15} /></div>}
       </div>
-      <div className="mt-2 text-3xl font-bold tabular-nums text-slate-900 dark:text-white">{value}</div>
-      {sub && <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">{sub}</div>}
+      <div className="mt-2 font-display text-3xl tabular-nums text-ink dark:text-white">{value}</div>
+      {sub && <div className="mt-1 text-xs text-ink/50 dark:text-white/50 font-sans">{sub}</div>}
     </Card>
   );
 }
@@ -122,14 +127,14 @@ export function StatCard({ label, value, sub, icon: Icon, accent }) {
 // ── Segmented control (tabs) ──────────────────────────────────────────────────
 export function Segmented({ options, value, onChange }) {
   return (
-    <div className="flex w-full sm:w-auto sm:inline-flex p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+    <div className="flex w-full sm:w-auto sm:inline-flex p-1 rounded-xl bg-paper border-2 border-ink dark:border-white/60">
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
-          className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
-            value === o.value ? 'bg-white dark:bg-[#222] text-accent shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+          className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-sm font-bold transition-colors ${
+            value === o.value ? 'bg-comic-yellow text-ink border-2 border-ink' : 'text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white'
           }`}
         >
           {o.icon && <o.icon size={15} className="shrink-0" />} {o.label}

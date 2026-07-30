@@ -15,35 +15,40 @@ const BlogPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white">
+    <div className="min-h-screen bg-paper halftone-bg text-ink dark:text-white">
       <div className="max-w-3xl mx-auto px-6 pt-28 pb-16">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-accent transition mb-10">
+        <Link to="/" className="wobble-hover inline-flex items-center gap-2 text-sm font-bold text-ink/60 dark:text-white/60 hover:text-accent transition mb-10">
           <ArrowLeft size={16} /> Back to portfolio
         </Link>
 
-        <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-3">Blog</h1>
-        <p className="text-slate-500 dark:text-slate-400 mb-12">Thoughts, notes, and write-ups.</p>
+        <h1
+          className="font-display text-5xl md:text-6xl uppercase tracking-wide mb-3"
+          style={{ textShadow: "5px 5px 0 rgb(var(--accent-rgb))" }}
+        >
+          Blog
+        </h1>
+        <p className="text-ink/60 dark:text-white/60 mb-12 font-sans">Thoughts, notes, and write-ups.</p>
 
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="w-8 h-8 border-2 border-accent/20 border-t-accent rounded-full animate-spin" />
           </div>
         ) : posts.length === 0 ? (
-          <p className="text-slate-400 dark:text-slate-500 py-12 text-center">No posts yet.</p>
+          <p className="text-ink/50 dark:text-white/50 py-12 text-center font-sans">No posts yet.</p>
         ) : (
-          <div className="space-y-4">
-            {posts.map((post) => (
+          <div className="space-y-5">
+            {posts.map((post, i) => (
               <Link
                 key={post._id || post.slug}
                 to={`/blog/${post.slug}`}
-                className="group block p-6 rounded-2xl bg-white dark:bg-zinc-900/80 border border-slate-200/80 dark:border-white/8 hover:border-accent/35 hover:shadow-lg transition-all duration-300"
+                className={`comic-panel group block p-6 ${i % 2 === 0 ? "-rotate-1" : "rotate-1"} hover:rotate-0`}
               >
-                <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 mb-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-ink/50 dark:text-white/50 mb-2">
                   <Calendar size={12} /> {fmt(post.createdAt)}
                 </div>
-                <h2 className="text-xl font-bold group-hover:text-accent transition-colors">{post.title}</h2>
-                {post.excerpt && <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{post.excerpt}</p>}
-                <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-accent">
+                <h2 className="font-display text-2xl tracking-wide group-hover:text-accent transition-colors">{post.title}</h2>
+                {post.excerpt && <p className="mt-2 text-sm text-ink/70 dark:text-white/70 leading-relaxed font-sans">{post.excerpt}</p>}
+                <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-bold text-accent">
                   Read more <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
                 </span>
               </Link>

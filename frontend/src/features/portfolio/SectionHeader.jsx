@@ -17,21 +17,22 @@ const SectionHeader = ({ meta = {}, eyebrow, heading, subtitle }) => {
       transition={{ duration: 0.6 }}
       className="relative text-center mb-16"
     >
-      {/* soft gradient glow behind the heading (matches the hub) */}
-      <div className="pointer-events-none absolute left-1/2 -top-10 -translate-x-1/2 w-[min(420px,90vw)] h-[220px] bg-accent/10 dark:bg-accent/12 rounded-full blur-[90px]" />
-
       {e && (
-        <div className="relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-5">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-          <span className="text-xs font-semibold text-accent uppercase tracking-widest">{e}</span>
+        <div className="inline-block -rotate-2 mb-6">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-comic-yellow border-[3px] border-ink dark:border-white/85 rounded-full shadow-comic-sm text-xs font-bold text-ink uppercase tracking-widest">
+            ★ {e}
+          </span>
         </div>
       )}
-      <h2 className="relative text-4xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
+      <h2
+        className="relative text-5xl md:text-6xl font-display uppercase tracking-wide text-ink dark:text-white px-2"
+        style={{ textShadow: "4px 4px 0 rgb(var(--accent-rgb))" }}
+      >
         {h}
       </h2>
-      <div className="relative mx-auto mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-indigo-500 via-accent to-violet-500" />
+      <div className="mx-auto mt-5 h-2.5 w-24 rotate-1 rounded-full bg-comic-red border-2 border-ink dark:border-white/70" />
       {s && (
-        <p className="relative mt-4 text-slate-500 dark:text-slate-400 max-w-lg mx-auto leading-relaxed">{s}</p>
+        <p className="relative mt-5 text-ink/70 dark:text-white/70 max-w-lg mx-auto leading-relaxed font-sans">{s}</p>
       )}
     </motion.div>
   );

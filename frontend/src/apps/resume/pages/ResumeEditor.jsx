@@ -8,7 +8,7 @@ function Section({ title, children, onAdd, addLabel }) {
   return (
     <Card className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="font-semibold text-slate-900 dark:text-white">{title}</h2>
+        <h2 className="font-display text-lg tracking-wide text-ink dark:text-white">{title}</h2>
         {onAdd && <Button variant="secondary" size="sm" icon={Plus} onClick={onAdd}>{addLabel || 'Add'}</Button>}
       </div>
       {children}
@@ -26,10 +26,10 @@ function BulletsEditor({ bullets, onChange }) {
       {bullets.map((b, i) => (
         <div key={i} className="flex gap-2">
           <Input value={b} onChange={e => update(i, e.target.value)} />
-          <button onClick={() => remove(i)} className="text-slate-300 hover:text-red-500 shrink-0"><Trash2 size={15} /></button>
+          <button onClick={() => remove(i)} className="text-ink/30 dark:text-white/30 hover:text-comic-red shrink-0"><Trash2 size={15} /></button>
         </div>
       ))}
-      <button onClick={add} className="text-xs font-medium text-accent hover:underline">+ Add bullet</button>
+      <button onClick={add} className="text-xs font-bold text-accent hover:underline">+ Add bullet</button>
     </div>
   );
 }
@@ -76,16 +76,16 @@ export default function ResumeEditor() {
   };
 
   const delBtn = (key, i) => (
-    <button onClick={() => removeAt(key, i)} className="text-slate-300 hover:text-red-500 mb-2 shrink-0"><Trash2 size={16} /></button>
+    <button onClick={() => removeAt(key, i)} className="text-ink/30 dark:text-white/30 hover:text-comic-red mb-2 shrink-0"><Trash2 size={16} /></button>
   );
 
   return (
     <div className="space-y-4 pb-10">
       {/* Sticky action bar */}
-      <div className="flex flex-wrap justify-between items-center gap-3 sticky top-14 lg:top-0 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-[#f2efe8]/90 dark:bg-[#0a0a0a]/90 backdrop-blur z-10 border-b border-slate-200 dark:border-white/10">
+      <div className="flex flex-wrap justify-between items-center gap-3 sticky top-14 lg:top-0 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-paper/95 backdrop-blur z-10 border-b-[3px] border-ink dark:border-white/70">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">{resume.variantName}</h1>
-          <Link to="/resume-builder/variants" className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400 hover:text-accent transition-colors">
+          <h1 className="font-display text-2xl tracking-wide text-ink dark:text-white">{resume.variantName}</h1>
+          <Link to="/resume-builder/variants" className="inline-flex items-center gap-1 text-sm font-bold text-ink/60 dark:text-white/60 hover:text-accent transition-colors">
             <ArrowLeft size={13} /> Variants
           </Link>
         </div>
@@ -101,10 +101,10 @@ export default function ResumeEditor() {
 
       {previewFiles && (
         <Card padding="p-4" className="flex flex-wrap items-center gap-4">
-          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Generated:</span>
-          <a href={previewFiles.html} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"><Eye size={14} /> HTML</a>
-          <a href={previewFiles.pdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"><Download size={14} /> PDF</a>
-          {previewFiles.docx && <a href={previewFiles.docx} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"><Download size={14} /> DOCX</a>}
+          <span className="text-sm font-bold text-ink dark:text-white">Generated:</span>
+          <a href={previewFiles.html} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-accent hover:underline"><Eye size={14} /> HTML</a>
+          <a href={previewFiles.pdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-accent hover:underline"><Download size={14} /> PDF</a>
+          {previewFiles.docx && <a href={previewFiles.docx} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-accent hover:underline"><Download size={14} /> DOCX</a>}
         </Card>
       )}
 
@@ -136,7 +136,7 @@ export default function ResumeEditor() {
 
       <Section title="Experience" addLabel="Add job" onAdd={() => setArr('experience', [...resume.experience, { role: '', company: '', location: '', duration: '', bullets: [] }])}>
         {resume.experience.map((exp, i) => (
-          <div key={i} className="border border-slate-200 dark:border-white/10 rounded-xl p-4 space-y-3">
+          <div key={i} className="border-2 border-ink/20 dark:border-white/20 rounded-xl p-4 space-y-3">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Role"><Input value={exp.role} onChange={e => mapAt('experience', i, { role: e.target.value })} /></Field>
               <Field label="Company"><Input value={exp.company} onChange={e => mapAt('experience', i, { company: e.target.value })} /></Field>
@@ -144,20 +144,20 @@ export default function ResumeEditor() {
               <Field label="Duration"><Input value={exp.duration} onChange={e => mapAt('experience', i, { duration: e.target.value })} /></Field>
             </div>
             <BulletsEditor bullets={exp.bullets} onChange={(bullets) => mapAt('experience', i, { bullets })} />
-            <button onClick={() => removeAt('experience', i)} className="text-xs font-medium text-red-500 hover:underline">Remove this job</button>
+            <button onClick={() => removeAt('experience', i)} className="text-xs font-bold text-comic-red hover:underline">Remove this job</button>
           </div>
         ))}
       </Section>
 
       <Section title="Projects" addLabel="Add project" onAdd={() => setArr('projects', [...resume.projects, { name: '', tech: '', bullets: [] }])}>
         {resume.projects.map((p, i) => (
-          <div key={i} className="border border-slate-200 dark:border-white/10 rounded-xl p-4 space-y-3">
+          <div key={i} className="border-2 border-ink/20 dark:border-white/20 rounded-xl p-4 space-y-3">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Project name"><Input value={p.name} onChange={e => mapAt('projects', i, { name: e.target.value })} /></Field>
               <Field label="Tech stack"><Input value={p.tech} onChange={e => mapAt('projects', i, { tech: e.target.value })} /></Field>
             </div>
             <BulletsEditor bullets={p.bullets} onChange={(bullets) => mapAt('projects', i, { bullets })} />
-            <button onClick={() => removeAt('projects', i)} className="text-xs font-medium text-red-500 hover:underline">Remove project</button>
+            <button onClick={() => removeAt('projects', i)} className="text-xs font-bold text-comic-red hover:underline">Remove project</button>
           </div>
         ))}
       </Section>

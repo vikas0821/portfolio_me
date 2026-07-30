@@ -5,7 +5,7 @@ function DropZone({ label, file, onFile }) {
   // tap/click hits the real input directly (programmatically clicking a hidden
   // input is blocked on mobile browsers). It also handles drag-drop natively.
   return (
-    <div className="relative rounded-xl border-2 border-dashed border-border bg-card p-8 text-center transition-colors hover:border-neutral/60 focus-within:border-neutral">
+    <div className="relative rounded-2xl border-[3px] border-dashed border-border bg-card p-8 text-center transition-colors hover:border-neutral focus-within:border-neutral">
       {/* No `accept` filter — Android file pickers wrongly grey out valid .csv
           files; the backend validates/parses the CSV instead. */}
       <input
@@ -17,20 +17,20 @@ function DropZone({ label, file, onFile }) {
       <div className="pointer-events-none">
         <div className="text-3xl mb-2">{file ? "✅" : "📁"}</div>
         {label && (
-          <div className="text-xs uppercase tracking-wide text-muted mb-1">
+          <div className="text-xs uppercase tracking-wide text-muted mb-1 font-bold">
             {label}
           </div>
         )}
         {file ? (
-          <div className="text-sm font-semibold text-bullish break-all">
+          <div className="text-sm font-bold text-bullish break-all">
             {file.name}
           </div>
         ) : (
           <>
-            <div className="text-sm font-medium text-txt">
+            <div className="text-sm font-bold text-txt">
               Drag &amp; drop CSV here
             </div>
-            <div className="text-xs text-muted mt-1">or tap to browse</div>
+            <div className="text-xs text-muted mt-1 font-sans">or tap to browse</div>
           </>
         )}
       </div>
@@ -57,10 +57,13 @@ export default function UploadPanel({
   return (
     <div className="max-w-3xl mx-auto">
       <div className="text-center mb-6">
-        <h1 className="text-2xl sm:text-3xl font-extrabold">
+        <h1
+          className="font-display text-3xl sm:text-4xl uppercase tracking-wide"
+          style={{ textShadow: "3px 3px 0 rgb(var(--c-neutral))" }}
+        >
           Analyze your NSE Option Chain
         </h1>
-        <p className="text-muted mt-2 text-sm">
+        <p className="text-muted mt-3 text-sm font-sans">
           Upload an NSE option-chain CSV and get probability scores, key levels,
           charts and a suggested strategy.
         </p>
@@ -76,7 +79,7 @@ export default function UploadPanel({
         </TabButton>
       </div>
 
-      <div className="bg-card border border-border rounded-2xl p-5 sm:p-6">
+      <div className="bg-card border-[3px] border-border rounded-2xl p-5 sm:p-6 shadow-comic-sm">
         {mode === "single" ? (
           <DropZone file={file} onFile={setFile} />
         ) : (

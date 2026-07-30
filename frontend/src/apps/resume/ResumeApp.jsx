@@ -27,11 +27,11 @@ export default function ResumeApp() {
 
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Mobile top bar */}
-        <div className="lg:hidden sticky top-0 z-20 flex items-center gap-3 h-14 px-4 bg-white/95 dark:bg-[#0d0d0d]/95 backdrop-blur border-b border-slate-200 dark:border-white/10">
-          <button onClick={() => setOpen(true)} aria-label="Open menu" className="p-2 -ml-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5">
+        <div className="lg:hidden sticky top-0 z-20 flex items-center gap-3 h-14 px-4 bg-paper border-b-[3px] border-ink dark:border-white/70">
+          <button onClick={() => setOpen(true)} aria-label="Open menu" className="p-2 -ml-2 rounded-lg text-ink/70 dark:text-white/70 hover:bg-ink/5 dark:hover:bg-white/5">
             <Menu size={20} />
           </button>
-          <span className="font-bold tracking-tight text-slate-900 dark:text-white">Resume OS</span>
+          <span className="font-display text-base tracking-wide text-ink dark:text-white">Resume OS</span>
         </div>
 
         <main className="flex-1 p-4 sm:p-6 max-w-6xl mx-auto w-full">

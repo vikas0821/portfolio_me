@@ -22,12 +22,12 @@ const fmtDate = (d) => d ? new Date(d).toISOString().slice(0, 10) : "";
 // ─── Shared UI atoms ─────────────────────────────────────────────────────────
 
 const Label = ({ children }) => (
-  <span className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">{children}</span>
+  <span className="block text-xs font-bold text-white/50 uppercase tracking-wider mb-1">{children}</span>
 );
 
 const Input = ({ className = "", ...p }) => (
   <input
-    className={`w-full px-3 py-2 rounded-lg bg-[#0f0f0f] border border-white/10 text-white placeholder:text-slate-600 focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/30 text-sm transition ${className}`}
+    className={`w-full px-3 py-2 rounded-lg bg-paper border-2 border-white/60 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-accent/40 text-sm transition ${className}`}
     {...p}
   />
 );
@@ -35,22 +35,22 @@ const Input = ({ className = "", ...p }) => (
 const Textarea = ({ rows = 3, className = "", ...p }) => (
   <textarea
     rows={rows}
-    className={`w-full px-3 py-2 rounded-lg bg-[#0f0f0f] border border-white/10 text-white placeholder:text-slate-600 focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/30 text-sm transition resize-y ${className}`}
+    className={`w-full px-3 py-2 rounded-lg bg-paper border-2 border-white/60 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-accent/40 text-sm transition resize-y ${className}`}
     {...p}
   />
 );
 
 const Btn = ({ variant = "primary", size = "sm", className = "", children, ...p }) => {
   const variants = {
-    primary: "bg-accent text-white hover:bg-accent/90",
-    ghost: "border border-white/10 text-slate-300 hover:bg-white/5",
-    danger: "bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20",
-    success: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20",
+    primary: "wobble-hover bg-accent border-[3px] border-white/85 text-white shadow-comic-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
+    ghost: "border-2 border-white/40 text-white/70 hover:bg-white/5",
+    danger: "border-2 border-comic-red text-comic-red hover:bg-comic-red/10",
+    success: "wobble-hover bg-comic-green border-[3px] border-white/85 text-ink shadow-comic-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none",
   };
   const sizes = { sm: "px-3 py-1.5 text-xs", md: "px-4 py-2 text-sm", lg: "px-6 py-3 text-base" };
   return (
     <button
-      className={`inline-flex items-center gap-1.5 rounded-lg font-medium transition disabled:opacity-40 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-lg font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
       {...p}
     >
       {children}
@@ -59,12 +59,12 @@ const Btn = ({ variant = "primary", size = "sm", className = "", children, ...p 
 };
 
 const Card = ({ children, className = "" }) => (
-  <div className={`bg-[#141414] border border-white/8 rounded-xl p-5 ${className}`}>{children}</div>
+  <div className={`comic-panel p-5 ${className}`}>{children}</div>
 );
 
 const Badge = ({ children, color = "slate" }) => {
-  const c = { slate: "bg-slate-800 text-slate-300", gold: "bg-accent/15 text-accent", green: "bg-emerald-500/15 text-emerald-400", red: "bg-red-500/15 text-red-400" };
-  return <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-medium ${c[color]}`}>{children}</span>;
+  const c = { slate: "bg-paper border-white/50 text-white", gold: "bg-comic-yellow/25 border-white/50 text-white", green: "bg-comic-green/25 border-white/50 text-white", red: "bg-comic-red/20 border-white/50 text-white" };
+  return <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-bold border-2 ${c[color]}`}>{children}</span>;
 };
 
 const Spinner = () => (
@@ -74,7 +74,7 @@ const Spinner = () => (
 );
 
 const Empty = ({ text }) => (
-  <p className="text-center text-slate-500 py-10 text-sm">{text}</p>
+  <p className="text-center text-white/50 py-10 text-sm font-sans">{text}</p>
 );
 
 // ─── Confirm delete dialog ────────────────────────────────────────────────────
@@ -83,10 +83,10 @@ const useConfirm = () => {
   const [state, setState] = useState({ open: false, resolve: null, msg: "" });
   const confirm = (msg) => new Promise((resolve) => setState({ open: true, resolve, msg }));
   const Dialog = state.open ? (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="bg-[#1c1c1c] border border-white/10 rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl">
-        <p className="text-white font-semibold mb-2">Confirm Delete</p>
-        <p className="text-slate-400 text-sm mb-6">{state.msg}</p>
+    <div className="dark fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+      <div className="comic-panel p-6 max-w-sm w-full mx-4">
+        <p className="text-white font-display text-lg tracking-wide mb-2">Confirm Delete</p>
+        <p className="text-white/60 text-sm mb-6 font-sans">{state.msg}</p>
         <div className="flex gap-3 justify-end">
           <Btn variant="ghost" onClick={() => { state.resolve(false); setState({ open: false }); }}>Cancel</Btn>
           <Btn variant="danger" onClick={() => { state.resolve(true); setState({ open: false }); }}>Delete</Btn>
@@ -102,8 +102,13 @@ const useConfirm = () => {
 const Section = ({ title, description, children }) => (
   <div>
     <div className="mb-6">
-      <h2 className="text-xl font-bold text-white">{title}</h2>
-      {description && <p className="text-slate-500 text-sm mt-1">{description}</p>}
+      <h2
+        className="font-display text-2xl tracking-wide text-white"
+        style={{ textShadow: "3px 3px 0 rgb(var(--accent-rgb))" }}
+      >
+        {title}
+      </h2>
+      {description && <p className="text-white/50 text-sm mt-2 font-sans">{description}</p>}
     </div>
     {children}
   </div>
@@ -300,8 +305,8 @@ const ProjectForm = ({ initial = emptyProject(), onSave, onCancel, saving }) => 
         <div><Label>Scale metric</Label><Input value={f.metrics?.scale || ""} onChange={(e) => setM("scale", e.target.value)} placeholder="50k req/day" /></div>
       </div>
       <label className="flex items-center gap-2 cursor-pointer">
-        <input type="checkbox" className="accent-indigo-500 w-4 h-4" checked={Boolean(f.isFeatured)} onChange={(e) => set("isFeatured", e.target.checked)} />
-        <span className="text-sm text-slate-300">Featured project</span>
+        <input type="checkbox" className="accent-[rgb(var(--accent-rgb))] w-4 h-4" checked={Boolean(f.isFeatured)} onChange={(e) => set("isFeatured", e.target.checked)} />
+        <span className="text-sm text-white/70 font-sans">Featured project</span>
       </label>
       <div className="flex gap-2 justify-end">
         <Btn type="button" variant="ghost" onClick={onCancel}><X size={14} /> Cancel</Btn>
@@ -352,7 +357,7 @@ const ProjectsSection = () => {
                         <p className="font-semibold text-white truncate">{p.name}</p>
                         {p.isFeatured && <Badge color="gold">Featured</Badge>}
                       </div>
-                      <p className="text-slate-400 text-xs mt-1 line-clamp-2">{p.description}</p>
+                      <p className="text-white/50 text-xs mt-1 line-clamp-2 font-sans">{p.description}</p>
                       <div className="flex flex-wrap gap-1 mt-2">{(p.techStack || []).slice(0, 5).map((t) => <Badge key={t}>{t}</Badge>)}</div>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
@@ -391,8 +396,8 @@ const ExpForm = ({ initial = emptyExp(), onSave, onCancel, saving }) => {
         <div><Label>End Date</Label><Input type="date" value={f.endDate} disabled={f.isCurrent} onChange={(e) => set("endDate", e.target.value)} /></div>
         <div className="flex items-end pb-1">
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" className="accent-indigo-500 w-4 h-4" checked={Boolean(f.isCurrent)} onChange={(e) => set("isCurrent", e.target.checked)} />
-            <span className="text-sm text-slate-300">Currently working here</span>
+            <input type="checkbox" className="accent-[rgb(var(--accent-rgb))] w-4 h-4" checked={Boolean(f.isCurrent)} onChange={(e) => set("isCurrent", e.target.checked)} />
+            <span className="text-sm text-white/70 font-sans">Currently working here</span>
           </label>
         </div>
       </div>
@@ -445,7 +450,7 @@ const ExperienceSection = () => {
                     <div>
                       <p className="font-semibold text-white">{e.role}</p>
                       <p className="text-accent text-sm">{e.company}</p>
-                      <p className="text-slate-500 text-xs mt-0.5">{e.location} · {e.isCurrent ? "Present" : fmtDate(e.endDate)}</p>
+                      <p className="text-white/50 text-xs mt-0.5 font-sans">{e.location} · {e.isCurrent ? "Present" : fmtDate(e.endDate)}</p>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
                       <Btn variant="ghost" onClick={() => setEditId(e._id)}><Pencil size={13} /></Btn>
@@ -525,8 +530,8 @@ const EducationSection = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="font-semibold text-white">{e.qualification}</p>
-                      <p className="text-slate-400 text-sm">{e.institution}</p>
-                      <p className="text-slate-500 text-xs mt-0.5">{e.score} · {e.year}</p>
+                      <p className="text-white/60 text-sm font-sans">{e.institution}</p>
+                      <p className="text-white/50 text-xs mt-0.5 font-sans">{e.score} · {e.year}</p>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
                       <Btn variant="ghost" onClick={() => setEditId(e._id)}><Pencil size={13} /></Btn>
@@ -610,7 +615,7 @@ const CertificationsSection = () => {
                     <div>
                       <p className="font-semibold text-white text-sm">{c.title}</p>
                       <p className="text-accent text-xs mt-0.5">{c.platform}</p>
-                      <p className="text-slate-500 text-xs">{c.issuer} {c.year && `· ${c.year}`}</p>
+                      <p className="text-white/50 text-xs font-sans">{c.issuer} {c.year && `· ${c.year}`}</p>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
                       <Btn variant="ghost" onClick={() => setEditId(c._id)}><Pencil size={13} /></Btn>
@@ -660,8 +665,8 @@ const MessagesSection = () => {
                     {!m.read && <Badge color="gold">New</Badge>}
                   </div>
                   <p className="text-accent text-xs flex items-center gap-1"><Mail size={11} />{m.email}</p>
-                  <p className="text-slate-300 text-sm mt-2 leading-relaxed">{m.message}</p>
-                  <p className="text-slate-600 text-xs mt-2">{new Date(m.createdAt).toLocaleString()}</p>
+                  <p className="text-white/70 text-sm mt-2 leading-relaxed font-sans">{m.message}</p>
+                  <p className="text-white/40 text-xs mt-2 font-sans">{new Date(m.createdAt).toLocaleString()}</p>
                 </div>
                 <div className="flex gap-2 flex-shrink-0">
                   {!m.read && <Btn variant="success" onClick={() => markRead(m._id)}><Check size={13} /> Read</Btn>}
@@ -729,13 +734,13 @@ const SettingsSection = () => {
       <div className="space-y-4">
         {/* Appearance */}
         <Card>
-          <h3 className="font-semibold text-white mb-4">Appearance</h3>
+          <h3 className="font-display text-lg tracking-wide text-white mb-4">Appearance</h3>
           <div className="flex items-center gap-4">
             <input
               type="color"
               value={form.accentColor || "#4f46e5"}
               onChange={(e) => onAccent(e.target.value)}
-              className="w-12 h-10 rounded-lg bg-transparent border border-white/10 cursor-pointer"
+              className="w-12 h-10 rounded-lg bg-transparent border-2 border-white/60 cursor-pointer"
             />
             <div className="flex-1 max-w-xs">
               <Label>Accent color (hex)</Label>
@@ -746,7 +751,7 @@ const SettingsSection = () => {
 
         {/* SEO */}
         <Card>
-          <h3 className="font-semibold text-white mb-4">SEO</h3>
+          <h3 className="font-display text-lg tracking-wide text-white mb-4">SEO</h3>
           <div className="space-y-3">
             <div><Label>Browser tab title</Label><Input value={form.seo?.title || ""} onChange={(e) => setPath(["seo", "title"], e.target.value)} /></div>
             <div><Label>Meta description</Label><Textarea value={form.seo?.description || ""} onChange={(e) => setPath(["seo", "description"], e.target.value)} /></div>
@@ -755,7 +760,7 @@ const SettingsSection = () => {
 
         {/* Hero */}
         <Card>
-          <h3 className="font-semibold text-white mb-4">Hero</h3>
+          <h3 className="font-display text-lg tracking-wide text-white mb-4">Hero</h3>
           <div className="grid md:grid-cols-3 gap-3">
             <div><Label>Badge text</Label><Input value={form.hero?.badge || ""} onChange={(e) => setPath(["hero", "badge"], e.target.value)} /></div>
             <div><Label>Primary button</Label><Input value={form.hero?.ctaPrimaryLabel || ""} onChange={(e) => setPath(["hero", "ctaPrimaryLabel"], e.target.value)} /></div>
@@ -765,10 +770,10 @@ const SettingsSection = () => {
 
         {/* Sections */}
         <Card>
-          <h3 className="font-semibold text-white mb-4">Section headings</h3>
+          <h3 className="font-display text-lg tracking-wide text-white mb-4">Section headings</h3>
           <div className="space-y-5">
             {SECTION_KEYS.map(([key, label]) => (
-              <div key={key} className="border-b border-white/5 pb-4 last:border-0 last:pb-0">
+              <div key={key} className="border-b-2 border-white/15 pb-4 last:border-0 last:pb-0">
                 <p className="text-xs font-bold text-accent uppercase tracking-wider mb-2">{label}</p>
                 <div className="grid md:grid-cols-3 gap-3">
                   <div><Label>Eyebrow</Label><Input value={form.sections?.[key]?.eyebrow || ""} onChange={(e) => setPath(["sections", key, "eyebrow"], e.target.value)} /></div>
@@ -782,7 +787,7 @@ const SettingsSection = () => {
 
         {/* Footer */}
         <Card>
-          <h3 className="font-semibold text-white mb-4">Footer</h3>
+          <h3 className="font-display text-lg tracking-wide text-white mb-4">Footer</h3>
           <div className="space-y-3">
             <div><Label>Tagline</Label><Textarea rows={2} value={form.footer?.tagline || ""} onChange={(e) => setPath(["footer", "tagline"], e.target.value)} /></div>
             <div><Label>CTA text</Label><Textarea rows={2} value={form.footer?.ctaText || ""} onChange={(e) => setPath(["footer", "ctaText"], e.target.value)} /></div>
@@ -824,7 +829,7 @@ const BlogForm = ({ initial = emptyPost(), onSave, onCancel, saving }) => {
           </button>
         </div>
         {preview
-          ? <div className="rounded-lg bg-[#0f0f0f] border border-white/10 p-4 min-h-[200px]"><Markdown>{f.content}</Markdown></div>
+          ? <div className="rounded-lg bg-paper border-2 border-white/60 p-4 min-h-[200px]"><Markdown>{f.content}</Markdown></div>
           : <Textarea rows={14} value={f.content} onChange={(e) => set("content", e.target.value)} placeholder={"## Heading\n\nWrite your post in **Markdown**.\n\n```js\nconst x = 1;\n```"} />
         }
       </div>
@@ -875,8 +880,8 @@ const BlogAdminSection = () => {
                     <div className="min-w-0">
                       <p className="font-semibold text-white truncate">{p.title}</p>
                       <p className="text-accent text-xs mt-0.5 font-mono">/blog/{p.slug}</p>
-                      {p.excerpt && <p className="text-slate-400 text-xs mt-1 line-clamp-2">{p.excerpt}</p>}
-                      <p className="text-slate-600 text-xs mt-1">{new Date(p.createdAt).toLocaleDateString()}</p>
+                      {p.excerpt && <p className="text-white/50 text-xs mt-1 line-clamp-2 font-sans">{p.excerpt}</p>}
+                      <p className="text-white/40 text-xs mt-1 font-sans">{new Date(p.createdAt).toLocaleDateString()}</p>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
                       <Btn variant="ghost" onClick={() => setEditId(p._id)}><Pencil size={13} /></Btn>
@@ -938,21 +943,22 @@ const LoginScreen = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
-      {/* Gradient blob */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-3xl" />
-      </div>
+    <div className="dark min-h-screen bg-paper halftone-bg flex items-center justify-center px-4">
       <div className="relative w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 mb-4">
-            <LayoutDashboard size={26} className="text-accent" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-comic-yellow border-[3px] border-white/85 shadow-comic-sm mb-4 -rotate-3">
+            <LayoutDashboard size={26} className="text-ink" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
-          <p className="text-slate-500 text-sm mt-1">Portfolio management dashboard</p>
+          <h1
+            className="font-display text-3xl uppercase tracking-wide text-white"
+            style={{ textShadow: "3px 3px 0 rgb(var(--accent-rgb))" }}
+          >
+            Admin Panel
+          </h1>
+          <p className="text-white/60 text-sm mt-2 font-sans">Portfolio management dashboard</p>
         </div>
 
-        <form onSubmit={submit} className="bg-[#141414] border border-white/8 rounded-2xl p-6 shadow-2xl space-y-4">
+        <form onSubmit={submit} className="comic-panel p-6 space-y-4">
           <div>
             <Label>Password</Label>
             <div className="relative">
@@ -964,7 +970,7 @@ const LoginScreen = ({ onLogin }) => {
                 required
                 className="pr-10"
               />
-              <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+              <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white">
                 {show ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
@@ -974,13 +980,13 @@ const LoginScreen = ({ onLogin }) => {
             {loading ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : "Sign In"}
           </Btn>
 
-          <p className="text-center text-xs text-slate-600">
-            Default: <code className="text-slate-400">admin@portfolio2025</code>
+          <p className="text-center text-xs text-white/40 font-sans">
+            Default: <code className="text-white/60">admin@portfolio2025</code>
           </p>
         </form>
 
-        <p className="text-center text-xs text-slate-600 mt-4">
-          <a href="/studio" className="hover:text-slate-400 transition">← Back to workspace</a>
+        <p className="text-center text-xs text-white/40 mt-4 font-sans">
+          <a href="/studio" className="hover:text-accent transition">← Back to workspace</a>
         </p>
       </div>
     </div>
@@ -994,34 +1000,34 @@ const AdminLayout = ({ activeSection, onNavigate, onLogout, children }) => {
   const current = NAV.find((n) => n.id === activeSection);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white flex">
+    <div className="dark min-h-screen bg-paper halftone-bg text-white flex">
       {/* Mobile overlay */}
       {sidebarOpen && <div className="fixed inset-0 bg-black/60 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       {/* Sidebar */}
-      <aside className={`fixed lg:sticky top-0 h-screen w-64 bg-[#111111] border-r border-white/8 flex flex-col z-30 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
+      <aside className={`fixed lg:sticky top-0 h-screen w-64 bg-paper border-r-[3px] border-white/70 flex flex-col z-30 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
         {/* Brand */}
-        <div className="px-5 py-5 border-b border-white/8">
+        <div className="px-5 py-5 border-b-[3px] border-white/70">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/20 flex items-center justify-center">
-              <LayoutDashboard size={16} className="text-accent" />
+            <div className="w-9 h-9 -rotate-6 rounded-xl bg-comic-yellow border-2 border-white/85 flex items-center justify-center">
+              <LayoutDashboard size={16} className="text-ink" />
             </div>
             <div>
-              <p className="font-bold text-sm text-white">Portfolio Admin</p>
-              <p className="text-xs text-slate-500">Content Manager</p>
+              <p className="font-display text-base tracking-wide text-white">Portfolio Admin</p>
+              <p className="text-xs text-white/50">Content Manager</p>
             </div>
           </div>
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
           {NAV.map(({ id, label, icon: Icon }) => {
             const active = activeSection === id;
             return (
               <button
                 key={id}
                 onClick={() => { onNavigate(id); setSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${active ? "bg-accent/10 text-accent border border-accent/15" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition border-2 ${active ? "bg-comic-yellow border-white/85 text-ink" : "border-transparent text-white/60 hover:bg-white/5 hover:text-white"}`}
               >
                 <Icon size={16} />
                 {label}
@@ -1032,10 +1038,10 @@ const AdminLayout = ({ activeSection, onNavigate, onLogout, children }) => {
 
         {/* Footer */}
         <div className="px-3 pb-4">
-          <a href="/" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-500 hover:text-white hover:bg-white/5 transition mb-1">
+          <a href="/" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold text-white/60 hover:text-white hover:bg-white/5 transition mb-1">
             <Eye size={16} /> View Portfolio
           </a>
-          <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition">
+          <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold text-comic-red hover:bg-comic-red/10 transition">
             <LogOut size={16} /> Logout
           </button>
         </div>
@@ -1044,13 +1050,13 @@ const AdminLayout = ({ activeSection, onNavigate, onLogout, children }) => {
       {/* Main */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-10 bg-[#0f0f0f]/90 backdrop-blur border-b border-white/8 px-5 py-3 flex items-center gap-4">
-          <button onClick={() => setSidebarOpen((o) => !o)} className="lg:hidden text-slate-400 hover:text-white p-1">
+        <header className="sticky top-0 z-10 bg-paper/95 backdrop-blur border-b-[3px] border-white/70 px-5 py-3 flex items-center gap-4">
+          <button onClick={() => setSidebarOpen((o) => !o)} className="lg:hidden text-white/60 hover:text-white p-1">
             <LayoutDashboard size={20} />
           </button>
           <div>
-            <h1 className="font-semibold text-white text-sm">{current?.label || "Dashboard"}</h1>
-            <p className="text-xs text-slate-500">Portfolio Admin</p>
+            <h1 className="font-display text-base tracking-wide text-white">{current?.label || "Dashboard"}</h1>
+            <p className="text-xs text-white/50">Portfolio Admin</p>
           </div>
         </header>
 

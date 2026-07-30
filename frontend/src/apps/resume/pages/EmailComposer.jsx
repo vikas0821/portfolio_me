@@ -57,11 +57,11 @@ export default function EmailComposer() {
       <PageHeader title="Compose email" subtitle={`${app.role} at ${app.company}`} />
 
       {sent ? (
-        <Card className="border-emerald-300/70 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20">
-          <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-semibold">
+        <Card className="!border-comic-green bg-comic-green/15">
+          <div className="flex items-center gap-2 text-ink dark:text-white font-bold">
             <CheckCircle2 size={18} /> Email sent to {email.to}
           </div>
-          <Link to="/resume-builder/applications" className="inline-flex items-center gap-1 mt-3 text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:gap-2 transition-all">
+          <Link to="/resume-builder/applications" className="inline-flex items-center gap-1 mt-3 text-sm font-bold text-ink dark:text-white hover:gap-2 transition-all">
             Back to applications <ArrowRight size={14} />
           </Link>
         </Card>
@@ -77,7 +77,7 @@ export default function EmailComposer() {
           <Field label="Body"><Textarea rows={12} value={email.bodyText} onChange={e => setEmail({ ...email, bodyText: e.target.value })} /></Field>
 
           <Field label="Attachments">
-            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-600 dark:text-slate-300">
+            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-ink/70 dark:text-white/70 font-sans">
               <label className="flex items-center gap-2"><input type="checkbox" checked={attachFormats.pdf} onChange={e => setAttachFormats(a => ({ ...a, pdf: e.target.checked }))} /> Résumé (PDF)</label>
               <label className="flex items-center gap-2"><input type="checkbox" checked={attachFormats.docx} onChange={e => setAttachFormats(a => ({ ...a, docx: e.target.checked }))} /> Résumé (DOCX)</label>
               {app.generatedFiles?.coverLetter && (

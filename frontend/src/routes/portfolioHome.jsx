@@ -21,20 +21,20 @@ const LoadingSkeleton = () => {
     return () => clearTimeout(t);
   }, []);
   return (
-  <div className="min-h-screen bg-white dark:bg-[#050505] flex items-center justify-center px-6">
-    <div className="text-center space-y-5 max-w-xs">
+  <div className="min-h-screen bg-paper halftone-bg flex items-center justify-center px-6">
+    <div className="comic-panel text-center space-y-4 max-w-xs p-8 -rotate-1">
       <div className="relative mx-auto w-14 h-14">
-        <div className="absolute inset-0 rounded-full border-2 border-accent/20" />
-        <div className="absolute inset-0 rounded-full border-2 border-t-accent animate-spin" />
-        <div className="absolute inset-2 rounded-full bg-accent/10 flex items-center justify-center">
-          <span className="text-accent font-black text-sm">V</span>
+        <div className="absolute inset-0 rounded-full border-[3px] border-ink/15" />
+        <div className="absolute inset-0 rounded-full border-[3px] border-t-accent animate-spin" />
+        <div className="absolute inset-2 rounded-full bg-comic-yellow border-2 border-ink flex items-center justify-center">
+          <span className="text-ink font-display text-sm">V</span>
         </div>
       </div>
       <div>
-        <p className="text-sm font-semibold text-slate-700 dark:text-white">
+        <p className="font-display text-lg tracking-wide text-ink dark:text-white">
           {slow ? "Waking up the server…" : "Loading portfolio"}
         </p>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 leading-relaxed">
+        <p className="text-xs text-ink/50 dark:text-white/50 mt-1.5 leading-relaxed font-sans">
           {slow ? "Free hosting sleeps when idle — the first load can take up to ~30s. Thanks for your patience!" : "Please wait..."}
         </p>
       </div>
@@ -44,16 +44,16 @@ const LoadingSkeleton = () => {
 };
 
 const ErrorState = ({ message }) => (
-  <div className="min-h-screen bg-white dark:bg-[#050505] flex items-center justify-center px-6">
-    <div className="text-center max-w-md">
-      <div className="w-16 h-16 rounded-2xl bg-red-100 dark:bg-red-500/10 border border-red-200/60 dark:border-red-500/20 flex items-center justify-center mx-auto mb-6">
-        <span className="text-2xl">⚠️</span>
+  <div className="min-h-screen bg-paper halftone-bg flex items-center justify-center px-6">
+    <div className="comic-panel text-center max-w-md p-8">
+      <div className="w-16 h-16 rounded-2xl bg-comic-red border-[3px] border-ink flex items-center justify-center mx-auto mb-6 rotate-3">
+        <span className="text-3xl">⚠️</span>
       </div>
-      <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-3">Something went wrong</h2>
-      <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 leading-relaxed">{message}</p>
+      <h2 className="font-display text-2xl tracking-wide text-ink dark:text-white mb-3">Uh oh, something broke</h2>
+      <p className="text-ink/60 dark:text-white/60 text-sm mb-6 leading-relaxed font-sans">{message}</p>
       <button
         onClick={() => window.location.reload()}
-        className="px-6 py-3 rounded-xl bg-accent text-white font-bold text-sm hover:bg-accent/90 active:scale-95 transition-all shadow-lg shadow-accent/25"
+        className="wobble-hover px-6 py-3 rounded-xl bg-accent border-[3px] border-ink text-white font-display tracking-wide shadow-comic-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
       >
         Try Again
       </button>

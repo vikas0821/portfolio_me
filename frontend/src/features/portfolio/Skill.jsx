@@ -3,23 +3,18 @@ import { useInView } from "react-intersection-observer";
 import SectionHeader from "./SectionHeader";
 
 const CATEGORY_META = {
-  Frontend:        { emoji: "⚡", color: "from-blue-500/20 to-cyan-500/10", dot: "bg-blue-400" },
-  Backend:         { emoji: "🔧", color: "from-green-500/20 to-emerald-500/10", dot: "bg-green-400" },
-  Database:        { emoji: "🗄️", color: "from-purple-500/20 to-violet-500/10", dot: "bg-purple-400" },
-  "DevOps & Tools":{ emoji: "🐳", color: "from-orange-500/20 to-red-500/10", dot: "bg-orange-400" },
+  Frontend:        { emoji: "⚡", strip: "bg-comic-blue" },
+  Backend:         { emoji: "🔧", strip: "bg-comic-green" },
+  Database:        { emoji: "🗄️", strip: "bg-comic-pink" },
+  "DevOps & Tools":{ emoji: "🐳", strip: "bg-comic-yellow" },
 };
 
-const TAG_COLORS = [
-  "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200/60 dark:border-blue-500/20",
-  "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-300 border-green-200/60 dark:border-green-500/20",
-  "bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-200/60 dark:border-purple-500/20",
-  "bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-200/60 dark:border-orange-500/20",
-];
+const TAG_COLORS = ["bg-comic-yellow", "bg-comic-blue", "bg-comic-pink", "bg-comic-green"];
 
 const SkillCard = ({ skill, index }) => {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
-  const meta = CATEGORY_META[skill.category] || { emoji: "🛠️", color: "from-slate-500/10 to-transparent", dot: "bg-slate-400" };
-  const tagColor = TAG_COLORS[index % TAG_COLORS.length];
+  const meta = CATEGORY_META[skill.category] || { emoji: "🛠️", strip: "bg-comic-yellow" };
+  const rotate = index % 2 === 0 ? "-rotate-1" : "rotate-1";
 
   return (
     <motion.div
@@ -27,37 +22,29 @@ const SkillCard = ({ skill, index }) => {
       initial={{ opacity: 0, y: 32 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.08, ease: [0.25, 0.1, 0.25, 1] }}
-      className="group relative p-6 rounded-2xl bg-white dark:bg-zinc-900/80 border border-slate-200/80 dark:border-white/8 hover:border-accent/35 hover:shadow-xl hover:shadow-accent/5 transition-all duration-300 overflow-hidden"
+      className={`comic-panel group relative p-6 overflow-hidden ${rotate} hover:rotate-0`}
     >
-      {/* Card gradient bg */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${meta.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-
-      <div className="relative z-10">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-5">
-          <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${meta.color} flex items-center justify-center text-xl border border-slate-200/60 dark:border-white/8 group-hover:scale-110 transition-transform duration-300`}>
-            {meta.emoji}
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">{skill.category}</h3>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
-              <span className="text-xs text-slate-400 dark:text-slate-500">{(skill.items || []).length} technologies</span>
-            </div>
-          </div>
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-5">
+        <div className={`w-12 h-12 rounded-xl ${meta.strip} border-[3px] border-ink flex items-center justify-center text-xl group-hover:-rotate-12 transition-transform duration-300`}>
+          {meta.emoji}
         </div>
-
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2">
-          {(skill.items || []).map((item) => (
-            <span
-              key={item}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 group-hover:border-accent/30 group-hover:text-accent group-hover:bg-accent/8 ${tagColor}`}
-            >
-              {item}
-            </span>
-          ))}
+        <div>
+          <h3 className="font-display text-xl tracking-wide text-ink dark:text-white">{skill.category}</h3>
+          <p className="text-xs text-ink/50 dark:text-white/50 font-bold">{(skill.items || []).length} technologies</p>
         </div>
+      </div>
+
+      {/* Tags */}
+      <div className="flex flex-wrap gap-2">
+        {(skill.items || []).map((item, i) => (
+          <span
+            key={item}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold border-2 border-ink text-ink ${TAG_COLORS[(index + i) % TAG_COLORS.length]}`}
+          >
+            {item}
+          </span>
+        ))}
       </div>
     </motion.div>
   );
@@ -65,7 +52,7 @@ const SkillCard = ({ skill, index }) => {
 
 const Skills = ({ skills = [], meta }) => {
   return (
-    <section id="skills" className="scroll-mt-20 py-28 px-6 bg-slate-50/80 dark:bg-zinc-950">
+    <section id="skills" className="scroll-mt-20 py-28 px-6 bg-paper halftone-bg">
       <div className="max-w-6xl mx-auto">
         <SectionHeader
           meta={meta}
@@ -75,7 +62,7 @@ const Skills = ({ skills = [], meta }) => {
         />
 
         {/* Cards grid */}
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-2 gap-8">
           {skills.map((skill, i) => (
             <SkillCard key={skill.category || i} skill={skill} index={i} />
           ))}
@@ -88,9 +75,9 @@ const Skills = ({ skills = [], meta }) => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-center mt-12 text-sm text-slate-400 dark:text-slate-600"
+            className="text-center mt-14 font-display text-lg tracking-wide text-ink/60 dark:text-white/60"
           >
-            Always learning &amp; adapting to new technologies
+            ALWAYS LEARNING &amp; ADAPTING TO NEW TECH
           </motion.p>
         )}
       </div>

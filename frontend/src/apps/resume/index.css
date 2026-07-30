@@ -1,10 +1,12 @@
 /* Resume Builder styles — scoped to .resume-root so they don't leak into the
    portfolio. Tailwind directives live in the portfolio's index.css (one build).
-   Canvas matches the portfolio: warm linen in light, near-black in dark. */
+   Canvas matches the portfolio's comic-book redesign: halftone paper. */
 .resume-root {
-  @apply text-slate-700 dark:text-slate-200 min-h-screen;
-  background-color: #f2efe8;
+  @apply text-ink dark:text-white min-h-screen;
+  background-color: rgb(var(--paper-rgb));
+  background-image: radial-gradient(rgba(20, 17, 24, 0.16) 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
 }
 .dark .resume-root {
-  background-color: #0a0a0a;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.14) 1.5px, transparent 1.5px);
 }

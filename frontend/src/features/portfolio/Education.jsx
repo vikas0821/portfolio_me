@@ -16,36 +16,36 @@ const EduCard = ({ edu, index, isLast }) => {
     >
       {/* Timeline */}
       <div className="flex flex-col items-center flex-shrink-0">
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent to-violet-500 flex items-center justify-center shadow-lg shadow-accent/25 z-10">
-          <GraduationCap size={18} className="text-white" />
+        <div className="w-12 h-12 rounded-full bg-comic-pink border-[3px] border-ink flex items-center justify-center shadow-comic-sm z-10">
+          <GraduationCap size={19} className="text-ink" />
         </div>
         {!isLast && (
-          <div className="flex-1 w-px bg-gradient-to-b from-accent/30 to-slate-200 dark:to-white/5 mt-3" style={{ minHeight: "24px" }} />
+          <div className="flex-1 w-[3px] border-l-[3px] border-dashed border-ink/30 dark:border-white/25 mt-3" style={{ minHeight: "24px" }} />
         )}
       </div>
 
       {/* Card */}
-      <div className="flex-1 pb-7">
-        <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900/80 border border-slate-200/80 dark:border-white/8 hover:border-accent/30 hover:shadow-lg transition-all duration-300">
+      <div className="flex-1 pb-8">
+        <div className="comic-panel p-6">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">{edu.qualification}</h3>
-              <p className="text-accent font-semibold text-sm mt-1">{edu.institution}</p>
+              <h3 className="font-display text-lg tracking-wide text-ink dark:text-white">{edu.qualification}</h3>
+              <p className="text-accent font-bold text-sm mt-1">{edu.institution}</p>
               {edu.location && (
                 <div className="flex items-center gap-1 mt-1.5">
-                  <MapPin size={12} className="text-slate-400" />
-                  <span className="text-xs text-slate-400 dark:text-slate-500">{edu.location}</span>
+                  <MapPin size={12} className="text-ink/40 dark:text-white/40" />
+                  <span className="text-xs text-ink/50 dark:text-white/50">{edu.location}</span>
                 </div>
               )}
             </div>
             <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
               {edu.year && (
-                <span className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200/60 dark:border-white/8 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <span className="px-3 py-1.5 rounded-lg bg-comic-yellow border-2 border-ink text-xs font-bold text-ink rotate-1">
                   {edu.year}
                 </span>
               )}
               {edu.score && (
-                <span className="text-xs font-semibold text-accent bg-accent/10 border border-accent/20 px-2.5 py-1 rounded-lg">
+                <span className="text-xs font-bold text-accent bg-accent/10 border-2 border-accent/40 px-2.5 py-1 rounded-lg">
                   {edu.score}
                 </span>
               )}
@@ -61,7 +61,7 @@ const Education = ({ education = [], meta }) => {
   if (education.length === 0) return null;
 
   return (
-    <section id="education" className="scroll-mt-20 py-28 px-6 bg-white dark:bg-[#050505]">
+    <section id="education" className="scroll-mt-20 py-28 px-6 bg-paper">
       <div className="max-w-4xl mx-auto">
         <SectionHeader
           meta={meta}

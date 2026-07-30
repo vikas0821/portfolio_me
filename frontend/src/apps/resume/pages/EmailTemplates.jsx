@@ -38,10 +38,10 @@ export default function EmailTemplates() {
         <Button variant="primary" icon={Plus} onClick={create}>New Template</Button>
       </PageHeader>
 
-      <Card padding="p-4" className="mb-5 bg-slate-50 dark:bg-[#0f0f0f]">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-2">Available placeholders</p>
+      <Card padding="p-4" className="mb-5">
+        <p className="text-xs font-bold uppercase tracking-wide text-ink/50 dark:text-white/50 mb-2">Available placeholders</p>
         <div className="flex flex-wrap gap-1.5">
-          {PLACEHOLDERS.map(p => <code key={p} className="text-xs px-2 py-0.5 rounded-md bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-accent">{`{{${p}}}`}</code>)}
+          {PLACEHOLDERS.map(p => <code key={p} className="text-xs px-2 py-0.5 rounded-md bg-paper border-2 border-ink/30 dark:border-white/30 text-accent">{`{{${p}}}`}</code>)}
         </div>
       </Card>
 
