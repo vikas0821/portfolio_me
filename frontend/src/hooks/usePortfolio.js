@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchPortfolio } from "../api/portfolioService";
 import { applyAccent } from "../lib/accent";
+import portfolioFallback from "../data/portfolioFallback";
 
 const applySeo = (seo) => {
   if (!seo) return;
@@ -16,27 +17,38 @@ const applySeo = (seo) => {
   }
 };
 
+// Renders instantly with bundled fallback content (Render's free tier sleeps
+// after inactivity — the first request can take 30-60s to wake it up) while
+// polling the real API in the background. As soon as live data arrives it
+// silently replaces the fallback; failed attempts retry with backoff instead
+// of surfacing an error, since the visitor already has a working page.
 const usePortfolio = () => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [data, setData] = useState(portfolioFallback);
 
   useEffect(() => {
-    fetchPortfolio()
-      .then((result) => {
-        if (result) {
-          setData(result);
-          if (result.settings) {
-            applyAccent(result.settings.accentColor);
-            applySeo(result.settings.seo);
-          }
-        } else setError("Failed to load portfolio data");
-      })
-      .catch(() => setError("Failed to load portfolio"))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    let timer;
+
+    const attempt = async (delay) => {
+      const result = await fetchPortfolio({ silent: true });
+      if (cancelled) return;
+      if (result) {
+        setData(result);
+        if (result.settings) {
+          applyAccent(result.settings.accentColor);
+          applySeo(result.settings.seo);
+        }
+        return;
+      }
+      const next = Math.min(delay * 1.5, 10000);
+      timer = setTimeout(() => attempt(next), next);
+    };
+
+    attempt(2000);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, []);
 
-  return { data, loading, error };
+  return { data };
 };
 
 export default usePortfolio;

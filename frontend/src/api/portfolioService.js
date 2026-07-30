@@ -8,12 +8,15 @@ function extractData(response) {
   return null;
 }
 
-export const fetchPortfolio = async () => {
+export const fetchPortfolio = async ({ silent = false } = {}) => {
   try {
     const response = await axiosInstance.get("/portfolio/getPortfolio");
-    return extractData(response);
+    const data = response.data;
+    if (data.responseCode === "00") return data.data;
+    if (!silent) toast.error(data.responseMessage || "Something went wrong");
+    return null;
   } catch (error) {
-    toast.error(error?.response?.data?.responseMessage || error.message || "Error fetching portfolio");
+    if (!silent) toast.error(error?.response?.data?.responseMessage || error.message || "Error fetching portfolio");
     return null;
   }
 };
