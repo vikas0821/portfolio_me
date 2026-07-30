@@ -1,4 +1,4 @@
-# Applies to the frontend (newclient) build context
+# Applies to the frontend build context
 node_modules
 dist
 .env

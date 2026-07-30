@@ -51,7 +51,7 @@ Secrets/ports are overridable via `.env` (see `.env.example`): `JWT_SECRET`,
 
 ```
 backend/      FastAPI app (routers, models, services, seed) + Dockerfile
-newclient/    React SPA (src/routes, src/apps/{resume,option}, src/features) + nginx + Dockerfile
+frontend/     React SPA (src/routes, src/apps/{resume,option}, src/features) + nginx + Dockerfile
 docker-compose.yml   MongoDB + backend + frontend
 DEPLOY.md     MongoDB Atlas + Render + Vercel deploy guide
 ```

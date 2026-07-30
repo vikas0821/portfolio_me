@@ -1,25 +1,14 @@
-"""Admin CRUD — mirrors the old /api/v1/admin contract (camelCase fields)."""
-import re
+"""Admin CRUD — portfolio content: profile, skills, projects, experience,
+education, certifications. Split out of routers/admin.py."""
 from datetime import datetime
 from fastapi import APIRouter, Depends, Body
-from pydantic import BaseModel
 from pymongo import DESCENDING
-from ..database import db, find, find_one, insert, get_by_id, update_by_id, delete_by_id
-from ..auth import login as do_login, require_role
-from ..defaults import get_or_create_settings
-from .. import serializers as S
+from ...database import find, find_one, insert, get_by_id, update_by_id, delete_by_id
+from ...auth import require_role
+from ... import serializers as S
 
-router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
+router = APIRouter(tags=["admin"])
 admin_only = Depends(require_role("admin"))
-
-
-class LoginIn(BaseModel):
-    password: str
-
-
-@router.post("/login")
-def admin_login(body: LoginIn):
-    return {"responseCode": "00", "token": do_login("admin", body.password)}
 
 
 def _parse_date(v):
@@ -259,90 +248,3 @@ def update_cert(cid: str, data: dict = Body(...)):
 def delete_cert(cid: str):
     delete_by_id("certifications", cid)
     return S.ok({"id": cid})
-
-
-# ── Messages ──────────────────────────────────────────────────────────────
-@router.get("/messages", dependencies=[admin_only])
-def list_messages():
-    return S.ok([S.message(m) for m in find("contact_messages", sort=[("created_at", DESCENDING)])])
-
-
-@router.delete("/messages/{mid}", dependencies=[admin_only])
-def delete_message(mid: str):
-    delete_by_id("contact_messages", mid)
-    return S.ok({"id": mid})
-
-
-@router.patch("/messages/{mid}/read", dependencies=[admin_only])
-def mark_read(mid: str):
-    update_by_id("contact_messages", mid, {"read": True})
-    return S.ok({"id": mid})
-
-
-# ── Site Settings (single document) ─────────────────────────────────────────
-@router.get("/settings", dependencies=[admin_only])
-def get_settings():
-    return S.ok(S.settings(get_or_create_settings()))
-
-
-@router.put("/settings", dependencies=[admin_only])
-def update_settings(data: dict = Body(...)):
-    s = get_or_create_settings()
-    changes = {}
-    if "accentColor" in data:
-        changes["accent_color"] = data["accentColor"]
-    for f in ("seo", "hero", "sections", "footer"):
-        if f in data and isinstance(data[f], dict):
-            changes[f] = {**(getattr(s, f) or {}), **data[f]}
-    s = update_by_id("site_settings", s.id, changes) if changes else s
-    return S.ok(S.settings(s))
-
-
-# ── Blog ──────────────────────────────────────────────────────────────────
-def _slugify(text):
-    s = re.sub(r"[^a-z0-9\s-]", "", (text or "").lower()).strip()
-    s = re.sub(r"\s+", "-", s)
-    return re.sub(r"-+", "-", s).strip("-")
-
-
-def _excerpt(content, fallback):
-    if fallback:
-        return fallback
-    plain = re.sub(r"\s+", " ", re.sub(r"[#*`>_~\-]", "", content or "")).strip()
-    return plain[:157] + "…" if len(plain) > 160 else plain
-
-
-@router.get("/blog", dependencies=[admin_only])
-def list_blog():
-    return S.ok([S.blog_full(b) for b in find("blog_posts", sort=[("created_at", DESCENDING)])])
-
-
-@router.post("/blog", dependencies=[admin_only])
-def create_blog(data: dict = Body(...)):
-    return _save_blog(None, data)
-
-
-@router.put("/blog/{bid}", dependencies=[admin_only])
-def update_blog(bid: str, data: dict = Body(...)):
-    return _save_blog(bid, data)
-
-
-@router.delete("/blog/{bid}", dependencies=[admin_only])
-def delete_blog(bid: str):
-    delete_by_id("blog_posts", bid)
-    return S.ok({"id": bid})
-
-
-def _save_blog(bid, data):
-    title = data.get("title", "")
-    content = data.get("content", "")
-    slug = _slugify(data.get("slug") or title) or f"post-{int(datetime.utcnow().timestamp())}"
-    clash = find_one("blog_posts", {"slug": slug})
-    if clash and clash.id != bid:
-        slug = f"{slug}-{int(datetime.utcnow().timestamp())}"
-    doc = {
-        "title": title, "content": content, "excerpt": _excerpt(content, data.get("excerpt", "")),
-        "slug": slug, "updated_at": datetime.utcnow(),
-    }
-    b = update_by_id("blog_posts", bid, doc) if bid else insert("blog_posts", doc)
-    return S.ok(S.blog_full(b))

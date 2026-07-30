@@ -43,7 +43,7 @@ services:
 
   frontend:
     build:
-      context: ./newclient
+      context: ./frontend
       args:
         VITE_API_URL: /api/v1/
         VITE_OPTION_API_URL: /api/v1/option

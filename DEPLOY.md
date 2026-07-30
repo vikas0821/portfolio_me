@@ -61,7 +61,7 @@ system libs (Pango/Cairo) — no Puppeteer/Chromium needed.
 
 The SPA reads its API base URLs at **build time**. Point them at the Render backend.
 
-1. New Project → import repo → **Root Directory: `newclient`** → Framework **Vite**.
+1. New Project → import repo → **Root Directory: `frontend`** → Framework **Vite**.
 2. Environment variables (Production):
 
    | Key | Value |
@@ -70,7 +70,7 @@ The SPA reads its API base URLs at **build time**. Point them at the Render back
    | `VITE_OPTION_API_URL` | `https://YOUR-BACKEND.onrender.com/api/v1/option` |
    | `VITE_RESUME_API_URL` | `https://YOUR-BACKEND.onrender.com` |
 
-3. SPA routing — `newclient/vercel.json` must rewrite all paths to `index.html` so
+3. SPA routing — `frontend/vercel.json` must rewrite all paths to `index.html` so
    `/portfolio`, `/admin`, `/resume-builder/...` deep-link correctly:
    ```json
    { "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }

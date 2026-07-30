@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .config import settings
 from .database import init_db
-from .routers import auth, portfolio, admin, notes, option, apps, resume
+from .routers import auth, portfolio, admin, notes, option, apps, resume, applications, email
 
 
 @asynccontextmanager
@@ -48,6 +48,8 @@ app.include_router(notes.router)
 app.include_router(option.router)
 app.include_router(apps.router)
 app.include_router(resume.router)
+app.include_router(applications.router)
+app.include_router(email.router)
 
 # Serve generated resume/cover-letter files
 os.makedirs(settings.output_dir, exist_ok=True)
