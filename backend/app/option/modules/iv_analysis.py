@@ -33,4 +33,11 @@ def get_iv_summary(df: pd.DataFrame, atm: float) -> dict:
         "iv_max": round(iv_max, 2),
         "iv_mean": round(iv_mean, 2),
         "iv_rank": iv_rank,
+        # Named "iv_rank" for convenience but this is NOT the standard
+        # historical IV Rank/Percentile (that needs a trailing IV history,
+        # which this tool doesn't persist) — it's today's ATM IV positioned
+        # between today's own min/max IV across the chain. Kept honest here
+        # so any consumer of the raw JSON (not just the Python docstring
+        # above) sees the caveat.
+        "iv_rank_note": "Same-day cross-sectional proxy, not a historical percentile.",
     }

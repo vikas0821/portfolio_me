@@ -1,5 +1,7 @@
 """Probability scoring engine: 9 weighted parameters -> directional bias."""
 
+import math
+
 import pandas as pd
 
 from app.option.config import ATM_ZONE_RANGE, PROBABILITY_WEIGHTS
@@ -16,6 +18,34 @@ def _signal(score: float) -> str:
 
 def _clamp(value: float, lo: float = -100.0, hi: float = 100.0) -> float:
     return max(lo, min(hi, value))
+
+
+def _percentages(weighted_score: float) -> tuple[float, float, float]:
+    """Convert a [-100, 100] weighted score to (bullish, bearish, sideways) %
+    via a symmetric softmax. All three logits are exactly 0 at
+    weighted_score == 0, so that case lands on a true even three-way split
+    (and therefore SIDEWAYS as the argmax direction), instead of a
+    hard-coded bullish-leaning baseline. As |score| grows, the matching
+    directional logit rises while the sideways logit (driven by |score|
+    alone) falls — weak signals naturally favor sideways and strong signals
+    dominate, with no special-cased late "boost" step and no discontinuity
+    anywhere.
+    """
+    s = _clamp(weighted_score)
+    bull_logit = s / 60.0
+    bear_logit = -s / 60.0
+    side_logit = -abs(s) / 100.0
+    exps = {
+        "BULLISH": math.exp(bull_logit),
+        "BEARISH": math.exp(bear_logit),
+        "SIDEWAYS": math.exp(side_logit),
+    }
+    total_exp = sum(exps.values())
+    return (
+        exps["BULLISH"] / total_exp * 100,
+        exps["BEARISH"] / total_exp * 100,
+        exps["SIDEWAYS"] / total_exp * 100,
+    )
 
 
 # ── Individual parameter scorers ─────────────────────────────────────────────
@@ -49,17 +79,20 @@ def _score_pcr(pcr_oi: float) -> dict:
 
 def _score_max_pain(spot: float, max_pain: float) -> dict:
     distance = spot - max_pain
-    if distance > 200:
+    # Bucketed on % of spot (not fixed index points) so this scales the same
+    # way for any underlying/index level, not just ~25,000-level NIFTY.
+    pct = (distance / spot * 100) if spot else 0.0
+    if pct > 0.8:
         score, meaning = -70, "Spot far above Max Pain, strong pull down"
-    elif distance > 100:
+    elif pct > 0.4:
         score, meaning = -40, "Spot above Max Pain, pull down"
-    elif distance > 50:
+    elif pct > 0.2:
         score, meaning = -20, "Spot slightly above, mild pull down"
-    elif distance >= -50:
+    elif pct >= -0.2:
         score, meaning = 0, "Spot near Max Pain, likely to stay"
-    elif distance >= -100:
+    elif pct >= -0.4:
         score, meaning = 20, "Spot slightly below, mild pull up"
-    elif distance >= -200:
+    elif pct >= -0.8:
         score, meaning = 40, "Spot below Max Pain, pull up"
     else:
         score, meaning = 70, "Spot far below Max Pain, pull up likely"
@@ -125,7 +158,7 @@ def _score_call_writing(df: pd.DataFrame, atm: float, total_oi: float) -> dict:
     elif frac > 0.02:
         score = -35
     else:
-        score = -10
+        score = 0  # no meaningful fresh writing detected => no signal, not a baked-in bearish tilt
     return {
         "key": "call_writing",
         "name": "CALL Writing Intensity",
@@ -148,7 +181,7 @@ def _score_put_writing(df: pd.DataFrame, atm: float, total_oi: float) -> dict:
     elif frac > 0.02:
         score = 35
     else:
-        score = 10
+        score = 0  # no meaningful fresh writing detected => no signal, not a baked-in bullish tilt
     return {
         "key": "put_writing",
         "name": "PUT Writing Intensity",
@@ -324,45 +357,39 @@ def compute_probability(data: dict) -> dict:
         if p is not None:
             params.append(p)
 
-    # Redistribute weight from any skipped parameters proportionally.
-    active_weight = sum(p["weight"] for p in params)
+    # Redistribute weight from any skipped parameters proportionally. DTE is
+    # excluded from the weight pool entirely: its own score is structurally
+    # always 0.0 (it acts through the Max Pain multiplier + sideways_factor
+    # below instead), so counting its weight here would only ever dilute the
+    # other real-signal parameters without ever contributing anything back.
+    scored_params = [p for p in params if p["key"] != "dte_effect"]
+    active_weight = sum(p["weight"] for p in scored_params)
     scale = (1.0 / active_weight) if active_weight else 1.0
 
     weighted_score = 0.0
-    for p in params:
+    for p in scored_params:
         eff_weight = p["weight"] * scale
         contribution = p["score"] * eff_weight
         p["contribution"] = round(contribution, 2)
         weighted_score += contribution
+    if p_dte is not None:
+        p_dte["contribution"] = 0.0
 
     # Near expiry, fade directional conviction toward sideways (shrink magnitude).
     weighted_score *= sideways_factor
     weighted_score = _clamp(weighted_score)
 
-    # Convert to percentages.
-    if weighted_score >= 0:
-        bullish_pct = min(90.0, 50 + weighted_score * 0.4)
-        bearish_pct = max(5.0, 30 - weighted_score * 0.25)
-    else:
-        abs_score = abs(weighted_score)
-        bearish_pct = min(90.0, 50 + abs_score * 0.4)
-        bullish_pct = max(5.0, 30 - abs_score * 0.25)
-    sideways_pct = max(5.0, 100 - bullish_pct - bearish_pct)
+    bullish_pct, bearish_pct, sideways_pct = _percentages(weighted_score)
 
-    # Boost sideways when the signal is weak.
-    if -15 < weighted_score < 15:
-        sideways_pct += 15
-        # Re-normalize the three to 100.
-        total = bullish_pct + bearish_pct + sideways_pct
-        bullish_pct = bullish_pct / total * 100
-        bearish_pct = bearish_pct / total * 100
-        sideways_pct = sideways_pct / total * 100
-
-    # Direction from the dominant percentage.
+    # Direction from the dominant percentage. SIDEWAYS listed first so that an
+    # exact tie (weighted_score == 0 gives all three an identical percentage)
+    # resolves to SIDEWAYS — Python's max() returns the first-seen key on a
+    # tie, and BULLISH-first ordering would otherwise silently reintroduce a
+    # directional bias at precisely the neutral point.
     trio = {
+        "SIDEWAYS": sideways_pct,
         "BULLISH": bullish_pct,
         "BEARISH": bearish_pct,
-        "SIDEWAYS": sideways_pct,
     }
     direction = max(trio, key=trio.get)
 

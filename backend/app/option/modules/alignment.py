@@ -6,12 +6,14 @@ if the weighted score looks decisive.
 """
 
 
-def compute_alignment(parameter_scores: list, gex_signal: dict | None = None) -> dict:
+def compute_alignment(parameter_scores: list) -> dict:
+    # Note: GEX is already one of `parameter_scores` (added by
+    # `_score_gex` inside `compute_probability`, under name "Gamma (GEX)")
+    # — it must not be appended again here, or its vote gets double-counted
+    # toward bullish_count/bearish_count/agreement_pct.
     signals = []
     for p in parameter_scores or []:
         signals.append({"name": p["name"], "signal": p.get("signal", "NEUTRAL")})
-    if gex_signal:
-        signals.append({"name": "Gamma (GEX)", "signal": gex_signal.get("signal", "NEUTRAL")})
 
     bull = sum(1 for s in signals if s["signal"] == "BULLISH")
     bear = sum(1 for s in signals if s["signal"] == "BEARISH")

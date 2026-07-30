@@ -15,8 +15,16 @@ from datetime import datetime
 _DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 _PATH = os.path.join(_DIR, "journal.jsonl")
 
-# Move smaller than this fraction of spot counts as FLAT / sideways.
+# Fallback flat-band when no expected_move was recorded (older entries, or a
+# prediction made without a valid expected-range). Move smaller than this
+# fraction of spot counts as FLAT / sideways.
 _FLAT_THRESHOLD = 0.0025  # 0.25%
+
+# When an expected_move (the ATM straddle-implied move at prediction time) is
+# available, use it to size the flat-band instead — a move within ~30% of
+# what the model itself expected shouldn't be graded UP/DOWN just because it
+# crosses an arbitrary fixed percentage.
+_FLAT_FRACTION_OF_EXPECTED_MOVE = 0.30
 
 
 def _ensure():
@@ -47,10 +55,13 @@ def _write_all(entries: list):
             f.write(json.dumps(e) + "\n")
 
 
-def _evaluate(direction: str, old_spot: float, new_spot: float) -> tuple:
+def _evaluate(direction: str, old_spot: float, new_spot: float, expected_move: float | None = None) -> tuple:
     """Return (outcome, actual_dir, move)."""
     move = new_spot - old_spot
-    thr = _FLAT_THRESHOLD * old_spot if old_spot else 0.0
+    if expected_move:
+        thr = _FLAT_FRACTION_OF_EXPECTED_MOVE * expected_move
+    else:
+        thr = _FLAT_THRESHOLD * old_spot if old_spot else 0.0
     if move > thr:
         actual = "UP"
     elif move < -thr:
@@ -65,7 +76,14 @@ def _evaluate(direction: str, old_spot: float, new_spot: float) -> tuple:
     return ("CORRECT" if correct else "WRONG"), actual, round(move, 1)
 
 
-def record_prediction(spot: float, direction: str, weighted_score: float, expiry: str) -> None:
+def record_prediction(
+    spot: float,
+    direction: str,
+    weighted_score: float,
+    expiry: str,
+    expected_move: float | None = None,
+    confidence: str | None = None,
+) -> None:
     """Resolve the previous open prediction against `spot`, then log a new one."""
     try:
         entries = _read_all()
@@ -80,7 +98,8 @@ def record_prediction(spot: float, direction: str, weighted_score: float, expiry
             if prev_exp and this_exp and prev_exp != this_exp:
                 break  # different contract — don't grade across expiries
             outcome, actual, move = _evaluate(
-                e.get("direction", "SIDEWAYS"), e.get("spot", spot), spot
+                e.get("direction", "SIDEWAYS"), e.get("spot", spot), spot,
+                e.get("expected_move"),
             )
             e["resolved"] = True
             e["outcome"] = outcome
@@ -96,6 +115,8 @@ def record_prediction(spot: float, direction: str, weighted_score: float, expiry
             "spot": round(float(spot), 2),
             "direction": direction,
             "weighted_score": weighted_score,
+            "confidence": confidence,
+            "expected_move": round(float(expected_move), 2) if expected_move else None,
             "expiry": expiry or "",
             "resolved": False,
             "outcome": None,
@@ -118,14 +139,19 @@ def get_stats() -> dict:
     correct = [e for e in resolved if e.get("outcome") == "CORRECT"]
     hit_rate = round(len(correct) / len(resolved) * 100, 1) if resolved else None
 
-    def _dir_rate(d):
-        sub = [e for e in resolved if e.get("direction") == d]
+    def _rate_for(sub):
         c = [e for e in sub if e.get("outcome") == "CORRECT"]
         return {
             "total": len(sub),
             "correct": len(c),
             "rate": round(len(c) / len(sub) * 100, 1) if sub else None,
         }
+
+    def _dir_rate(d):
+        return _rate_for([e for e in resolved if e.get("direction") == d])
+
+    def _confidence_rate(level):
+        return _rate_for([e for e in resolved if e.get("confidence") == level])
 
     return {
         "total_predictions": len(entries),
@@ -137,6 +163,14 @@ def get_stats() -> dict:
             "BULLISH": _dir_rate("BULLISH"),
             "BEARISH": _dir_rate("BEARISH"),
             "SIDEWAYS": _dir_rate("SIDEWAYS"),
+        },
+        # Are HIGH-confidence calls actually right more often than LOW-confidence
+        # ones? Entries recorded before `confidence` was tracked have it as
+        # None and simply won't appear in any of these three buckets.
+        "by_confidence": {
+            "HIGH": _confidence_rate("HIGH"),
+            "MODERATE": _confidence_rate("MODERATE"),
+            "LOW": _confidence_rate("LOW"),
         },
         "recent": list(reversed(entries[-20:])),
     }

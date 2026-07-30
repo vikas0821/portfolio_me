@@ -118,11 +118,12 @@ def get_iv_skew(df: pd.DataFrame, atm: float) -> dict:
 
 
 def get_straddle_move(df: pd.DataFrame, atm: float) -> float:
-    """Market-implied 1-sigma move to expiry = ATM straddle price.
+    """ATM straddle premium, used as an approximate ~1-sigma move to expiry.
 
     The combined ATM call + put premium is the market's own forecast of how far
     the underlying will travel by expiry, and is usually more reliable than a
-    sqrt-of-time IV estimate.
+    sqrt-of-time IV estimate — but it's an approximation, not a literal
+    standard deviation of a lognormal distribution.
     """
     row = df[df["strike"] == atm]
     if row.empty:

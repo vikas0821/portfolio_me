@@ -160,7 +160,7 @@ def build_analysis(
         "gex_sig": gex_sig,
     })
 
-    alignment = compute_alignment(prob.get("parameter_scores", []), gex_sig)
+    alignment = compute_alignment(prob.get("parameter_scores", []))
 
     strategy = suggest_strategy(
         prob,
@@ -185,6 +185,8 @@ def build_analysis(
         journal.record_prediction(
             spot, prob.get("direction", "SIDEWAYS"),
             prob.get("weighted_score", 0.0), expiry_str,
+            expected_move=exp_range.get("straddle_move"),
+            confidence=prob.get("confidence"),
         )
 
     return {

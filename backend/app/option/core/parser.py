@@ -52,6 +52,36 @@ def _clean_number(value) -> float:
         return 0.0
 
 
+def _validate_header(text: str) -> None:
+    """Loose sanity check on the header row (line 2) before trusting column
+    *position* for everything downstream. Column mapping in COLUMN_MAP is
+    purely positional — a reordered/different NSE export would otherwise be
+    read silently (IV into an OI slot, etc.) with no error at all. This
+    deliberately checks for a handful of near-universal keywords rather than
+    an exact header string, since NSE's own export format has minor variants
+    (extra bid/ask columns etc.) that a strict match would false-positive on.
+    """
+    lines = text.splitlines()
+    if len(lines) < 2:
+        raise ParseError("CSV has fewer than 2 header rows; this doesn't look like an NSE option-chain export.")
+    header_line = lines[1].upper()
+    if "STRIKE" not in header_line:
+        raise ParseError(
+            "Header row doesn't contain a STRIKE column — this doesn't look like an "
+            "NSE option-chain export, or the export format has changed."
+        )
+    if header_line.count("OI") < 2:
+        raise ParseError(
+            "Header row doesn't have the expected CALL/PUT OI columns — this doesn't "
+            "look like an NSE option-chain export, or the export format has changed."
+        )
+    if header_line.count("IV") < 2:
+        raise ParseError(
+            "Header row doesn't have the expected CALL/PUT IV columns — this doesn't "
+            "look like an NSE option-chain export, or the export format has changed."
+        )
+
+
 def parse_csv(raw_bytes: bytes) -> pd.DataFrame:
     """Parse raw NSE option-chain CSV bytes into a clean DataFrame.
 
@@ -61,6 +91,8 @@ def parse_csv(raw_bytes: bytes) -> pd.DataFrame:
         text = raw_bytes.decode("utf-8-sig", errors="replace")
     except Exception as exc:  # pragma: no cover - defensive
         raise ParseError(f"Could not decode file: {exc}")
+
+    _validate_header(text)
 
     try:
         raw = pd.read_csv(

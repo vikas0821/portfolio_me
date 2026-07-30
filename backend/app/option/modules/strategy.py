@@ -69,7 +69,7 @@ def suggest_strategy(prob: dict, levels: dict, atm: float, df: pd.DataFrame, dte
             )
 
         # ── Strong bullish ───────────────────────────────────────────────
-        if bullish > 60 and dte > 5:
+        if bullish > 60 and dte > 3:
             buy_strike = atm
             sell_strike = nearest_resistance_above(df, atm)
             if sell_strike <= buy_strike:
@@ -103,7 +103,7 @@ def suggest_strategy(prob: dict, levels: dict, atm: float, df: pd.DataFrame, dte
             }
 
         # ── Strong bearish ───────────────────────────────────────────────
-        if bearish > 60 and dte > 5:
+        if bearish > 60 and dte > 3:
             buy_strike = atm
             sell_strike = nearest_support_below(df, atm)
             if sell_strike >= buy_strike:
@@ -137,7 +137,7 @@ def suggest_strategy(prob: dict, levels: dict, atm: float, df: pd.DataFrame, dte
             }
 
         # ── Sideways ─────────────────────────────────────────────────────
-        if sideways > 50 and dte > 7:
+        if sideways > 50 and dte > 3:
             return _build_iron_condor(
                 df, atm, dte,
                 rationale=f"Range-bound bias ({sideways:.0f}%). Iron Condor collects "
