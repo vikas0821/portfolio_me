@@ -2,18 +2,16 @@
    portfolio. Tailwind directives live in the portfolio's index.css (one build). */
 
 .option-root {
-  color-scheme: dark;
-  /* Default theme tokens (Midnight) — JS overrides --c-* on :root at runtime. */
-  --c-bg: 10 14 26;
-  --c-card: 15 21 32;
-  --c-border: 30 45 69;
-  --c-bullish: 0 200 150;
-  --c-bearish: 255 69 96;
-  --c-neutral: 0 180 216;
-  --c-warning: 255 209 102;
-  --c-txt: 226 232 240;
-  --c-muted: 100 116 139;
-
+  /* --c-* tokens and color-scheme are set on :root by OptionApp.jsx (so
+     portaled content — e.g. InfoTip's popover, which renders via
+     createPortal outside this div's subtree — can see them too). Nothing
+     is redeclared here: a local fallback on this selector would win over
+     the live :root value for everything inside it (inheritance is always
+     the lowest cascade priority, easily beaten by any rule directly
+     targeting the element, even a low-specificity class selector), which
+     is exactly the regression that showed up when this used to hardcode
+     the Midnight theme's dark values here "just in case" — it permanently
+     shadowed the real light/dark toggle for everything in this subtree. */
   min-height: 100vh;
   background-color: rgb(var(--c-bg));
   color: rgb(var(--c-txt));
