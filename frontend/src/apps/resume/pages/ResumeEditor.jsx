@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
-import { Plus, Trash2, Save, Download, Eye, ArrowLeft } from 'lucide-react';
-import { Card, Button, Field, Input, Select, Textarea, inputCls, labelCls, Loading } from '../components/ui';
+import { Plus, Trash2, Save, Download, Eye } from 'lucide-react';
+import { Card, Button, Field, Input, Select, Textarea, labelCls, Loading } from '../components/ui';
 
 function Section({ title, children, onAdd, addLabel }) {
   return (
@@ -35,27 +34,14 @@ function BulletsEditor({ bullets, onChange }) {
 }
 
 export default function ResumeEditor() {
-  const { id } = useParams();
-  const navigate = useNavigate();
   const [resume, setResume] = useState(null);
   const [saving, setSaving] = useState(false);
   const [previewFiles, setPreviewFiles] = useState(null);
   const [rendering, setRendering] = useState(false);
 
   useEffect(() => {
-    async function load() {
-      if (id) {
-        const res = await api.get(`/resumes/${id}`);
-        setResume(res.data);
-      } else {
-        const list = (await api.get('/resumes')).data;
-        if (list.length === 0) { navigate('/resume-builder/variants'); return; }
-        const target = list.find(r => r.isDefault) || list[0];
-        navigate(`/resume-builder/resumes/${target._id}`, { replace: true });
-      }
-    }
-    load();
-  }, [id]);
+    api.get('/resume').then(res => setResume(res.data));
+  }, []);
 
   if (!resume) return <Loading label="Loading résumé…" />;
 
@@ -84,10 +70,7 @@ export default function ResumeEditor() {
       {/* Sticky action bar */}
       <div className="flex flex-wrap justify-between items-center gap-3 sticky top-14 lg:top-0 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-paper/95 backdrop-blur z-10 border-b-[3px] border-ink dark:border-white/70">
         <div>
-          <h1 className="font-display text-2xl tracking-wide text-ink dark:text-white">{resume.variantName}</h1>
-          <Link to="/resume-builder/variants" className="inline-flex items-center gap-1 text-sm font-bold text-ink/60 dark:text-white/60 hover:text-accent transition-colors">
-            <ArrowLeft size={13} /> Variants
-          </Link>
+          <h1 className="font-display text-2xl tracking-wide text-ink dark:text-white">Resume Editor</h1>
         </div>
         <div className="flex items-center gap-2">
           <Select className="w-auto" value={resume.template} onChange={e => set('template', e.target.value)}>
@@ -107,10 +90,6 @@ export default function ResumeEditor() {
           {previewFiles.docx && <a href={previewFiles.docx} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-accent hover:underline"><Download size={14} /> DOCX</a>}
         </Card>
       )}
-
-      <Section title="Variant">
-        <Field label="Variant name"><Input value={resume.variantName} onChange={e => set('variantName', e.target.value)} /></Field>
-      </Section>
 
       <Section title="Personal info">
         <div className="grid sm:grid-cols-2 gap-4">
@@ -158,18 +137,6 @@ export default function ResumeEditor() {
             </div>
             <BulletsEditor bullets={p.bullets} onChange={(bullets) => mapAt('projects', i, { bullets })} />
             <button onClick={() => removeAt('projects', i)} className="text-xs font-bold text-comic-red hover:underline">Remove project</button>
-          </div>
-        ))}
-      </Section>
-
-      <Section title="Employment summary" addLabel="Add row" onAdd={() => setArr('employment', [...resume.employment, { company: '', role: '', period: '', location: '' }])}>
-        {resume.employment.map((e2, i) => (
-          <div key={i} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-2 items-end">
-            <Field label="Company"><Input value={e2.company} onChange={e => mapAt('employment', i, { company: e.target.value })} /></Field>
-            <Field label="Role"><Input value={e2.role} onChange={e => mapAt('employment', i, { role: e.target.value })} /></Field>
-            <Field label="Period"><Input value={e2.period} onChange={e => mapAt('employment', i, { period: e.target.value })} /></Field>
-            <Field label="Location"><Input value={e2.location} onChange={e => mapAt('employment', i, { location: e.target.value })} /></Field>
-            {delBtn('employment', i)}
           </div>
         ))}
       </Section>

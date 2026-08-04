@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Menu } from "lucide-react";
 import Sidebar from "./components/Sidebar";
-import Dashboard from "./pages/Dashboard";
-import ResumeVariants from "./pages/ResumeVariants";
 import ResumeEditor from "./pages/ResumeEditor";
 import Apply from "./pages/Apply";
 import Applications from "./pages/Applications";
@@ -36,10 +34,8 @@ export default function ResumeApp() {
 
         <main className="flex-1 p-4 sm:p-6 max-w-6xl mx-auto w-full">
           <Routes>
-            <Route path="" element={<Dashboard />} />
-            <Route path="variants" element={<ResumeVariants />} />
+            <Route path="" element={<Navigate to="applications" replace />} />
             <Route path="resumes" element={<ResumeEditor />} />
-            <Route path="resumes/:id" element={<ResumeEditor />} />
             <Route path="apply" element={<Apply />} />
             <Route path="applications" element={<Applications />} />
             <Route path="email/:applicationId" element={<EmailComposer />} />

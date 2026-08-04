@@ -1,11 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, Layers, Send, Mail, ListChecks, LogOut, FileSignature, Sun, Moon, X } from 'lucide-react';
+import { FileText, Send, Mail, ListChecks, LogOut, FileSignature, Sun, Moon, X } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 
 const links = [
-  { to: '/resume-builder', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/resume-builder/resumes', label: 'Resume Editor', icon: FileText },
-  { to: '/resume-builder/variants', label: 'Resume Variants', icon: Layers },
   { to: '/resume-builder/apply', label: 'Apply', icon: Send },
   { to: '/resume-builder/applications', label: 'Applications', icon: ListChecks },
   { to: '/resume-builder/email-templates', label: 'Email Templates', icon: Mail },

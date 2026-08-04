@@ -137,7 +137,9 @@ function AppCard({ app, expanded, onToggle, updateStatus, onAppChange }) {
             className="text-xs font-bold rounded-lg px-2 py-1 capitalize bg-paper border-2 border-ink dark:border-white/50 text-ink dark:text-white focus:outline-none focus:ring-2 focus:ring-accent/40">
             {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
-          <Badge color="slate" className="tabular-nums">ATS {app.atsScore?.before}%→{app.atsScore?.after}%</Badge>
+          {((app.atsScore?.before || 0) > 0 || (app.atsScore?.after || 0) > 0) && (
+            <Badge color="slate" className="tabular-nums">ATS {app.atsScore?.before}%→{app.atsScore?.after}%</Badge>
+          )}
           {app.emailSent
             ? <Badge color="green">Email sent</Badge>
             : app.recruiterEmail ? <Link to={`/resume-builder/email/${app._id}`} className="text-accent text-xs font-medium hover:underline">Send email</Link> : null}
@@ -276,7 +278,11 @@ export default function Applications() {
                       </td>
                       <td className="px-3 text-ink/70 dark:text-white/70">{app.role}</td>
                       <td className="px-3 text-ink/50 dark:text-white/50 text-xs">{app.source || '—'}</td>
-                      <td className="px-3 tabular-nums text-ink/60 dark:text-white/60 whitespace-nowrap">{app.atsScore?.before}% → {app.atsScore?.after}%</td>
+                      <td className="px-3 tabular-nums text-ink/60 dark:text-white/60 whitespace-nowrap">
+                        {((app.atsScore?.before || 0) > 0 || (app.atsScore?.after || 0) > 0)
+                          ? `${app.atsScore?.before}% → ${app.atsScore?.after}%`
+                          : <span className="text-ink/30 dark:text-white/30">—</span>}
+                      </td>
                       <td className="px-3">
                         {app.followUpDate
                           ? <span className={`text-xs whitespace-nowrap ${isFollowUpDue(app) ? 'text-ink dark:text-white font-bold' : 'text-ink/60 dark:text-white/60'}`}>{new Date(app.followUpDate).toLocaleDateString()}{app.followUpDone ? ' ✓' : ''}</span>
@@ -296,11 +302,13 @@ export default function Applications() {
                         </select>
                       </td>
                       <td className="px-3">
-                        <div className="flex gap-2">
-                          {app.generatedFiles?.pdf && <a href={app.generatedFiles.pdf} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">PDF</a>}
-                          {app.generatedFiles?.docx && <a href={app.generatedFiles.docx} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">DOCX</a>}
-                          {app.generatedFiles?.coverLetter && <a href={app.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">CL</a>}
-                        </div>
+                        {(app.generatedFiles?.pdf || app.generatedFiles?.docx || app.generatedFiles?.coverLetter) ? (
+                          <div className="flex gap-2">
+                            {app.generatedFiles?.pdf && <a href={app.generatedFiles.pdf} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">PDF</a>}
+                            {app.generatedFiles?.docx && <a href={app.generatedFiles.docx} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">DOCX</a>}
+                            {app.generatedFiles?.coverLetter && <a href={app.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">CL</a>}
+                          </div>
+                        ) : <span className="text-ink/30 dark:text-white/30 text-xs">—</span>}
                       </td>
                       <td className="px-3 text-ink/50 dark:text-white/50 text-xs whitespace-nowrap">{new Date(app.appliedAt).toLocaleDateString()}</td>
                     </tr>

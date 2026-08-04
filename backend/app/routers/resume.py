@@ -1,18 +1,17 @@
-"""Resume Builder API (role: resume) — resume variants, ATS scoring.
+"""Resume Builder API (role: resume) — the single resume: get-or-create
+(seeded from portfolio data), edit, and render (HTML/PDF).
 Mounted at /api/* to match the merged resume frontend's axios baseURL.
 
 Applications and email live in routers/applications.py and routers/email.py —
 split out of here so each file covers one sub-domain of the resume builder."""
 import os
-import json
 from datetime import datetime
 from fastapi import APIRouter, Depends, Body, HTTPException
-from fastapi.responses import JSONResponse
 from pymongo import DESCENDING
-from ..database import db, find, get_by_id, insert, update_by_id, delete_by_id
+from ..database import find, get_by_id, insert, update_by_id
 from ..auth import require_role
 from ..config import settings
-from ..services.resume_ats import analyze_keywords
+from ..services.resume_from_portfolio import build_resume_from_portfolio
 from ..services.resume_render import render_resume_html, html_to_pdf_bytes
 
 router = APIRouter(prefix="/api", tags=["resume"])
@@ -58,12 +57,12 @@ def _resume_doc(b, base):
 
 
 # ── Resumes ─────────────────────────────────────────────────────────────────
-@router.get("/resumes", dependencies=[resume_only])
-def list_resumes():
-    rows = find("resumes", sort=[("updated_at", DESCENDING)])
-    return [{"_id": r.id, "variantName": r.variant_name, "isDefault": r.is_default,
-             "template": r.template, "name": r.name, "headline": r.headline,
-             "updatedAt": r.updated_at.isoformat() if r.updated_at else None} for r in rows]
+@router.get("/resume", dependencies=[resume_only])
+def get_or_create_resume():
+    existing = find("resumes", sort=[("is_default", DESCENDING), ("updated_at", DESCENDING)])
+    if existing:
+        return resume_out(existing[0])
+    return resume_out(insert("resumes", build_resume_from_portfolio()))
 
 
 @router.get("/resumes/{rid}", dependencies=[resume_only])
@@ -74,34 +73,12 @@ def get_resume(rid: str):
     return resume_out(r)
 
 
-@router.post("/resumes", dependencies=[resume_only])
-def create_resume(data: dict = Body(...)):
-    r = insert("resumes", _resume_doc(data, {}))
-    return JSONResponse(status_code=201, content=resume_out(r))
-
-
 @router.put("/resumes/{rid}", dependencies=[resume_only])
 def update_resume(rid: str, data: dict = Body(...)):
     base = get_by_id("resumes", rid)
     if not base:
         raise HTTPException(404, "Resume not found")
     return resume_out(update_by_id("resumes", rid, _resume_doc(data, base)))
-
-
-@router.delete("/resumes/{rid}", dependencies=[resume_only])
-def delete_resume(rid: str):
-    if not delete_by_id("resumes", rid):
-        raise HTTPException(404, "Resume not found")
-    return {"ok": True}
-
-
-@router.post("/resumes/{rid}/default", dependencies=[resume_only])
-def set_default(rid: str):
-    r = get_by_id("resumes", rid)
-    if not r:
-        raise HTTPException(404, "Resume not found")
-    db.resumes.update_many({}, {"$set": {"is_default": False}})
-    return resume_out(update_by_id("resumes", rid, {"is_default": True}))
 
 
 @router.post("/resumes/{rid}/render", dependencies=[resume_only])
@@ -120,14 +97,3 @@ def render_resume(rid: str, data: dict = Body(default={})):
         "html": f"/api/output/resumes/{r.id}/resume.html",
         "pdf": f"/api/output/resumes/{r.id}/resume.pdf",
     }}
-
-
-# ── ATS ─────────────────────────────────────────────────────────────────────
-@router.post("/ats/analyze", dependencies=[resume_only])
-def ats_analyze(data: dict = Body(...)):
-    resume_text = ""
-    if data.get("resumeVariantId"):
-        r = get_by_id("resumes", data["resumeVariantId"])
-        if r:
-            resume_text = json.dumps(resume_dict(r))
-    return analyze_keywords(data.get("jdText", ""), resume_text)

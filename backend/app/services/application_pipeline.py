@@ -1,16 +1,13 @@
-"""Generates the on-disk artifacts (tailored resume PDF + cover letter PDF) for
-a job application, and scores ATS match before/after tailoring.
+"""Generates the on-disk artifacts (cover letter PDF) for a job application.
 
 Extracted out of routers/applications.py so the route handler stays a thin
 HTTP-shape layer and this logic can be unit-tested without FastAPI/Mongo.
 """
-import json
 import os
 import re
 from datetime import date
 
-from .resume_ats import analyze_keywords, tailor_resume
-from .resume_render import render_resume_html, html_to_pdf_bytes
+from .resume_render import html_to_pdf_bytes
 
 
 def _ensure(path):
@@ -39,24 +36,3 @@ def write_cover_letter(run_dir, text):
 
 
 EMPTY_ATS = {"score": 0, "matched": [], "missing": []}
-
-
-def generate_resume_artifacts(run_dir, folder, resume_dict, jd_text, template):
-    """Tailor `resume_dict` against `jd_text`, render + write resume.html/.pdf.
-
-    Returns (generated_files_fragment, ats_before, ats_after).
-    """
-    ats_before = analyze_keywords(jd_text, json.dumps(resume_dict))
-    tailored = tailor_resume(resume_dict, ats_before["matched"])
-    ats_after = analyze_keywords(jd_text, json.dumps(tailored))
-    html = render_resume_html(tailored, template)
-    with open(os.path.join(run_dir, "resume.html"), "w", encoding="utf-8") as f:
-        f.write(html)
-    with open(os.path.join(run_dir, "resume.pdf"), "wb") as f:
-        f.write(html_to_pdf_bytes(html))
-    gen = {
-        "folderName": folder,
-        "pdf": f"/api/output/applications/{folder}/resume.pdf",
-        "html": f"/api/output/applications/{folder}/resume.html",
-    }
-    return gen, ats_before, ats_after
