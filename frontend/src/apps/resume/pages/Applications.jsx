@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../api';
+import api, { fileUrl } from '../api';
 import { ChevronDown, ChevronRight, Trash2, FileText, Download, ExternalLink, Search, Inbox } from 'lucide-react';
 import { PageHeader, Card, Button, Field, Input, Textarea, Badge, Loading, EmptyState, STATUS_BADGE } from '../components/ui';
 
@@ -86,7 +86,7 @@ function DetailsPanel({ app, onChange }) {
               {savingCover ? 'Saving…' : 'Save & generate PDF'}
             </Button>
             {app.generatedFiles?.coverLetter && (
-              <a href={app.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"><Download size={14} /> View PDF</a>
+              <a href={fileUrl(app.generatedFiles.coverLetter)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"><Download size={14} /> View PDF</a>
             )}
           </div>
         </Field>
@@ -153,9 +153,9 @@ function AppCard({ app, expanded, onToggle, updateStatus, onAppChange }) {
 
         {(files.pdf || files.docx || files.coverLetter) && (
           <div className="mt-2 flex gap-3 text-xs">
-            {files.pdf && <a href={files.pdf} target="_blank" rel="noreferrer" className="text-accent hover:underline">PDF</a>}
-            {files.docx && <a href={files.docx} target="_blank" rel="noreferrer" className="text-accent hover:underline">DOCX</a>}
-            {files.coverLetter && <a href={files.coverLetter} target="_blank" rel="noreferrer" className="text-accent hover:underline">Cover letter</a>}
+            {files.pdf && <a href={fileUrl(files.pdf)} target="_blank" rel="noreferrer" className="text-accent hover:underline">PDF</a>}
+            {files.docx && <a href={fileUrl(files.docx)} target="_blank" rel="noreferrer" className="text-accent hover:underline">DOCX</a>}
+            {files.coverLetter && <a href={fileUrl(files.coverLetter)} target="_blank" rel="noreferrer" className="text-accent hover:underline">Cover letter</a>}
           </div>
         )}
 
@@ -304,9 +304,9 @@ export default function Applications() {
                       <td className="px-3">
                         {(app.generatedFiles?.pdf || app.generatedFiles?.docx || app.generatedFiles?.coverLetter) ? (
                           <div className="flex gap-2">
-                            {app.generatedFiles?.pdf && <a href={app.generatedFiles.pdf} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">PDF</a>}
-                            {app.generatedFiles?.docx && <a href={app.generatedFiles.docx} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">DOCX</a>}
-                            {app.generatedFiles?.coverLetter && <a href={app.generatedFiles.coverLetter} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">CL</a>}
+                            {app.generatedFiles?.pdf && <a href={fileUrl(app.generatedFiles.pdf)} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">PDF</a>}
+                            {app.generatedFiles?.docx && <a href={fileUrl(app.generatedFiles.docx)} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">DOCX</a>}
+                            {app.generatedFiles?.coverLetter && <a href={fileUrl(app.generatedFiles.coverLetter)} target="_blank" rel="noreferrer" className="text-accent hover:underline text-xs">CL</a>}
                           </div>
                         ) : <span className="text-ink/30 dark:text-white/30 text-xs">—</span>}
                       </td>

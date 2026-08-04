@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import api from '../api';
+import api, { fileUrl } from '../api';
 import { Plus, Trash2, Download, Eye } from 'lucide-react';
 import { Card, Button, Field, Input, Select, Textarea, labelCls, Loading } from '../components/ui';
 
@@ -36,6 +36,7 @@ function BulletsEditor({ bullets, onChange }) {
 export default function ResumeEditor() {
   const [resume, setResume] = useState(null);
   const [previewFiles, setPreviewFiles] = useState(null);
+  const [renderedAt, setRenderedAt] = useState(0);
   const [rendering, setRendering] = useState(false);
 
   useEffect(() => {
@@ -51,9 +52,15 @@ export default function ResumeEditor() {
 
   const render = async () => {
     setRendering(true);
-    try { setPreviewFiles((await api.post('/resume/render', resume)).data.files); }
-    finally { setRendering(false); }
+    try {
+      setPreviewFiles((await api.post('/resume/render', resume)).data.files);
+      setRenderedAt(Date.now());
+    } finally { setRendering(false); }
   };
+  // The rendered file is saved at a fixed path and overwritten on every
+  // render, so a cache-busting query param keeps re-previews from showing
+  // the browser's cached copy of the previous version.
+  const previewUrl = (path) => `${fileUrl(path)}?t=${renderedAt}`;
 
   const delBtn = (key, i) => (
     <button onClick={() => removeAt(key, i)} className="text-ink/30 dark:text-white/30 hover:text-comic-red mb-2 shrink-0"><Trash2 size={16} /></button>
@@ -79,11 +86,18 @@ export default function ResumeEditor() {
       </div>
 
       {previewFiles && (
-        <Card padding="p-4" className="flex flex-wrap items-center gap-4">
-          <span className="text-sm font-bold text-ink dark:text-white">Generated:</span>
-          <a href={previewFiles.html} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-accent hover:underline"><Eye size={14} /> HTML</a>
-          <a href={previewFiles.pdf} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-accent hover:underline"><Download size={14} /> PDF</a>
-          {previewFiles.docx && <a href={previewFiles.docx} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-accent hover:underline"><Download size={14} /> DOCX</a>}
+        <Card padding="p-4" className="space-y-3">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="text-sm font-bold text-ink dark:text-white">Preview:</span>
+            <a href={previewUrl(previewFiles.pdf)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-accent hover:underline"><Download size={14} /> Download PDF</a>
+            <a href={previewUrl(previewFiles.html)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-accent hover:underline"><Download size={14} /> Download HTML</a>
+            {previewFiles.docx && <a href={previewUrl(previewFiles.docx)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-bold text-accent hover:underline"><Download size={14} /> Download DOCX</a>}
+          </div>
+          <iframe
+            title="Résumé preview"
+            src={previewUrl(previewFiles.html)}
+            className="w-full h-[75vh] rounded-lg border-2 border-ink/20 dark:border-white/20 bg-white"
+          />
         </Card>
       )}
 
