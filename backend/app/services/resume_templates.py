@@ -19,6 +19,7 @@ CLASSIC = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
   .entry { margin-bottom: 8px; page-break-inside: avoid; }
   .row { display: flex; justify-content: space-between; }
   .title { font-weight: 700; color: #111827; }
+  .edu-entry .title { font-weight: 400; }
   .sub { color: #1f3a5f; }
   .meta { color: #6b7280; font-size: 9px; }
   ul { margin: 3px 0 0; padding-left: 14px; }
@@ -55,7 +56,7 @@ CLASSIC = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
   {% endif %}
 
   {% if r.education %}<h2>Education</h2>
-    {% for ed in r.education %}<div class="entry">
+    {% for ed in r.education %}<div class="entry edu-entry">
       <div class="row"><span class="title">{{ ed.degree }}</span><span class="meta">{{ ed.year }} {{ ed.score }}</span></div>
       <div class="sub">{{ ed.institute }}</div>
     </div>{% endfor %}
@@ -81,6 +82,7 @@ MODERN = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
   .entry { margin-bottom: 10px; page-break-inside: avoid; }
   .row { display: flex; justify-content: space-between; }
   .title { font-weight: 700; color: #0f172a; font-size: 10.8px; }
+  .edu-entry .title { font-weight: 400; }
   .sub { color: #0d9488; font-weight: 600; }
   .meta { color: #6b7280; font-size: 9px; font-weight: 600; }
   ul { margin: 4px 0 0; padding-left: 15px; }
@@ -116,7 +118,7 @@ MODERN = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
   {% endif %}
 
   {% if r.education %}<h2>Education</h2>
-    {% for ed in r.education %}<div class="entry">
+    {% for ed in r.education %}<div class="entry edu-entry">
       <div class="row"><span class="title">{{ ed.degree }}</span><span class="meta">{{ ed.year }} {{ ed.score }}</span></div>
       <div class="sub">{{ ed.institute }}</div>
     </div>{% endfor %}
@@ -142,6 +144,7 @@ MINIMAL = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
   .entry { margin-bottom: 9px; page-break-inside: avoid; }
   .row { display: flex; justify-content: space-between; }
   .title { font-weight: 600; color: #18181b; }
+  .edu-entry .title { font-weight: 400; }
   .sub { color: #52525b; font-style: italic; }
   .meta { color: #a1a1aa; font-size: 8.5px; }
   ul { margin: 4px 0 0; padding-left: 13px; }
@@ -178,7 +181,7 @@ MINIMAL = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
   {% endif %}
 
   {% if r.education %}<h2>Education</h2>
-    {% for ed in r.education %}<div class="entry">
+    {% for ed in r.education %}<div class="entry edu-entry">
       <div class="row"><span class="title">{{ ed.degree }}</span><span class="meta">{{ ed.year }} {{ ed.score }}</span></div>
       <div class="sub">{{ ed.institute }}</div>
     </div>{% endfor %}
@@ -203,6 +206,7 @@ ATS_COMPACT = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><styl
   .entry { margin-bottom: 6px; page-break-inside: avoid; }
   .row { display: flex; justify-content: space-between; }
   .title { font-weight: 700; }
+  .edu-entry .title { font-weight: 400; }
   .sub { font-weight: 400; }
   .meta { font-size: 9px; }
   ul { margin: 2px 0 0; padding-left: 14px; }
@@ -239,7 +243,7 @@ ATS_COMPACT = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><styl
   {% endif %}
 
   {% if r.education %}<h2>Education</h2>
-    {% for ed in r.education %}<div class="entry">
+    {% for ed in r.education %}<div class="entry edu-entry">
       <div class="row"><span class="title">{{ ed.degree }}, {{ ed.institute }}</span><span class="meta">{{ ed.year }} {{ ed.score }}</span></div>
     </div>{% endfor %}
   {% endif %}
@@ -267,6 +271,7 @@ SIDEBAR = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
   .side .skillval { font-size: 8.5px; color: #94a3b8; margin-top: 1px; }
   .side .entry { margin-bottom: 8px; page-break-inside: avoid; }
   .side .title { font-size: 9px; font-weight: 700; color: #f1f5f9; }
+  .side .edu-entry .title { font-weight: 400; }
   .side .sub { font-size: 8.5px; color: #94a3b8; }
   .side .meta { font-size: 8px; color: #64748b; }
   .main h2 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #0f172a;
@@ -295,7 +300,7 @@ SIDEBAR = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
       {% endif %}
 
       {% if r.education %}<h2>Education</h2>
-        {% for ed in r.education %}<div class="entry">
+        {% for ed in r.education %}<div class="entry edu-entry">
           <div class="title">{{ ed.degree }}</div>
           <div class="sub">{{ ed.institute }}</div>
           <div class="meta">{{ ed.year }} {{ ed.score }}</div>
