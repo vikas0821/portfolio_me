@@ -7,11 +7,16 @@ served by **one React frontend**, **one Python (FastAPI) backend**, and **one Mo
 Browser ─> React SPA (Vite + nginx)
                 │  /api/*  (proxied)
                 ▼
-          FastAPI backend (SQLModel + WeasyPrint + pandas)
+          FastAPI backend (PyMongo + WeasyPrint + pandas)
                 │
                 ▼
             MongoDB (one database, all sections)
 ```
+
+The public portfolio renders instantly from bundled fallback data and swaps in live
+data once the backend responds — so a Render free-tier cold start (backend asleep,
+~1-2 min to wake) never shows a blank page. The whole site (portfolio + every private
+tool) shares one comic-book/pop-art visual design system.
 
 ## Sections & gates
 
@@ -20,7 +25,7 @@ Browser ─> React SPA (Vite + nginx)
 | `/` | Hub launcher (cards into every section) | public |
 | `/portfolio`, `/blog` | Portfolio + Markdown blog | public |
 | `/notes` | Private Notion-style notes | `NOTES_PASSWORD` |
-| `/resume-builder` | Resume builder + ATS + PDF export | `RESUME_PASSWORD` |
+| `/resume-builder` | Resume editor (auto-filled from your portfolio data, 5 selectable designs, PDF/HTML export) + external job-application tracker + recruiter email templates | `RESUME_PASSWORD` |
 | `/option-analysis` | NSE option-chain analyzer | `OPTION_PASSWORD` |
 | `/admin` | Content management for all of the above | `ADMIN_PASSWORD` |
 
@@ -45,7 +50,8 @@ docker exec platform_backend python -m app.seed   # first-time seed data
 
 Secrets/ports are overridable via `.env` (see `.env.example`): `JWT_SECRET`,
 `ADMIN_PASSWORD`, `NOTES_PASSWORD`, `RESUME_PASSWORD`, `OPTION_PASSWORD`,
-`WEB_HOST_PORT`, `API_HOST_PORT`, `PG_HOST_PORT`, and optional `SMTP_*` for resume email.
+`WEB_HOST_PORT`, `API_HOST_PORT`, `MONGO_HOST_PORT`, and optional `SMTP_*` for
+sending recruiter emails from the resume builder.
 
 ## Layout
 
