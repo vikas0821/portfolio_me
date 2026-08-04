@@ -3,11 +3,11 @@ Split out of routers/resume.py."""
 import os
 from fastapi import APIRouter, Depends, Body, HTTPException
 from fastapi.responses import JSONResponse
-from pymongo import DESCENDING
 from ..database import get_by_id, find, find_one, insert, update_by_id, delete_by_id
 from ..auth import require_role
 from ..config import settings
 from ..services import resume_mail as mail
+from ..services.resume_from_portfolio import build_resume_from_portfolio
 
 router = APIRouter(prefix="/api", tags=["email"])
 resume_only = Depends(require_role("resume"))
@@ -64,8 +64,7 @@ def email_preview(b: dict = Body(...)):
         t = find_one("email_templates", {"is_default": True}) or find_one("email_templates")
     if not t:
         raise HTTPException(404, "No email template available")
-    resumes = find("resumes", sort=[("is_default", DESCENDING), ("updated_at", DESCENDING)])
-    ctx = mail.build_context(a, resumes[0] if resumes else None)
+    ctx = mail.build_context(a, build_resume_from_portfolio())
     return {
         "subject": mail.render_template(t.subject, ctx),
         "bodyText": mail.html_to_text(mail.render_template(t.body_html, ctx)),

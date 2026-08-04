@@ -7,5 +7,5 @@ VALID_STATUSES = ["applied", "replied", "interview", "offer", "rejected", "ghost
 COLLECTIONS = [
     "profiles", "projects", "experiences", "skills", "education", "certifications",
     "contact_messages", "site_settings", "blog_posts", "note_sections", "notes",
-    "resumes", "applications", "email_templates", "email_logs",
+    "applications", "email_templates", "email_logs",
 ]

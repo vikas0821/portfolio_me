@@ -22,18 +22,18 @@ def text_to_html(text: str) -> str:
     return f'<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.6;white-space:pre-wrap;">{esc}</div>'
 
 
-def build_context(app, resume) -> dict:
+def build_context(app, resume: dict) -> dict:
     skill_values = []
-    for s in (resume.skills if resume else []) or []:
+    for s in resume.get("skills", []) or []:
         skill_values += [v.strip() for v in (s.get("value", "") or "").split(",") if v.strip()]
     top = skill_values[:6]
     return {
         "recruiterName": app.recruiter_name or "Hiring Manager",
         "recruiterEmail": app.recruiter_email, "company": app.company, "role": app.role,
         "location": app.location, "jobRef": app.job_ref,
-        "candidateName": resume.name if resume else "", "candidateHeadline": resume.headline if resume else "",
-        "candidateEmail": resume.email if resume else "", "candidatePhone": resume.phone if resume else "",
-        "candidateLinkedin": resume.linkedin if resume else "",
+        "candidateName": resume.get("name", ""), "candidateHeadline": resume.get("headline", ""),
+        "candidateEmail": resume.get("email", ""), "candidatePhone": resume.get("phone", ""),
+        "candidateLinkedin": resume.get("linkedin", ""),
         "topSkills": ", ".join(top), "topSkillsList": top,
     }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
-import { Plus, Trash2, Save, Download, Eye } from 'lucide-react';
+import { Plus, Trash2, Download, Eye } from 'lucide-react';
 import { Card, Button, Field, Input, Select, Textarea, labelCls, Loading } from '../components/ui';
 
 function Section({ title, children, onAdd, addLabel }) {
@@ -35,7 +35,6 @@ function BulletsEditor({ bullets, onChange }) {
 
 export default function ResumeEditor() {
   const [resume, setResume] = useState(null);
-  const [saving, setSaving] = useState(false);
   const [previewFiles, setPreviewFiles] = useState(null);
   const [rendering, setRendering] = useState(false);
 
@@ -50,14 +49,9 @@ export default function ResumeEditor() {
   const mapAt = (key, i, patch) => setArr(key, resume[key].map((x, idx) => idx === i ? { ...x, ...patch } : x));
   const removeAt = (key, i) => setArr(key, resume[key].filter((_, idx) => idx !== i));
 
-  const save = async () => {
-    setSaving(true);
-    try { setResume((await api.put(`/resumes/${resume._id}`, resume)).data); }
-    finally { setSaving(false); }
-  };
   const render = async () => {
     setRendering(true);
-    try { setPreviewFiles((await api.post(`/resumes/${resume._id}/render`, { template: resume.template })).data.files); }
+    try { setPreviewFiles((await api.post('/resume/render', resume)).data.files); }
     finally { setRendering(false); }
   };
 
@@ -71,14 +65,16 @@ export default function ResumeEditor() {
       <div className="flex flex-wrap justify-between items-center gap-3 sticky top-14 lg:top-0 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-paper/95 backdrop-blur z-10 border-b-[3px] border-ink dark:border-white/70">
         <div>
           <h1 className="font-display text-2xl tracking-wide text-ink dark:text-white">Resume Editor</h1>
+          <p className="text-xs text-ink/50 dark:text-white/50 font-sans mt-0.5">
+            Loaded from your portfolio data. Edits here are only for this download — they won't be saved.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Select className="w-auto" value={resume.template} onChange={e => set('template', e.target.value)}>
             <option value="classic">Classic</option>
             <option value="modern">Modern</option>
           </Select>
-          <Button variant="secondary" icon={Eye} loading={rendering} onClick={render}>{rendering ? 'Rendering…' : 'Preview'}</Button>
-          <Button variant="primary" icon={Save} loading={saving} onClick={save}>{saving ? 'Saving…' : 'Save'}</Button>
+          <Button variant="primary" icon={Eye} loading={rendering} onClick={render}>{rendering ? 'Rendering…' : 'Preview'}</Button>
         </div>
       </div>
 
