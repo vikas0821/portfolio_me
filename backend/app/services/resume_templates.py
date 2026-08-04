@@ -5,6 +5,15 @@ linkedin, summary, experience[], projects[], skills[], education[],
 certifications[] — see backend/app/services/resume_from_portfolio.py."""
 from jinja2 import Template
 
+# Education is rendered as one bullet per entry (degree — institute (year, score))
+# rather than a stacked title/sub/meta block, across every template.
+EDU_LINE = (
+    "{{ ed.degree }}"
+    "{% if ed.institute %} — {{ ed.institute }}{% endif %}"
+    "{% if ed.year %} ({{ ed.year }}{% if ed.score %}, {{ ed.score }}{% endif %})"
+    "{% elif ed.score %} ({{ ed.score }}){% endif %}"
+)
+
 # ── Classic — traditional single column, navy accent ────────────────────────
 CLASSIC = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
   @page { size: A4; margin: 14mm 12mm; }
@@ -19,7 +28,6 @@ CLASSIC = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
   .entry { margin-bottom: 8px; page-break-inside: avoid; }
   .row { display: flex; justify-content: space-between; }
   .title { font-weight: 700; color: #111827; }
-  .edu-entry .title { font-weight: 400; }
   .sub { color: #1f3a5f; }
   .meta { color: #6b7280; font-size: 9px; }
   ul { margin: 3px 0 0; padding-left: 14px; }
@@ -55,12 +63,9 @@ CLASSIC = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
     {% for s in r.skills %}<div class="skillrow"><div class="skilllabel">{{ s.label }}</div><div class="skillval">{{ s.value }}</div></div>{% endfor %}
   {% endif %}
 
-  {% if r.education %}<h2>Education</h2>
-    {% for ed in r.education %}<div class="entry edu-entry">
-      <div class="row"><span class="title">{{ ed.degree }}</span><span class="meta">{{ ed.year }} {{ ed.score }}</span></div>
-      <div class="sub">{{ ed.institute }}</div>
-    </div>{% endfor %}
-  {% endif %}
+  {% if r.education %}<h2>Education</h2><ul>
+    {% for ed in r.education %}<li>""" + EDU_LINE + """</li>{% endfor %}
+  </ul>{% endif %}
 
   {% if r.certifications %}<h2>Certifications</h2><ul>
     {% for c in r.certifications %}<li>{{ c.label }}{% if c.value %} — {{ c.value }}{% endif %}</li>{% endfor %}
@@ -82,7 +87,6 @@ MODERN = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
   .entry { margin-bottom: 10px; page-break-inside: avoid; }
   .row { display: flex; justify-content: space-between; }
   .title { font-weight: 700; color: #0f172a; font-size: 10.8px; }
-  .edu-entry .title { font-weight: 400; }
   .sub { color: #0d9488; font-weight: 600; }
   .meta { color: #6b7280; font-size: 9px; font-weight: 600; }
   ul { margin: 4px 0 0; padding-left: 15px; }
@@ -117,12 +121,9 @@ MODERN = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
     {% for s in r.skills %}<div class="skillrow"><div class="skilllabel">{{ s.label }}</div><div class="skillval">{{ s.value }}</div></div>{% endfor %}
   {% endif %}
 
-  {% if r.education %}<h2>Education</h2>
-    {% for ed in r.education %}<div class="entry edu-entry">
-      <div class="row"><span class="title">{{ ed.degree }}</span><span class="meta">{{ ed.year }} {{ ed.score }}</span></div>
-      <div class="sub">{{ ed.institute }}</div>
-    </div>{% endfor %}
-  {% endif %}
+  {% if r.education %}<h2>Education</h2><ul>
+    {% for ed in r.education %}<li>""" + EDU_LINE + """</li>{% endfor %}
+  </ul>{% endif %}
 
   {% if r.certifications %}<h2>Certifications</h2><ul>
     {% for c in r.certifications %}<li>{{ c.label }}{% if c.value %} — {{ c.value }}{% endif %}</li>{% endfor %}
@@ -144,7 +145,6 @@ MINIMAL = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
   .entry { margin-bottom: 9px; page-break-inside: avoid; }
   .row { display: flex; justify-content: space-between; }
   .title { font-weight: 600; color: #18181b; }
-  .edu-entry .title { font-weight: 400; }
   .sub { color: #52525b; font-style: italic; }
   .meta { color: #a1a1aa; font-size: 8.5px; }
   ul { margin: 4px 0 0; padding-left: 13px; }
@@ -180,12 +180,9 @@ MINIMAL = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
     {% for s in r.skills %}<div class="skillrow"><div class="skilllabel">{{ s.label }}</div><div class="skillval">{{ s.value }}</div></div>{% endfor %}
   {% endif %}
 
-  {% if r.education %}<h2>Education</h2>
-    {% for ed in r.education %}<div class="entry edu-entry">
-      <div class="row"><span class="title">{{ ed.degree }}</span><span class="meta">{{ ed.year }} {{ ed.score }}</span></div>
-      <div class="sub">{{ ed.institute }}</div>
-    </div>{% endfor %}
-  {% endif %}
+  {% if r.education %}<h2>Education</h2><ul>
+    {% for ed in r.education %}<li>""" + EDU_LINE + """</li>{% endfor %}
+  </ul>{% endif %}
 
   {% if r.certifications %}<h2>Certifications</h2><ul>
     {% for c in r.certifications %}<li>{{ c.label }}{% if c.value %} — {{ c.value }}{% endif %}</li>{% endfor %}
@@ -206,7 +203,6 @@ ATS_COMPACT = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><styl
   .entry { margin-bottom: 6px; page-break-inside: avoid; }
   .row { display: flex; justify-content: space-between; }
   .title { font-weight: 700; }
-  .edu-entry .title { font-weight: 400; }
   .sub { font-weight: 400; }
   .meta { font-size: 9px; }
   ul { margin: 2px 0 0; padding-left: 14px; }
@@ -242,11 +238,9 @@ ATS_COMPACT = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><styl
     {% for s in r.skills %}<div class="skillrow"><span class="skilllabel">{{ s.label }}: </span><span class="skillval">{{ s.value }}</span></div>{% endfor %}
   {% endif %}
 
-  {% if r.education %}<h2>Education</h2>
-    {% for ed in r.education %}<div class="entry edu-entry">
-      <div class="row"><span class="title">{{ ed.degree }}, {{ ed.institute }}</span><span class="meta">{{ ed.year }} {{ ed.score }}</span></div>
-    </div>{% endfor %}
-  {% endif %}
+  {% if r.education %}<h2>Education</h2><ul>
+    {% for ed in r.education %}<li>""" + EDU_LINE + """</li>{% endfor %}
+  </ul>{% endif %}
 
   {% if r.certifications %}<h2>Certifications</h2><ul>
     {% for c in r.certifications %}<li>{{ c.label }}{% if c.value %} — {{ c.value }}{% endif %}</li>{% endfor %}
@@ -271,9 +265,10 @@ SIDEBAR = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
   .side .skillval { font-size: 8.5px; color: #94a3b8; margin-top: 1px; }
   .side .entry { margin-bottom: 8px; page-break-inside: avoid; }
   .side .title { font-size: 9px; font-weight: 700; color: #f1f5f9; }
-  .side .edu-entry .title { font-weight: 400; }
   .side .sub { font-size: 8.5px; color: #94a3b8; }
   .side .meta { font-size: 8px; color: #64748b; }
+  .side ul { margin: 3px 0 0; padding-left: 12px; }
+  .side li { margin-top: 4px; font-size: 8.5px; color: #cbd5e1; }
   .main h2 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #0f172a;
              margin: 14px 0 6px; padding-bottom: 3px; border-bottom: 2px solid #0f172a; }
   .main h2:first-child { margin-top: 0; }
@@ -299,13 +294,9 @@ SIDEBAR = Template("""<!DOCTYPE html><html><head><meta charset="utf-8"><style>
         {% for s in r.skills %}<div class="skillrow"><div class="skilllabel">{{ s.label }}</div><div class="skillval">{{ s.value }}</div></div>{% endfor %}
       {% endif %}
 
-      {% if r.education %}<h2>Education</h2>
-        {% for ed in r.education %}<div class="entry edu-entry">
-          <div class="title">{{ ed.degree }}</div>
-          <div class="sub">{{ ed.institute }}</div>
-          <div class="meta">{{ ed.year }} {{ ed.score }}</div>
-        </div>{% endfor %}
-      {% endif %}
+      {% if r.education %}<h2>Education</h2><ul>
+        {% for ed in r.education %}<li>""" + EDU_LINE + """</li>{% endfor %}
+      </ul>{% endif %}
 
       {% if r.certifications %}<h2>Certifications</h2>
         {% for c in r.certifications %}<div class="entry">
