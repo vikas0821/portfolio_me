@@ -80,6 +80,9 @@ export default function ResumeEditor() {
           <Select className="w-auto" value={resume.template} onChange={e => set('template', e.target.value)}>
             <option value="classic">Classic</option>
             <option value="modern">Modern</option>
+            <option value="minimal">Minimal</option>
+            <option value="ats">ATS-Friendly</option>
+            <option value="sidebar">Two-Column</option>
           </Select>
           <Button variant="primary" icon={Eye} loading={rendering} onClick={render}>{rendering ? 'Rendering…' : 'Preview'}</Button>
         </div>
